@@ -4,17 +4,6 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <script>
-/* ★一時措置：パソコン幅で開いたときも SP 版を見せる。
-   電話と同じ 390px の枠に入れ直すので、メディアクエリも dvh も innerWidth も
-   実機と同じ値になる。CSS と JS は一行も変えていない。戻すときはこの script と
-   sp-frame.html を消すだけ。 */
-(function(){
-  if(window.top!==window.self)return;      /* 枠の中では何もしない */
-  if(window.innerWidth<768)return;         /* スマホ幅はそのまま */
-  location.replace('sp-frame.html'+location.hash);
-})();
-</script>
-<script>
 /* 起動の最小限。JS が動く印と、幕（veil）の制御だけをここに置く。
    本体は js/main.js（ES Modules・defer）。低速回線で動画に帯域を取られても
    幕の上限タイマーだけは先に動き出すよう、この部分は head に直書きする。 */
