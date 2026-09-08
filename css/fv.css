@@ -1,0 +1,371 @@
+@charset "utf-8";
+/* ==========================================================================
+   幕・地の映像・上部バー・章レール・FV（覗き穴）・カーソル・追従CTA
+   ========================================================================== */
+
+/* ---------- 幕 ---------- */
+/* 待っている間の画面。地はクリームにして明るく開ける。
+   ロゴ → 歩くキャラクター → 進みの線 の縦並び */
+.veil{
+  position:fixed;inset:0;z-index:100;
+  background:var(--cream);color:var(--wine);
+  display:none;align-items:center;justify-content:center;
+  transition:opacity .7s var(--ease-io),visibility 0s .7s;
+}
+.js .veil{display:flex}
+.veil.is-out{opacity:0;visibility:hidden}
+.veil__mark{display:flex;flex-direction:column;align-items:center;gap:18px}
+.veil__mark svg{opacity:0;animation:veil-in 1.2s var(--ease-out) .1s forwards}
+
+/* キャラクターの区画。左右のゆれは外側、跳ねとしゃがみは内側に分けて持たせる。
+   1つの transform に混ぜると、あとから書いた方が前を打ち消す */
+.veil__toon{
+  position:relative;width:132px;height:116px;
+  display:flex;align-items:flex-end;justify-content:center;
+  animation:veil-sway 3.4s ease-in-out infinite;
+}
+.veil__walker{
+  display:block;width:104px;height:auto;
+  transform-origin:50% 100%;
+  animation:veil-toon 3.4s cubic-bezier(.34,.02,.3,1) infinite;
+}
+/* 足もとの影。しゃがむと広がり、跳ねると縮む */
+.veil__shadow{
+  position:absolute;left:50%;bottom:2px;width:62px;height:9px;margin-left:-31px;
+  border-radius:50%;background:rgba(85,22,31,.16);
+  animation:veil-shadow 3.4s cubic-bezier(.34,.02,.3,1) infinite;
+}
+@keyframes veil-sway{
+  0%,100%{transform:translateX(-11px)}
+  50%{transform:translateX(11px)}
+}
+@keyframes veil-toon{
+  0%,100%{transform:translateY(0)     rotate(-3deg) scale(1,1)}
+  10%    {transform:translateY(-10px) rotate(3deg)  scale(.96,1.06)}
+  20%    {transform:translateY(0)     rotate(-3deg) scale(1.05,.95)}
+  30%    {transform:translateY(-10px) rotate(3deg)  scale(.96,1.06)}
+  40%    {transform:translateY(0)     rotate(-3deg) scale(1.05,.95)}
+  50%    {transform:translateY(-9px)  rotate(2deg)  scale(.97,1.05)}
+  62%    {transform:translateY(7px)   rotate(0deg)  scale(1.14,.82)}   /* しゃがむ */
+  72%    {transform:translateY(-14px) rotate(0deg)  scale(.9,1.14)}    /* 伸び上がる */
+  82%    {transform:translateY(0)     rotate(-2deg) scale(1.04,.96)}
+  91%    {transform:translateY(-8px)  rotate(3deg)  scale(.97,1.05)}
+}
+@keyframes veil-shadow{
+  0%,100%{transform:scale(1);opacity:.16}
+  10%,30%,50%,72%,91%{transform:scale(.72);opacity:.09}
+  20%,40%,82%{transform:scale(1);opacity:.16}
+  62%{transform:scale(1.2);opacity:.2}
+}
+/* 読み込み中の目印。3つの丸が順に跳ねる */
+.veil__dots{display:flex;align-items:center;gap:10px}
+.veil__dots i{
+  display:block;width:9px;height:9px;border-radius:50%;background:var(--wine);
+  opacity:.22;animation:veil-dot 1.15s ease-in-out infinite;
+}
+.veil__dots i:nth-child(2){animation-delay:.15s}
+.veil__dots i:nth-child(3){animation-delay:.3s}
+@keyframes veil-dot{
+  0%,58%,100%{opacity:.22;transform:translateY(0) scale(1)}
+  29%{opacity:1;transform:translateY(-7px) scale(1.18)}
+}
+@keyframes veil-in{from{opacity:0;transform:translateY(8px) scale(.96)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){
+  .veil__toon,.veil__walker,.veil__shadow,.veil__dots i{animation:none}
+  .veil__dots i{opacity:.5}
+}
+
+/* ---------- 舞台（固定キャンバス）と映像 ---------- */
+/* 背景の写真は外した。扉の canvas の後ろは body の地色（--deep）がそのまま出る。
+   canvas(.stage) は z-index:1（main は 2 なので本文は前のまま） */
+.stage{position:fixed;inset:0;width:100%;height:100%;z-index:1;display:block;pointer-events:none;opacity:0;transition:opacity .6s}
+.stage.is-on{opacity:1}
+/* 映像そのものを地に敷き、上下が曲線の帯にマスクで抜く。
+   曲線は支給された fv.png の輪郭を1列ずつ measure して6次多項式に載せ、
+   3次ベジエ9本に置き直したもの（元画像との差は上1px・下2px以内）。
+   帯の縦横比は 799:695 で固定。JS は --bandW / --bandH を同じ比のまま大きくするので、
+   拡大しても曲線の形は崩れない。囲みの線は引かない（元画像も枠は無い）*/
+:root{
+--band:url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 799 695' preserveAspectRatio='none'%3E%3Cpath d='M0 152.3C44.4 132.7 88.8 122.4 133.2 114.3C177.6 106.3 221.9 100.6 266.3 94.8C310.7 89.1 355.1 83.3 399.5 77.0C443.9 70.6 488.3 63.7 532.7 56.0C577.1 48.3 621.4 39.8 665.8 30.5C710.2 21.1 754.6 10.8 799.0 0.5L799 671.7C710.2 688.2 621.4 694.1 532.7 694.5C443.9 695.0 355.1 689.9 266.3 679.6C177.6 669.3 88.8 653.8 0.0 628.1Z' fill='%23fff'/%3E%3C/svg%3E");
+}
+/* SP の地。横幅は画面幅ちょうど、上端は画面の上。高さは元の比のまま伸びる。
+   曲線の帯（映像）はこの上に重なるので、帯が広がるにつれて隠れていく */
+.fv-bg{
+  position:fixed;left:0;width:100%;height:auto;
+  z-index:0;pointer-events:none;
+}
+.fv-bg--top{top:0}
+.fv-bg--bottom{bottom:0}
+@media (min-width:768px){ .fv-bg{display:none} }
+.stage-band{
+  position:fixed;inset:0;z-index:1;pointer-events:none;opacity:0;transition:opacity .6s;
+  -webkit-mask-image:var(--band);mask-image:var(--band);
+  -webkit-mask-size:var(--bandW,100vw) var(--bandH,36vh);mask-size:var(--bandW,100vw) var(--bandH,36vh);
+  -webkit-mask-position:50% 50%;mask-position:50% 50%;
+  -webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;
+}
+.stage-band.is-on{opacity:1}
+/* --vz はスクロールで少しずつ上げる。帯に近づくぶんだけ画が寄る。
+   マスクは親に置いてあるので、この拡大は形に影響しない */
+.stage-video{
+  position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
+  transform:scale(var(--vz,1));transform-origin:50% 50%;
+  /* --vb は JS が書く。最初は少し暗く、スクロールで明るく、螺旋に入ると再び落とす */
+  filter:brightness(var(--vb,1));
+}
+/* JS が無い: 映像の1コマ目（ポスター）を FV の背景として全面に敷く。video 要素は出さない */
+.no-js .stage-band{display:none}
+.no-js .fv{height:auto}
+.no-js .fv__sticky{position:relative}
+.no-js .fv__sticky::before{content:'';position:absolute;inset:0;z-index:0;
+  background:linear-gradient(rgba(26,5,8,.6),rgba(26,5,8,.3) 40%,rgba(26,5,8,.75)),url(../img/poster-door.webp) center/cover no-repeat}
+.no-js .side-cta{display:none}
+
+/* ---------- 上部バー ---------- */
+.bar{
+  position:fixed;left:0;right:0;top:0;z-index:60;height:var(--bar-h);
+  display:flex;align-items:center;gap:16px;
+  padding:0 var(--px);
+  color:var(--cream);
+  transition:color .5s,transform .6s var(--ease-out),opacity .6s;
+  pointer-events:none;
+}
+.bar > *{pointer-events:auto}
+.bar.is-light{color:var(--wine)}
+.bar.is-hidden{transform:translateY(-100%);opacity:0}
+.bar__brand{display:flex;align-items:center;gap:10px;text-decoration:none;font-family:var(--ff-serif);font-weight:700;font-size:15px;letter-spacing:.04em}
+.bar__brand img{width:32px;height:32px;border-radius:50%}
+.bar__meta{margin-left:auto;display:none;font-size:11px;letter-spacing:.14em;opacity:.7;align-items:center;gap:10px}
+.bar__meta .mono{letter-spacing:.2em}
+.bar__sep{opacity:.5}
+@media (min-width:768px){.bar__meta{margin-left:auto;display:flex}}
+
+/* ---------- 章レール（PC） ---------- */
+.rail{display:none}
+@media (min-width:1024px){
+  .rail{
+    position:fixed;left:26px;top:50%;transform:translateY(-50%);z-index:55;
+    display:flex;flex-direction:column;gap:12px;
+    transition:opacity .5s;
+  }
+  .rail a{
+    display:flex;align-items:center;gap:10px;text-decoration:none;
+    font-size:11px;letter-spacing:.14em;color:var(--cream);opacity:.42;
+    transition:opacity .35s,color .5s;
+  }
+  .rail.is-light a{color:var(--wine)}
+  .rail a i{width:14px;height:1px;background:currentColor;transition:width .45s var(--ease-out)}
+  .rail a span{opacity:0;transform:translateX(-4px);transition:opacity .35s,transform .45s var(--ease-out)}
+  .rail a:hover,.rail a.is-active{opacity:1}
+  .rail a.is-active i{width:30px}
+  .rail a.is-active span,.rail:hover a span{opacity:1;transform:none}
+  .rail.is-hidden{opacity:0;pointer-events:none}
+}
+
+/* ---------- FV ---------- */
+.fv{
+  position:relative;z-index:1;
+  height:280vh;height:280svh;
+  color:var(--cream);
+}
+.fv__sticky{
+  position:sticky;top:0;height:100vh;height:100svh;
+  display:grid;
+  grid-template-rows:var(--bar-h) auto 1fr auto auto;
+  grid-template-areas:'bar' 'copy' 'door' 'foot' 'cta';
+  padding:0 var(--px) 28px;
+  overflow:hidden;
+}
+.fv__copy{grid-area:copy;position:relative;z-index:2;padding-top:10px;text-align:center}
+/* SP は画面のちょうど真ん中に置く。中央寄せに transform を使うと、下の
+   「スクロールで消える」ルールの transform に上書きされるので grid で寄せる。
+   inset:0 は sticky の padding box に対して効くので、下の余白の影響も受けない */
+@media (max-width:767px){
+  .fv__copy{
+    /* grid-area を残したままだと、絶対配置の基準がその行になって上に張り付く。
+       auto に戻すと grid 全体の padding box が基準になり、画面の中心に来る */
+    grid-area:auto;
+    position:absolute;inset:0;padding-top:0;
+    display:grid;align-content:center;justify-items:center;
+  }
+}
+/* 幕を外したので、読みやすさは文字自身の影で作る。
+   ぼかしだけだと明るい空に負けるので、まず1pxの縁を8方向に回してから外側をぼかす */
+.fv__title{
+  text-shadow:
+    1px 0 0 rgba(26,5,8,.62), -1px 0 0 rgba(26,5,8,.62),
+    0 1px 0 rgba(26,5,8,.62), 0 -1px 0 rgba(26,5,8,.62),
+    1px 1px 0 rgba(26,5,8,.62), -1px -1px 0 rgba(26,5,8,.62),
+    1px -1px 0 rgba(26,5,8,.62), -1px 1px 0 rgba(26,5,8,.62),
+    0 2px 12px rgba(26,5,8,.72), 0 0 26px rgba(26,5,8,.55);
+}
+.fv__lead,.fv__meta,.fv__eyebrow{text-shadow:0 1px 3px rgba(26,5,8,.7),0 0 14px rgba(26,5,8,.55)}
+.fv__eyebrow{font-size:10.5px;letter-spacing:.22em;opacity:.78;margin-bottom:16px}
+.fv__eyebrow-sep{opacity:.5;margin:0 6px}
+.fv__title{
+  font-family:var(--ff-serif);font-weight:700;
+  font-size:clamp(32px,9.6vw,48px);line-height:1.32;letter-spacing:.02em;
+  text-wrap:balance;
+}
+.fv__line{display:block}
+.fv__word{display:inline-block;white-space:nowrap}
+.fv__word--ink{color:var(--yellow)}
+.fv__lead{display:none;margin-top:22px;font-size:15.5px;line-height:1.95;color:var(--on-dark);max-width:520px}
+.fv__ctas{display:none;margin-top:30px;align-items:center;gap:26px;flex-wrap:wrap}
+.fv__meta{display:none}
+/* SP 用の CTA。扉の区画の下端に寄せて、目のマスコットの上に置く。
+   キャラクターはボタンの右下で左を向くので、指がボタンを指す */
+.fv__cta{
+  grid-area:cta;position:relative;z-index:2;
+  justify-self:center;
+  /* コメントがボタンの上半分に重なるまで引き上げる。
+     吹き出し自身の下マージン(14px)ぶんも足して引く必要がある */
+  margin-top:-33px;
+}
+.fv__cta .btn{min-height:68px;padding:16px 62px;font-size:18px}
+/* 吹き出しはボタンより前に出す */
+.fv__mascot{z-index:3}
+@media (min-width:768px){ .fv__cta{display:none} }
+
+.fv__mascot{
+  grid-area:foot;position:relative;z-index:2;justify-self:end;align-self:end;
+  display:flex;align-items:flex-end;gap:8px;
+  pointer-events:none;
+}
+.fv__mascot .say{margin-bottom:14px;max-width:170px;font-size:12.5px}
+.fv__mascot .rig{width:88px}
+/* 移植した目。小さいと「暗い染み」にしか見えないので、マスコットより大きく取る */
+.fv__eye{display:block;width:150px;height:150px}
+/* 背の低い機種は目のマスコットと指差しがぶつかる。どちらも消さずに小さくして逃がす。
+   高さの条件だけだと横長のPCにも当たるので、幅の条件を必ず併記する。
+   ★この塊は .fv__eye の後に置く。前に置くと同じ詳細度で後勝ちに負けて効かない */
+@media (max-width:767px) and (max-height:700px){
+  .fv__cta{margin-top:-28px}
+  .fv__cta .btn{min-height:60px;padding:13px 46px;font-size:16px}
+  .fv__mascot .say{font-size:11.5px;margin-bottom:10px}
+  .fv__eye{width:96px;height:96px}
+}
+@media (max-width:767px) and (max-height:600px){
+  .fv__eye{width:80px;height:80px}
+}
+
+/* 文字の出現（1文字ずつ持ち上げる。JS が [data-split] を span に割る） */
+.js .fv__copy .ch-w{display:inline-block;overflow:hidden;vertical-align:bottom}
+.js .fv__copy .ch-c{display:inline-block;transform:translateY(110%);transition:transform 1s var(--ease-out)}
+.js .fv.is-in .ch-c{transform:none}
+.js .fv [data-fade]{opacity:0;transform:translateY(14px);transition:opacity 1s var(--ease-out) .55s,transform 1.2s var(--ease-out) .55s}
+.js .fv.is-in [data-fade]{opacity:1;transform:none}
+/* 幕開けの出現は「中身」に付ける。外側の要素はスクロールの消え方（--fp）を持つので分ける */
+.js .fv__mascot > *,.js .fv__cta > *{opacity:0;transform:translateY(16px);transition:opacity .9s var(--ease-out) .9s,transform 1.1s var(--ease-out) .9s}
+.js .fv.is-in .fv__mascot > *,.js .fv.is-in .fv__cta > *{opacity:1;transform:none}
+.js .fv__meta > span{opacity:0;transform:translateY(10px);transition:opacity 1s var(--ease-out) .7s,transform 1.2s var(--ease-out) .7s}
+.js .fv.is-in .fv__meta > span{opacity:1;transform:none}
+
+
+/* スクロールで文字が消えていく（JS が --fp を書く） */
+.fv__copy,.fv__cta,.fv__mascot,.fv__meta{
+  opacity:calc(1 - var(--fp,0) * 3.2);
+  transform:translateY(calc(var(--fp,0) * -60px));
+}
+.fv.is-through .fv__mascot,.fv.is-through .fv__cta{visibility:hidden}
+/* 透明になっても要素は残るのでリンクは押せてしまう。消えたら当たり判定も外す */
+.fv.is-dim .fv__cta,.fv.is-dim .fv__copy{pointer-events:none}
+
+@media (min-width:768px){
+  .fv{height:260vh;height:260svh}
+  .fv__sticky{
+    grid-template-columns:minmax(0,46%) 1fr;
+    grid-template-rows:var(--bar-h) 1fr auto;
+    grid-template-areas:'bar bar' 'copy door' 'foot foot';
+    padding-bottom:40px;
+    align-items:center;
+  }
+  .fv__copy{text-align:left;padding-top:0;align-self:center}
+  .fv__eyebrow{font-size:11px;margin-bottom:26px}
+  .fv__title{font-size:clamp(40px,4.2vw,64px);line-height:1.28}
+  .fv__lead,.fv__ctas{display:flex}
+  .fv__lead{display:block}
+  .fv__meta{
+    grid-area:foot;display:flex;gap:28px;align-self:end;
+    font-size:10.5px;letter-spacing:.18em;padding-bottom:2px;
+    color:rgba(245,239,230,.72);
+  }
+  .fv__mascot{position:absolute;right:var(--px);bottom:36px;grid-area:auto}
+  .fv__mascot .rig{width:104px}
+  .fv__eye{width:210px;height:210px}
+}
+@media (min-width:1024px){
+  .fv__sticky{grid-template-columns:minmax(0,48%) 1fr;padding-left:calc(var(--px) + 80px)}
+}
+
+
+/* ---------- カーソル（PC・fine pointer） ---------- */
+.cursor{display:none}
+@media (hover:hover) and (pointer:fine){
+  .has-cursor .cursor{
+    display:block;position:fixed;left:0;top:0;z-index:90;pointer-events:none;
+    width:0;height:0;
+  }
+  .has-cursor .cursor i{
+    position:absolute;left:-4px;top:-4px;width:8px;height:8px;border-radius:50%;
+    background:var(--yellow);mix-blend-mode:difference;
+    transition:transform .35s var(--ease-out),opacity .3s;
+  }
+  .has-cursor .cursor span{
+    position:absolute;left:-22px;top:-22px;width:44px;height:44px;border-radius:50%;
+    border:1px solid rgba(255,216,62,.7);
+    display:flex;align-items:center;justify-content:center;
+    font-family:var(--ff-mono);font-size:9px;letter-spacing:.16em;color:var(--yellow);
+    transform:scale(.55);opacity:.55;
+    transition:transform .45s var(--ease-out),opacity .3s,background-color .3s,border-color .3s;
+    white-space:nowrap;
+  }
+  .has-cursor .cursor.is-link span{transform:scale(1);opacity:1;background:rgba(255,216,62,.08)}
+  .has-cursor .cursor.is-label span{transform:scale(1.55);opacity:1;background:var(--yellow);color:var(--wine-2);border-color:var(--yellow)}
+  .has-cursor .cursor.is-label i{opacity:0}
+  .has-cursor .cursor.is-hidden{opacity:0}
+  .has-cursor,.has-cursor a,.has-cursor button{cursor:none}
+}
+
+/* ---------- 追従CTA（右端・現行版と同一意匠） ----------
+   FV を出てから最終CTA が画面を占めるまでの区間だけ出す。
+   .is-on は JS が付ける。JS 無効時は出さない（消せない板が残らないように）。
+   縦書き。vertical-rl では column が「右→左の横並び」になるので、
+   HTML の並び（無料・60分 → 説明会に申し込む）がそのまま読み順になる。 */
+.side-cta{
+  position:fixed;
+  right:0;
+  top:62%;              /* 画面中央より少し下。親指の届く帯 */
+  z-index:60;
+  writing-mode:vertical-rl;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;
+  padding:18px 10px;
+  background:var(--yellow);
+  color:var(--wine-2);
+  text-decoration:none;
+  text-align:center;
+  border-radius:12px 0 0 12px;
+  box-shadow:-5px 5px 18px rgba(26,5,8,.3);
+  /* 隠している間は画面の外へ逃がす。visibility でタブ順からも外す */
+  transform:translate(100%,-50%);
+  opacity:0;visibility:hidden;pointer-events:none;
+  transition:transform 420ms var(--ease-out),opacity 300ms var(--ease-out);
+}
+.side-cta.is-on{transform:translate(0,-50%);opacity:1;visibility:visible;pointer-events:auto}
+.side-cta:active{transform:translate(2px,-50%)}
+.side-cta__sub{font-size:10px;font-weight:700;line-height:1.2;opacity:.75;white-space:nowrap}
+.side-cta__main{font-size:15px;font-weight:700;line-height:1.25;letter-spacing:.02em;white-space:nowrap}
+@media (min-width:768px){
+  .side-cta{padding:30px 16px;border-radius:16px 0 0 16px;gap:8px}
+  .side-cta__sub{font-size:13px}
+  .side-cta__main{font-size:21px}
+}
+@media (prefers-reduced-motion:reduce){
+  .side-cta{transition:opacity 200ms linear}
+}
+
+@media (prefers-reduced-motion:reduce){
+  .veil__mark svg{animation:none;opacity:1}
+  .js .fv__copy .ch-c{transform:none;transition:none}
+  .js .fv [data-fade],.js .fv__mascot{opacity:1;transform:none;transition:none}
+}

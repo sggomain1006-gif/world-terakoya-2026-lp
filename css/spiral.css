@@ -1,0 +1,524 @@
+@charset "utf-8";
+/* ==========================================================================
+   spiral.css — 応募から帰国までの7段階を、螺旋に並べたカードで見せる
+   ・既定は「ふつうの縦並び」。JS が .is-3d を付けたときだけ螺旋になる
+   ・JS 無効／動きを減らす設定では、そのまま読める一覧のまま残る
+   ・カードの座標は JS が transform で書く。ここでは器と見た目だけを持つ
+   ========================================================================== */
+
+/* 章見出しも章末のCTAも外したので、章は螺旋だけになる。
+   終わりで白い章がそのまま映像の上にせり上がる */
+.ch--flow{padding-top:0;padding-bottom:0}
+
+/* 螺旋を組めたときだけ、章の地を外して FV の映像を透かす。
+   JS が動かないときは地の色のまま（映像の上に本文を並べても読めないため） */
+.ch--flow.is-glass{background:transparent}
+.ch--flow.is-glass::before{display:none}
+
+.spiral{position:relative}
+.spiral__track{position:relative}
+.spiral__view{position:relative}
+
+/* ==========================================================================
+   1. 既定＝フォールバック（縦並び）
+   ========================================================================== */
+.spiral__cards{
+  /* 縦並びのときだけ、FV との間に余白を取る（螺旋のときは inset:0 で上書きされる） */
+  list-style:none;margin:0 auto;padding:72px var(--px) 0;
+  display:flex;flex-direction:column;gap:64px;max-width:var(--col);
+}
+.scard{position:relative}
+.scard__title{
+  margin:0 0 14px;font-family:var(--ff-serif);font-size:clamp(21px,5.4vw,26px);
+  line-height:1.42;letter-spacing:.02em;color:var(--wine);text-wrap:balance;
+}
+.scard__media{
+  margin:20px 0 0;position:relative;overflow:hidden;border-radius:0;
+  background:var(--cream-3);aspect-ratio:4/3;
+}
+.scard__media img,.scard__media video{display:block;width:100%;height:100%;object-fit:cover}
+.scard__media figcaption{
+  position:absolute;left:0;right:0;bottom:0;padding:22px 12px 8px;
+  font-size:10px;letter-spacing:.18em;color:var(--cream);
+  background:linear-gradient(to top,rgba(26,5,8,.72),transparent);
+}
+.scard__detail{margin:0}
+.scard__body{margin:0;font-size:15.5px;line-height:1.95}
+.scard__body + .scard__body{margin-top:.8em}
+
+/* 研修日程のプレート。地の色に関わらず読めるよう currentColor で組む */
+.plate{margin:14px 0 0;padding:0;display:flex;flex-wrap:wrap;gap:6px}
+.plate > div{
+  display:flex;align-items:baseline;gap:6px;padding:5px 9px;
+  border:1px solid currentColor;border-radius:3px;opacity:.88;
+}
+.plate dt{font-size:10px;letter-spacing:.16em;opacity:.7}
+.plate dd{margin:0;font-size:11px;letter-spacing:.04em}
+.plate dd small{font-size:9px;opacity:.75;margin-left:3px}
+
+/* HUD・足あと・読み物は螺旋のときだけ出す */
+.spiral__ground,.spiral__read{display:none}
+.spiral__big{display:none}
+
+/* ==========================================================================
+   2. 螺旋（JS が .is-3d を付けたとき）
+   ========================================================================== */
+.is-3d .spiral__track{height:var(--track-h,400vh)}
+
+.is-3d .spiral__stage{
+  position:sticky;top:0;height:100vh;height:100dvh;
+  display:grid;
+  grid-template-columns:1fr;
+  grid-template-rows:minmax(0,1fr) auto auto;
+  grid-template-areas:'view' 'read' 'ground';
+  overflow:clip;
+  background:transparent;
+  color:var(--on-dark);
+  --ink:var(--cream);
+  --rule:var(--line-cream);
+}
+.is-3d .spiral__view{position:relative;z-index:1}
+/* 入り: 幕を張らないぶん、中身は右から入ってきて濃くなる */
+.is-3d .spiral__read,.is-3d .spiral__ground{opacity:var(--in,1)}
+/* グリッドの子は既定で min-content より縮まない。折り返さない HUD が
+   画面より広い列を作ってしまうので、明示的に縮めるようにする */
+.is-3d .spiral__stage > *{min-width:0}
+
+/* --- 中段：螺旋そのもの ------------------------------------------------------ */
+.is-3d .spiral__view{grid-area:view;overflow:clip}
+.is-3d .spiral__cards{
+  position:absolute;inset:0;margin:0;padding:0;max-width:none;display:block;
+  perspective:var(--persp,900px);perspective-origin:50% 46%;
+}
+/* --- カードは「湾曲した画面」そのもの。中身は写真か動画だけ ----------------------
+   本家は WebGL で板の頂点を cos で曲げている。ここは SVG マスクで上下の縁を
+   反らせ、走査線・RGB の縦縞・筒状の光沢・左右の落ち込みを重ねて同じ形に見せる。
+   マスクは preserveAspectRatio='none' なので、カードの大きさに追従して伸びる */
+:root{
+  --bow:url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 120' preserveAspectRatio='none'%3E%3Cpath d='M4 4 Q100 0 196 4 L196 116 Q100 120 4 116 Z' fill='%23fff'/%3E%3C/svg%3E");
+  --bow-edge:url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 120' preserveAspectRatio='none'%3E%3Cpath d='M4 4 Q100 0 196 4 L196 116 Q100 120 4 116 Z' fill='none' stroke='%23F5EFE6' stroke-opacity='.52' stroke-width='1.4' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E");
+  --bow-edge-us:url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 120' preserveAspectRatio='none'%3E%3Cpath d='M4 4 Q100 0 196 4 L196 116 Q100 120 4 116 Z' fill='none' stroke='%23FFD83E' stroke-opacity='.58' stroke-width='1.4' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E");
+}
+.is-3d .scard{
+  position:absolute;left:50%;top:50%;width:var(--cw,300px);aspect-ratio:4/3;
+  margin:0;padding:0;transform-origin:50% 50%;
+  backface-visibility:hidden;
+  will-change:transform,opacity;
+  background:#070203;
+  /* box-shadow はマスクに切られて出ないので drop-shadow を使う。
+     後ろも同じ現場の映像なので、影が無いとカードが地に溶ける */
+  filter:drop-shadow(0 16px 26px rgba(0,0,0,.62)) drop-shadow(0 2px 6px rgba(0,0,0,.5));
+  -webkit-mask-image:var(--bow);mask-image:var(--bow);
+  -webkit-mask-size:100% 100%;mask-size:100% 100%;
+  -webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;
+}
+/* 見出しと本文は読み物欄へ JS が移す。移すまでの一瞬を出さない */
+.is-3d .scard > .scard__detail{display:none}
+
+.is-3d .scard__media{
+  position:absolute;inset:0;z-index:1;margin:0;
+  aspect-ratio:auto;background:#070203;border-radius:0;box-shadow:none;
+}
+.is-3d .scard__media img,.is-3d .scard__media video{filter:saturate(1.06) contrast(1.04)}
+/* 走査線と RGB の縦縞。近づくと画素が見える、くらいの薄さにする */
+.is-3d .scard__media::before{
+  content:'';position:absolute;inset:0;z-index:1;pointer-events:none;
+  background:
+    repeating-linear-gradient(to bottom,rgba(0,0,0,.19) 0 1px,transparent 1px 3px),
+    repeating-linear-gradient(to right,
+      rgba(255,64,64,.03) 0 1px,rgba(64,255,140,.03) 1px 2px,rgba(80,130,255,.03) 2px 3px);
+  mix-blend-mode:overlay;
+}
+/* 筒状の光沢と、左右が奥へ回り込む落ち込み。湾曲がいちばん出るのはここ */
+.is-3d .scard__media::after{
+  content:'';position:absolute;inset:0;z-index:2;pointer-events:none;
+  background:
+    linear-gradient(100deg,rgba(255,255,255,.18) 0%,rgba(255,255,255,.04) 14%,
+      transparent 38%,transparent 62%,rgba(255,255,255,.05) 84%,rgba(255,255,255,.16) 100%),
+    linear-gradient(to right,rgba(5,1,2,.70) 0%,rgba(5,1,2,.30) 5%,rgba(5,1,2,.08) 13%,
+      transparent 26%,transparent 74%,rgba(5,1,2,.08) 87%,rgba(5,1,2,.30) 95%,rgba(5,1,2,.70) 100%),
+    linear-gradient(to bottom,rgba(255,255,255,.11) 0%,transparent 14%);
+}
+/* 反った輪郭の線。border では四角のままでマスクに切られるので背景で引く。
+   日本と現地の違いは、この線の色で出す */
+.is-3d .scard::after{
+  content:'';position:absolute;inset:0;z-index:3;pointer-events:none;
+  background:var(--bow-edge);background-size:100% 100%;background-repeat:no-repeat;
+}
+.is-3d .scard[data-phase="us"]::after{background-image:var(--bow-edge-us)}
+.is-3d .scard.is-front{cursor:pointer}
+
+/* --- 下段：本文と足あと ------------------------------------------------------ */
+.is-3d .spiral__read{
+  grid-area:read;z-index:2;
+  display:block;position:relative;
+  padding:0 var(--gut-r,var(--px)) 0 var(--px);
+  height:var(--read-h,150px);
+}
+.spiral__read .scard__detail{
+  position:absolute;left:var(--px);right:var(--gut-r,var(--px));top:0;margin:0;
+  opacity:0;transform:translateY(10px);pointer-events:none;
+  transition:opacity .34s var(--ease-out),transform .34s var(--ease-out);
+}
+.spiral__read .scard__detail.is-on{opacity:1;transform:none;pointer-events:auto}
+.scard__no{margin-right:.14em;opacity:.72;font-feature-settings:normal}
+.spiral__read .scard__title{
+  margin:0 0 12px;font-family:var(--ff-serif);font-weight:700;
+  font-size:clamp(19px,5.2vw,23px);line-height:1.4;letter-spacing:.02em;
+  color:var(--cream);text-wrap:balance;
+  text-shadow:
+    -1.2px -1.2px 0 rgba(4,1,2,.94),1.2px -1.2px 0 rgba(4,1,2,.94),
+    -1.2px 1.2px 0 rgba(4,1,2,.94),1.2px 1.2px 0 rgba(4,1,2,.94),
+    -1.6px 0 0 rgba(4,1,2,.94),1.6px 0 0 rgba(4,1,2,.94),
+    0 -1.6px 0 rgba(4,1,2,.94),0 1.6px 0 rgba(4,1,2,.94),
+    0 0 7px rgba(4,1,2,.96),0 0 18px rgba(4,1,2,.8);
+}
+.spiral__read .scard__body{
+  font-size:14px;line-height:1.9;color:rgba(245,239,230,.94);
+  /* 幕を張らないので、輪郭は文字の影だけで持たせる。
+     細かくずらした影を輪から重ねて、明るいコマでも字の縁が残るようにする */
+  text-shadow:
+    -1.2px -1.2px 0 rgba(4,1,2,.94),1.2px -1.2px 0 rgba(4,1,2,.94),
+    -1.2px 1.2px 0 rgba(4,1,2,.94),1.2px 1.2px 0 rgba(4,1,2,.94),
+    -1.6px 0 0 rgba(4,1,2,.94),1.6px 0 0 rgba(4,1,2,.94),
+    0 -1.6px 0 rgba(4,1,2,.94),0 1.6px 0 rgba(4,1,2,.94),
+    0 0 7px rgba(4,1,2,.96),0 0 18px rgba(4,1,2,.8);
+}
+
+.is-3d .spiral__ground{
+  grid-area:ground;z-index:2;
+  display:block;position:relative;height:62px;margin-top:8px;
+  border-top:1px solid var(--rule,var(--line));
+}
+.spiral__walker{
+  position:absolute;left:0;bottom:0;width:56px;
+  transform:translateX(var(--walk,0px));will-change:transform;
+}
+.spiral__walker .rig{width:56px;display:block}
+.spiral__walker img,.spiral__walker svg{display:block;width:100%;height:auto}
+.spiral__ground .trail__print{
+  position:absolute;width:17px;height:auto;opacity:0;
+  transform:scale(.6) rotate(var(--r,0deg));
+  transition:opacity .5s var(--ease-out),transform .5s var(--ease-out);
+}
+.spiral__ground .trail__print.is-on{opacity:.85;transform:scale(1) rotate(var(--r,0deg))}
+
+/* ==========================================================================
+   3. 画面ごとの調整（SP ファースト。PC は min-width の中だけ）
+   ========================================================================== */
+/* 背の低い機種。カードを浅くして縦を空ける */
+@media (max-height:700px) and (max-width:767px){
+  .is-3d .scard{aspect-ratio:16/9}
+  .spiral__read .scard__body{font-size:13px;line-height:1.85}
+  .is-3d .spiral__ground{height:50px}
+}
+
+@media (min-width:768px){
+  .spiral__cards{gap:80px}
+  .is-3d .spiral__cards{perspective-origin:70% 46%}
+
+  .spiral__read .scard__body{font-size:15px;line-height:1.95}
+  .is-3d .spiral__read{
+    --gut-r:max(var(--px),calc((100vw - var(--wrap)) / 2));
+    padding-left:max(var(--px),calc((100vw - var(--wrap)) / 2));
+  }
+  .spiral__read .scard__detail{left:max(var(--px),calc((100vw - var(--wrap)) / 2))}
+  .is-3d .spiral__ground{
+    height:70px;margin:0 max(var(--px),calc((100vw - var(--wrap)) / 2)) 26px;
+  }
+}
+
+/* 1024px 以上は2カラム。左に本文を置き、右の区画で螺旋を回す。
+   左の縦ナビ（.rail）に本文がかからないよう、左は 120px 以上空ける */
+@media (min-width:1024px){
+  .spiral__read .scard__title{font-size:24px;margin-bottom:14px}
+  .is-3d .spiral__stage{
+    grid-template-columns:minmax(280px,34%) 1fr;
+    grid-template-rows:minmax(0,1fr) auto;
+    grid-template-areas:'read view' 'ground ground';
+  }
+  .is-3d .spiral__read{
+    --gut-r:28px;align-self:center;
+    padding:0 28px 0 max(120px,calc((100vw - var(--wrap)) / 2));
+  }
+  .spiral__read .scard__detail{left:max(120px,calc((100vw - var(--wrap)) / 2))}
+  .spiral__read .scard__body{font-size:15.5px}
+  /* 左の余白に段数を大きく置く。カードの番号と同じものを飾りとして重ねる */
+  .is-3d .spiral__big{
+    display:block;position:absolute;margin:0;
+    left:max(120px,calc((100vw - var(--wrap)) / 2));
+    bottom:calc(100% + 20px);
+    font-family:var(--ff-serif);font-weight:700;
+    font-size:clamp(56px,6vw,88px);line-height:1;letter-spacing:.02em;
+    opacity:.24;pointer-events:none;text-shadow:0 2px 10px rgba(4,1,2,.85);
+  }
+}
+
+/* ==========================================================================
+   目的（グローバル探究）— 螺旋の映像の上に、白い地がせり上がって覆う
+   映像は position:fixed なので、この章に不透明な地を敷くだけで
+   スクロールに合わせて下から白がかぶさる
+   ========================================================================== */
+.ch--purpose{
+  position:relative;z-index:1;
+  background:#fff;color:var(--text);
+  padding:96px 0 104px;
+}
+.purpose__h{
+  margin:0;display:flex;flex-direction:column;align-items:flex-start;
+  gap:7px;text-align:left;
+}
+/* 黒地の帯は左から右へ拭うように出す。行ごとに少しずらして、
+   1行ずつ引かれていくように見せる。IntersectionObserver は親の <p>（data-reveal）
+   を見ているので、子を clip-path で隠しても検知は生きている */
+/* ★.js を必ず付ける。付け忘れると JS 無効のとき見出しが永久に隠れる
+   （data-reveal と同じ理由。隠す側の規則は必ず .js の中に置く） */
+.js .purpose__h .purpose__line{
+  clip-path:inset(0 100% 0 0);
+  transition:clip-path .82s var(--ease-out);
+}
+.js .purpose__h .purpose__line:nth-child(2){transition-delay:.16s}
+.js .purpose__h .purpose__line:nth-child(3){transition-delay:.32s}
+.js .purpose__h.is-in .purpose__line{clip-path:inset(0 0 0 0)}
+/* 拭いを主役にするので、共通の「下から浮く」動きはこの2つだけ止める */
+.js .purpose__h[data-reveal]{transform:none}
+.purpose__line{
+  display:inline;   /* 折り返しても行ごとに地が付くよう inline のまま扱う */
+  box-decoration-break:clone;-webkit-box-decoration-break:clone;
+  background:var(--wine);color:var(--cream);
+  font-family:var(--ff-serif);font-weight:700;
+  /* 「自分だけの問いを深める」11字が1行に収まる大きさに抑える。
+     はみ出すと最後の1字だけが次の行に落ちて、地が1字ぶんの帯になる */
+  font-size:clamp(22px,6.9vw,32px);line-height:1.62;letter-spacing:.02em;
+  padding:.10em .3em;
+}
+.purpose__line--tag{
+  font-size:clamp(19px,5.4vw,25px);letter-spacing:.18em;
+  font-family:var(--ff-sans);font-weight:700;
+  margin-top:6px;
+}
+.purpose__lead{
+  margin:34px 0 0;max-width:var(--col);
+  font-size:16px;line-height:2.05;color:var(--text);
+}
+
+@media (min-width:768px){
+  .ch--purpose{padding:128px 0 136px}
+  .purpose__h{gap:9px}
+  .purpose__line{font-size:clamp(34px,4.2vw,50px);letter-spacing:.045em}
+  .purpose__line--tag{font-size:clamp(23px,2.4vw,30px);margin-top:14px}
+  .purpose__lead{margin-top:44px;font-size:17px;max-width:640px}
+}
+
+/* 章の終わりに置く2つ目の見出し。上の見出しと同じ形で、次の章へ渡す */
+.purpose__h--next{margin-top:52px}
+.purpose__note{
+  margin:20px 0 0;max-width:var(--col);
+  font-size:15px;line-height:2;color:var(--text-2);
+}
+
+/* 次の章を指さすキャラクター。左を向いているので、吹き出しは左に置いて
+   しっぽ（.say::after は右に出る）が本人を向くようにする */
+.purpose__guide{
+  margin:22px 0 0;display:flex;align-items:flex-end;justify-content:center;gap:8px;
+}
+.purpose__guide .say{margin:0 0 24px;max-width:none;font-size:12.5px}
+.purpose__mascot{flex:0 0 auto;display:block;width:88px;height:auto}
+
+@media (min-width:768px){
+  .purpose__h--next{margin-top:76px}
+  .purpose__note{margin-top:26px;font-size:16px;max-width:640px}
+  .purpose__guide{margin-top:30px;gap:12px}
+  .purpose__guide .say{font-size:14px;margin-bottom:30px}
+  .purpose__mascot{width:112px}
+}
+
+/* ==========================================================================
+   3つのプログラムの一覧（参考: プログラム部分参考.png）
+   参考はバーガンディの地に白い錠剤だったが、この章は白地なので反転させる。
+   錠剤をバーガンディ、見出しの札を黒、日数の箱をより濃いワイン＋黄の数字。
+   錠剤は details で開き、中に担当者と事実を入れる（JS 無しでも開ける）
+   ========================================================================== */
+.plist{margin:34px 0 0;max-width:var(--col)}
+
+/* 列の見出し。画面が狭いときは列が縦に割れるので出さない */
+.plist__head{display:none}
+
+.plist__rows{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+.plist__item{margin:0}
+.plist__fold{background:var(--wine);border-radius:26px;overflow:hidden}
+
+.plist__row{
+  display:grid;
+  grid-template-columns:1fr auto auto;
+  grid-template-areas:'where days mark' 'when days mark';
+  align-items:center;column-gap:12px;
+  color:var(--cream);cursor:pointer;list-style:none;
+  padding:12px 14px 12px 20px;
+  min-height:100px;box-sizing:border-box;
+}
+.plist__row::-webkit-details-marker{display:none}
+.plist__row::marker{content:''}
+.plist__when{
+  grid-area:when;display:flex;align-items:baseline;flex-wrap:wrap;gap:0 6px;
+  font-family:var(--ff-sans);font-weight:700;font-size:clamp(14px,3.9vw,16px);
+  letter-spacing:.01em;line-height:1.3;color:rgba(245,239,230,.82);
+}
+.plist__when small{font-size:.7em;font-weight:700;opacity:.78;letter-spacing:.02em}
+/* ▶。字ではなく三角で描く（書体のサブセットに記号を足さずに済む） */
+.plist__when i{
+  width:0;height:0;margin:0 4px;align-self:center;
+  border-left:7px solid currentColor;
+  border-top:5px solid transparent;border-bottom:5px solid transparent;
+}
+.plist__where{
+  grid-area:where;margin-bottom:2px;white-space:nowrap;
+  font-family:var(--ff-sans);font-weight:700;font-size:clamp(14px,5vw,23px);
+  letter-spacing:.01em;line-height:1.25;color:var(--cream);
+}
+/* 日数は「10」と「Days」を縦に積む */
+.plist__days{
+  grid-area:days;display:flex;flex-direction:column;align-items:center;gap:1px;
+  background:var(--wine-2);border-radius:16px;padding:10px 13px;
+}
+.plist__days b{font-family:var(--ff-sans);font-weight:700;font-size:clamp(22px,5.8vw,26px);color:var(--yellow);line-height:1}
+.plist__days small{font-size:11px;font-weight:700;letter-spacing:.06em;color:rgba(245,239,230,.86);line-height:1.2}
+/* 開閉の印。開くと縦棒が消えてマイナスになる */
+.plist__mark{
+  grid-area:mark;position:relative;width:14px;height:14px;flex:0 0 14px;margin-left:2px;
+  background:
+    linear-gradient(currentColor,currentColor) center/14px 1.6px no-repeat,
+    linear-gradient(currentColor,currentColor) center/1.6px 14px no-repeat;
+}
+.plist__fold[open] .plist__mark{background-size:14px 1.6px,1.6px 0}
+
+/* 開いた中身はクリームの地。風景写真 → 概要 → 事実 → 担当者 の順 */
+.plist__body{
+  background:var(--cream);color:var(--text);padding:20px 0;
+  animation:plist-in .34s var(--ease-out) both;
+}
+@keyframes plist-in{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+/* 写真は少し縮めて、まわりにクリームの余白を残す（本文の左右の余白と揃える） */
+/* ★上下の margin は親（padding なし）をすり抜けて外に出る。
+   写真の上のクリームが消えて、代わりにワインの帯が出た。
+   余白は親の padding で作り、写真は左右だけ margin を持つ */
+.plist__scene{
+  margin:0 20px;display:block;aspect-ratio:16/9;overflow:hidden;
+  border-radius:0;background:var(--cream-3);
+}
+.plist__scene img{display:block;width:100%;height:100%;object-fit:cover}
+.plist__lead{
+  margin:18px 20px 0;
+  font-size:13.5px;line-height:1.8;color:var(--text);
+}
+.plist__facts{margin:16px 20px 0;display:flex;flex-direction:column;gap:8px}
+.plist__facts > div{display:grid;grid-template-columns:64px 1fr;gap:10px;align-items:baseline}
+.plist__facts dt{font-size:10.5px;letter-spacing:.14em;color:var(--wine);opacity:.85}
+.plist__facts dd{margin:0;font-size:13px;line-height:1.75;color:var(--text)}
+.plist__pm{
+  margin:20px 20px 0;padding:18px 0;
+  border-top:1px solid var(--line);border-bottom:1px solid var(--line);
+  display:flex;gap:16px;align-items:flex-start;
+}
+.plist__pm-photo{
+  flex:0 0 auto;width:120px;height:150px;object-fit:cover;
+  border-radius:0;background:var(--cream-3);
+}
+.plist__pm-body{min-width:0}
+/* 折りたたみの締め。そのプログラムらしさを一言で置く。
+   吹き出しの尻尾は右下に出るので、キャラクターは吹き出しの右で左を向く */
+.plist__guide{
+  display:flex;align-items:flex-end;justify-content:center;gap:8px;
+  margin:26px 20px 0;
+}
+/* 3つ並ぶと同じ絵の繰り返しになるので、置き方と向きを変える。
+   左に立たせるときは吹き出しの尻尾も左へ回す（既定は右下に出る） */
+/* row-reverse では主軸の始点が右になるので、左へ寄せるには flex-end を使う */
+.plist__guide--left{flex-direction:row-reverse;justify-content:flex-end}
+.plist__guide--left .say::after{right:auto;left:-6px}
+.plist__guide--right{justify-content:flex-end}
+.plist__guide .say{margin:0 0 20px;max-width:none;font-size:12.5px}
+.plist__mascot{flex:none;display:block;width:80px;height:auto}
+.plist__pm-role{margin:0;font-size:10px;letter-spacing:.2em;color:var(--wine);opacity:.8}
+.plist__pm-name{margin:4px 0 0;font-family:var(--ff-serif);font-weight:700;font-size:19px;color:var(--wine);line-height:1.3}
+.plist__pm-text{margin:8px 0 0;font-size:13px;line-height:1.85;color:var(--text-2)}
+
+@media (max-height:700px) and (max-width:767px){
+  .plist__pm-photo{width:104px;height:130px}
+}
+
+@media (min-width:768px){
+  .plist{margin-top:44px;max-width:720px}
+  .plist__head{
+    display:grid;grid-template-columns:1fr 290px 88px 16px;column-gap:16px;
+    margin:0 0 10px;padding:0 14px 0 24px;
+  }
+  .plist__h{
+    justify-self:center;
+    background:var(--deep);color:var(--cream);border-radius:3px;
+    padding:5px 12px;font-size:12px;font-weight:700;letter-spacing:.1em;
+  }
+  .plist__rows{gap:12px}
+  .plist__row{
+    grid-template-columns:1fr 290px 88px 16px;
+    grid-template-areas:'when where days mark';
+    column-gap:16px;padding:12px 14px 12px 24px;
+    min-height:111px;
+  }
+  .plist__when{font-size:17px}
+  .plist__where{margin-bottom:0;justify-self:center;font-size:28px}
+  .plist__days{padding:12px 14px;justify-content:center}
+  .plist__days b{font-size:30px}
+  .plist__days small{font-size:12px}
+  .plist__body{padding:28px 0}
+  .plist__scene{margin:0 28px}
+  .plist__lead{margin:24px 28px 0;font-size:15px}
+  .plist__facts{margin:18px 28px 0;gap:10px}
+  .plist__facts > div{grid-template-columns:84px 1fr;gap:14px}
+  .plist__facts dd{font-size:14px}
+  .plist__pm{margin:24px 28px 0;padding:22px 0;gap:22px}
+  .plist__pm-photo{width:170px;height:212px}
+  .plist__guide{margin:32px 28px 0;gap:12px}
+  .plist__guide .say{font-size:14px;margin-bottom:26px}
+  .plist__mascot{width:104px}
+  .plist__pm-name{font-size:23px}
+  .plist__pm-text{font-size:14.5px}
+}
+
+/* ==========================================================================
+   日程表（sf.png / bn1.png / bn2.png を表に起こしたもの）
+   元は日付が列の横長の表。画面が狭いと必ず横に溢れるので、
+   1日=1行の縦組みにして、午前・午後・宿泊をラベル付きで並べる
+   ========================================================================== */
+.sched{width:calc(100% - 40px);margin:18px 20px 0;border-collapse:collapse;font-size:12.5px;line-height:1.7}
+.sched thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.sched tr{display:grid;grid-template-columns:58px 1fr;gap:2px 10px;padding:9px 0;border-top:1px solid var(--line)}
+.sched tr:first-child{border-top:none}
+.sched th[scope="row"]{
+  grid-row:1 / span 3;align-self:start;text-align:left;font-weight:700;color:var(--wine);
+  display:flex;align-items:baseline;gap:5px;padding-top:1px;
+}
+.sched th b{font-size:14px;font-variant-numeric:tabular-nums}
+.sched th span{font-size:11px;opacity:.7}
+.sched td{text-align:left;color:var(--text);padding:0}
+.sched td::before{
+  content:attr(data-l) '　';color:var(--wine);opacity:.62;font-size:10.5px;letter-spacing:.1em;
+}
+.sched td[data-l="宿泊"]{color:var(--text-2);font-size:12px}
+
+@media (min-width:768px){
+  /* 幅があるので、元の表と同じ 4 列に戻す */
+  .sched{width:calc(100% - 56px);margin:22px 28px 0;font-size:13.5px}
+  .sched thead{position:static;width:auto;height:auto;clip:auto}
+  .sched thead th{
+    text-align:left;font-size:10.5px;letter-spacing:.14em;color:var(--wine);opacity:.7;
+    font-weight:700;padding:0 12px 8px 0;border-bottom:1px solid var(--line);
+  }
+  .sched tr{display:table-row;border-top:none}
+  .sched tbody tr{border-top:1px solid var(--line)}
+  .sched th[scope="row"]{display:table-cell;width:74px;padding:9px 12px 9px 0;vertical-align:top}
+  .sched td{padding:9px 12px 9px 0;vertical-align:top}
+  .sched td:last-child{padding-right:0;width:26%}
+  .sched td::before{content:none}
+  .sched .sched__all{color:var(--wine)}
+}

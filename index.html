@@ -1,0 +1,856 @@
+<!doctype html>
+<html lang="ja" class="no-js">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<script>
+/* 起動の最小限。JS が動く印と、幕（veil）の制御だけをここに置く。
+   本体は js/main.js（ES Modules・defer）。低速回線で動画に帯域を取られても
+   幕の上限タイマーだけは先に動き出すよう、この部分は head に直書きする。 */
+(function(){
+  var root=document.documentElement;
+  root.className=root.className.replace('no-js','js');
+  window.dataLayer=window.dataLayer||[];
+  if('scrollRestoration' in history){try{history.scrollRestoration='manual';}catch(e){}}
+  /* 再読み込みのときは、URL に残っているアンカーを「飛び先の指定」と見なさない。
+     タブを押すと #parent などが replaceState で URL に残るため、そのまま
+     再読み込みすると勝手にそこまでスクロールしてしまう（幕が見えなくなる）。
+     ブラウザ自身の飛び先移動も起きるので、アンカー自体も消しておく。 */
+  var nav=(performance.getEntriesByType&&performance.getEntriesByType('navigation')[0])||null;
+  var isReload=nav?nav.type==='reload':(performance.navigation&&performance.navigation.type===1);
+  if(isReload&&location.hash){
+    try{history.replaceState(null,'',location.pathname+location.search);}catch(e){}
+  }
+  var deepLink=!isReload&&/^#(student|parent|university|dispatch|fee|briefing|faq)$/.test(location.hash);
+  var pinning=!deepLink;
+  function toTop(){if(pinning&&(window.scrollY||window.pageYOffset))window.scrollTo(0,0);}
+  function pin(){if(!pinning)return;toTop();requestAnimationFrame(pin);}
+  toTop();requestAnimationFrame(pin);
+  window.__veil={t0:Date.now(),MIN:520,MAX:1900,deepLink:deepLink,release:function(){pinning=false;}};
+  setTimeout(function(){pinning=false;},6000);
+  root.classList.add('is-veiled');
+}());
+</script>
+<link rel="stylesheet" href="fonts/fonts.css?v=2026090924">
+<link rel="stylesheet" href="css/base.css?v=2026090924">
+<link rel="stylesheet" href="css/fv.css?v=2026090924">
+<link rel="stylesheet" href="css/sections.css?v=2026090924">
+<link rel="stylesheet" href="css/spiral.css?v=2026090924">
+<link rel="stylesheet" href="css/kifu-parity.css?v=2026090924">
+<link rel="preload" as="image" href="img/poster-door.webp" fetchpriority="high">
+<link rel="modulepreload" href="js/main.js?v=2026090924">
+<link rel="modulepreload" href="js/door.js?v=2026090924">
+<link rel="modulepreload" href="js/ui.js?v=2026090924">
+<link rel="modulepreload" href="js/mascot.js?v=2026090924">
+<link rel="modulepreload" href="js/eye.js?v=2026090924">
+<link rel="modulepreload" href="js/lib/gl.js?v=2026090924">
+<link rel="modulepreload" href="js/lib/mat4.js?v=2026090924">
+<link rel="modulepreload" href="js/lib/spring.js?v=2026090924">
+<link rel="modulepreload" href="js/lib/geom.js?v=2026090924">
+<title>ワールド寺子屋プログラム2026（第5回）｜NPO法人EdFuture</title>
+<meta name="description" content="高校生が自分の探究テーマを持って渡米し、現地校で学び、自分でアポを取って大学や企業を訪ね、探究発表を行う海外探究プログラム。2027年3月派遣・3便。説明会は無料・オンライン・全3回。">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="canonical" href="https://edfuture.jp/world-terakoya-2026/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="NPO法人EdFuture">
+<meta property="og:title" content="ワールド寺子屋プログラム2026（第5回）｜NPO法人EdFuture">
+<meta property="og:description" content="まだ言葉にならない違和感を、問いに変えに行く。現地校で学び、自分でアポを取り、毎晩振り返る海外探究プログラム。">
+<meta property="og:url" content="https://edfuture.jp/world-terakoya-2026/">
+<meta property="og:image" content="https://edfuture.jp/world-terakoya-2026/img/ogp.jpg">
+<meta name="twitter:card" content="summary_large_image">
+</head>
+<body>
+<!-- FV の背景写真。canvas は透過なので、これが扉の後ろに透ける。
+     .fv の中に置くと .fv の重ね文脈（z-index:1）に入って扉より前に来てしまう -->
+
+<!-- 幕。JS が付ける .is-veiled の間だけ見える（JS 無効なら最初から無い） -->
+<div class="veil" id="veil" aria-hidden="true">
+  <div class="veil__mark">
+    <svg viewBox="0 0 720 850" width="64" height="76" aria-hidden="true"><use href="#logo-mark"/></svg>
+    <!-- 待っている間のキャラクター。リグは JS が読むので、幕の間はまだ動かせない。
+         ここは素の画像1枚を CSS だけで歩かせる（跳ねる・傾く・しゃがむ） -->
+    <div class="veil__toon">
+      <span class="veil__shadow"></span>
+      <img class="veil__walker" src="assets/mascot/pose-walk-a.svg" width="104" height="104" alt="" decoding="async">
+    </div>
+    <span class="veil__dots" aria-hidden="true"><i></i><i></i><i></i></span>
+  </div>
+</div>
+
+<!-- 固定の舞台。扉の WebGL はここに描く（FV と最終CTA の背後に見える） -->
+<canvas class="stage" id="stage" aria-hidden="true"></canvas>
+<!-- 扉の向こうの映像。WebGL のテクスチャとして使う。CSS 版の扉（WebGL 無し）でも同じ要素を使う -->
+<!-- SP の地。横幅を画面幅に合わせ、上はサンフランシスコ、下はボストンを置く。
+     どちらも画面の端に合わせ、曲線の帯はこの上に乗る -->
+<img class="fv-bg fv-bg--top" src="img/fv-sf.webp?v=2026090924" width="900" height="599" decoding="async" alt="" aria-hidden="true">
+<img class="fv-bg fv-bg--bottom" src="img/fv-bn.webp?v=2026090924" width="900" height="600" decoding="async" alt="" aria-hidden="true">
+<div class="stage-band" id="stageBand" aria-hidden="true">
+  <video class="stage-video" id="doorVideo" playsinline muted loop preload="none"
+       width="1280" height="720" poster="img/poster-door.webp" data-src="video/door.mp4"
+       aria-label="現地校の廊下を、参加者が現地の生徒たちと歩いている映像"></video>
+</div>
+
+<!-- SVG シンボル（ロゴマーク・足あと・矢印） -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="logo-mark" viewBox="0 0 720 850"><path fill="currentColor" d="M358.5 13.1c-14.3 1.7-28.6 3.3-57 6.4-19.6 2.1-28.4 3.2-46 5.4-8.8 1.2-20 2.5-25 3.1-23.6 2.5-37 4.1-48 5.5-6.6.9-17.8 2.2-25 3-7.1.8-19.1 2.1-26.5 3-7.4.8-17.5 2-22.5 2.5-4.9.5-13.7 1.6-19.5 2.4s-16.1 2-23 2.6-15.2 1.6-18.5 2c-3.3.5-9.7 1.2-14.3 1.6-4.5.4-8.9 1.2-9.7 1.8-1.3 1-1.6 35.7-2 301.6-.2 165.3-.1 306.6.3 314l.7 13.5 48 24.2c53.8 27.1 48 25.2 69.6 22.8 7.4-.8 26.2-2.8 41.9-4.5 15.7-1.6 32.6-3.4 37.5-4 5-.6 14-1.5 20-2 6.1-.6 17.5-1.7 25.5-2.5s16.6-1.5 19.1-1.5h4.5l3.4 8.2c9.6 23.7 25.2 44.9 47.5 64.7 10.1 8.9 36 24.2 38.4 22.6 1.3-.7 1.6-526.2.3-528.1-.4-.6-7.3-4.9-15.4-9.4l-14.7-8.2-10.8 1.1c-5.9.6-14.8 1.6-19.8 2.1-45.9 5.2-51.1 5.6-53 4-1.5-1.3-2.4-42.6-.9-46.4.7-1.7 2.2-2 18.4-3.6 6.3-.6 19.6-2 29.5-3.1 23.1-2.5 33.9-3.5 50-5 18.7-1.6 17 1.4 17.3-30.4.1-19.2-.1-27.2-1-28.2-1.2-1.5-3.3-1.4-22.8.7-4.7.5-17.3 1.9-28 3s-22.9 2.5-27 3c-7.5 1-46.9 5.4-63 7-4.7.5-17.8 2-29.1 3.4-11.4 1.4-22.9 2.6-25.6 2.6-9.5 0-8.8-4.9-9.1 58.8-.2 47.6-.1 56.1 1.2 57.1 1.1.9 5.8.7 21.2-.9 33.7-3.5 77.3-8 88.9-9.1 6.1-.6 20.9-2 33-3.3 13.2-1.4 22.7-1.9 23.8-1.4 1.6.8 1.7 4.6 1.7 58.1 0 44.3-.3 57.7-1.2 58.9-.9 1.1-4.6 1.9-12.8 2.8-6.3.6-17.1 1.8-24 2.6s-18.3 2.1-25.5 2.9c-7.1.7-19.3 2.1-27 3-7.7.8-18.7 2-24.5 2.6-27.7 2.7-52.4 5.9-53.4 6.9-.8.8-1.2 20.4-1.5 66.9-.4 75.6-1.1 69.7 8.8 68.6 3.1-.3 12.8-1.2 21.6-2s23.4-2.1 32.5-2.9c28.2-2.6 45.4-3.5 46.6-2.5.8.7.6 2.7-.8 7.7-7.4 26.4-9.1 41.1-8.4 72.7.3 14.8.8 29.1 1.2 31.7l.6 4.7-3.4.5c-1.8.3-11.4 1.2-21.3 2.1s-21.6 2-26 2.5-16.3 1.6-26.5 2.5-24.6 2.2-32 3-19.3 1.9-26.5 2.5c-7.1.6-21.3 1.9-31.5 3-38 3.9-43.8 4.4-55 4.4l-11.5.1-.3-305.3L41 68l2.2-1c1.3-.5 7-1.4 12.8-2s13.7-1.5 17.5-2c3.9-.5 14.2-1.6 23-2.5s20.7-2.2 26.5-3c16-2.1 27.4-3.4 39.5-4.5 6.1-.6 11.9-1.3 13-1.6 2-.4 6.4-.9 33.5-3.9 7.4-.8 19.4-2.2 26.5-3 7.2-.9 16.8-2 21.5-2.5s20.2-2.3 34.5-3.9c14.3-1.7 30.7-3.5 36.5-4.1s16.7-1.7 24.3-2.5c7.5-.8 15.4-1.5 17.5-1.5 6.5 0 8.2-2 8.2-10 0-5.8-.3-7.1-1.9-8-1.1-.5-2.1-.9-2.3-.9-.2.1-7 1-15.3 2m-18.1 439.7c.3.5-2.2 3.5-5.5 6.8-14.7 14.3-29.5 35.1-38.9 54.6-3.3 6.7-6.6 13.4-7.3 14.8-1 2-2.3 2.6-6.2 3.1-10.6 1.4-17.1 1.8-18.2 1.1-1.6-1-2.1-70.8-.5-72.4 1.1-1.1 5-1.6 39.7-5.4 13.2-1.5 24.2-2.8 24.4-3 .8-.8 12-.4 12.5.4m60.3-418.1c-.3 10.9-.3 54.3 0 96.6l.6 76.7 2.1.6c2.2.5 15.8-.5 42.1-3.1 30.4-2.9 34.9-3.5 35.7-4.8 1.2-1.8 1-136.5-.2-138.7-.8-1.5-17-11.8-31.2-19.9-1.8-1-5.5-3.2-8.3-4.9C415.1 21.3 404.3 15 402.9 15s-1.7 2.6-2.2 19.7m167.7 216.4c-.3.6-.6 34.9-.5 76.3.2 76.9-.4 108.6-2.2 108.6-.5 0-3-1.5-5.6-3.4-20.8-15.2-42.2-23.8-66.9-27-17-2.2-22-2.1-53.9 2-2.9.4-5.4.5-5.5.3-.2-.2-.5-22.9-.8-50.4l-.5-50-14.4-7.3c-11.2-5.7-14.6-7-15.7-6.1-2.1 1.8-2.1 523.1 0 524.9 2.5 2 18.4 5.9 41.6 10.1 12.9 2.4 48.3 1.9 60.2-.9 34.2-7.8 58.3-21.8 81.1-47 2.7-2.9 5.2-5 5.8-4.7.5.4.9 10.9.9 25 0 23.4.1 24.5 2 25.5 2.6 1.4 94.6 1.3 97.2-.1 1.7-.9 1.8-12.9 1.8-287.7 0-221.7-.3-287.1-1.2-288-1.7-1.7-122.3-1.7-123.4-.1M502 502.5c23.8 3.8 40.8 14 54.1 32.4 10.1 14.1 10.9 18.6 12.1 68.1 1.2 52.5 0 68.5-6.3 85.7-19.3 52.3-85.8 66-125.2 25.7-9.3-9.5-9.8-12.3-2.1-12.4 1.7 0 10.7-1.1 20-2.5s18.9-2.8 21.4-3.2c8.7-1.1 8 4.9 8-70.3v-66.7l-2.2-2.1c-1.3-1.1-12.4-7.3-24.8-13.7-28.2-14.5-27.8-14.1-21.9-19.6 11.3-10.6 27-18.7 40.8-21.1 12.2-2.1 14.6-2.1 26.1-.3m-31.8 114.4c6.8 6.1 2.9 16.1-6.2 16.1-8.3 0-13.6-9.4-8.4-15.1 4.2-4.7 10-5.1 14.6-1 M67.8 500.3c-11 9.1-11.3 32.7-.8 55 2.8 5.8 5.1 6.6 13.1 4.2 8-2.5 9.2-3.9 11.5-13.6 5.7-25-2.1-47.9-16.2-47.9-3.6 0-5.6.6-7.6 2.3m57.5 48.7c-10.2 6.2-14.5 26.4-9.9 46.5 2.7 12 3.5 13 9.9 14 2.3.4 5.7 1.1 7.6 1.7 5.6 1.7 8-1.8 12.7-19.7 3.6-13.2 3.9-18.2 1.9-26.4-3.7-15.3-12.8-21.9-22.2-16.1m-43.7 22.5c-7.3 2.8-8.5 6.5-4.5 15 4.3 9.2 11.4 11.2 17.6 5 3.4-3.4 3.5-3.8 3-9.1-1.1-11.1-6.2-14.5-16.1-10.9m32.1 48.7c-4.3 3.3-6.3 16.9-3.2 22.8 5.7 11.1 16.2 6.6 22.7-9.9 2.3-5.9 1.5-7-7.9-10.9-8.8-3.6-9.3-3.7-11.6-2"/></symbol>
+    <symbol id="ico-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="ico-down" viewBox="0 0 24 24"><path d="M12 5v14M6 13l6 6 6-6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  </defs>
+</svg>
+
+<!-- ===================== 上部バー ===================== -->
+<header class="bar" id="bar">
+  <a class="bar__brand" href="#top" aria-label="ページの先頭へ">
+    <img src="img/logo-edfuture.webp" width="34" height="34" alt="" decoding="async">
+    <span class="bar__name">EdFuture</span>
+  </a>
+  <p class="bar__meta"><span class="mono">WORLD TERAKOYA PROGRAM</span><span class="bar__sep">/</span>2026 · 第5回</p>
+</header>
+
+<!-- ===================== 章レール（PC） ===================== -->
+<nav class="rail" id="rail" aria-label="章">
+  <a href="#top" data-rail="top"><i></i><span>扉</span></a>
+  <a href="#flow" data-rail="flow"><i></i><span>流れ</span></a>
+  <a href="#dispatch" data-rail="dispatch"><i></i><span>3つの派遣</span></a>
+  <a href="#who" data-rail="who"><i></i><span>あなたへ</span></a>
+  <a href="#briefing" data-rail="briefing"><i></i><span>説明会</span></a>
+  <a href="#faq" data-rail="faq"><i></i><span>Q&amp;A</span></a>
+</nav>
+
+<main id="main">
+
+<!-- ===================== FV: 曲線の帯（映像はマスクで抜く） ===================== -->
+<section class="fv" id="top" aria-labelledby="fv-h">
+  <div class="fv__sticky">
+    <div class="fv__copy" id="fvCopy">
+      <h1 class="fv__title" id="fv-h">
+        <span class="fv__line"><span class="fv__word" data-split>あなたの一歩で、</span></span>
+        <span class="fv__line"><span class="fv__word fv__word--ink" data-split>世界は広がる</span></span>
+      </h1>
+      <p class="fv__lead" data-fade>高校生が自分の問いを持って渡米し、現地校で学び、自分でアポを取って人に会いに行く。<br class="pc">2027年3月、サンフランシスコ／ボストン・ニューヨークへ。</p>
+      <div class="fv__ctas" data-fade>
+        <a class="btn btn--lg" href="#briefing" data-cta="form" data-cta-pos="fv" data-magnet>説明会に申し込む<small>無料・オンライン・60分</small></a>
+        <a class="btn-line" href="#flow">応募から帰国までの流れ<svg class="ico" width="16" height="16"><use href="#ico-down"/></svg></a>
+      </div>
+    </div>
+
+    <!-- SP 用の CTA。吹き出しより下に来るよう、目の行の下に独立した段を作って置く。
+         PC は .fv__ctas が同じ役目を持つので出さない -->
+    <div class="fv__cta">
+      <a class="btn btn--lg" href="#briefing" data-cta="form" data-cta-pos="fv-sp" data-magnet>説明会はこちら</a>
+    </div>
+
+    <div class="fv__meta mono">
+      <span>2027.03.06 – 03.29</span>
+      <span>SAN FRANCISCO / BOSTON / NEW YORK</span>
+    </div>
+
+    <div class="fv__mascot" id="fvMascot">
+      <p class="say">今すぐ申し込む</p>
+      <!-- ポートフォリオから移植した目（js/eye.js）。WebGL が無い環境では
+           canvas が空のまま残るだけで、他は何も出ない -->
+      <canvas class="fv__eye" id="fvEye" aria-hidden="true"></canvas>
+    </div>
+
+  </div>
+</section>
+
+<!-- ===================== 01 流れ ===================== -->
+<section class="ch ch--flow" id="flow" aria-labelledby="flow-h">
+  <!-- 見出しは画面に出さない。FV の直後に螺旋が始まる。
+       読み上げと検索のために、章の名前だけ sr-only で残す -->
+  <h2 class="sr-only" id="flow-h">応募から帰国までの流れ</h2>
+
+  <!-- 7段階を螺旋に並べる。JS が動かないときは、そのまま縦に読める一覧になる -->
+  <div class="spiral" id="spiral">
+    <div class="spiral__track">
+      <div class="spiral__stage">
+
+        <div class="spiral__view">
+          <ol class="spiral__cards">
+
+            <li class="scard" data-phase="jp">
+              <div class="scard__detail">
+                <h3 class="scard__title"><span class="scard__no">①</span><span class="nb">まだ言葉にならない</span><span class="nb">違和感から始める</span></h3>
+                <p class="scard__body">整った探究テーマは要りません。「地元がどんどん寂しくなっているのに、みんな仕方ないと言う」くらいの荒さで出発します。応募時の志望理由は800〜1000字ですが、問われるのは完成度ではなく、何が引っかかっているかです。</p>
+              </div>
+              <figure class="scard__media">
+                <img src="img/step-01.webp" width="1200" height="900" loading="lazy" decoding="async" alt="資料とタブレットを持って屋外に立つ参加者">
+              </figure>
+            </li>
+
+            <li class="scard" data-phase="jp">
+              <div class="scard__detail">
+                <h3 class="scard__title"><span class="scard__no">②</span>違和感を、自分の問いにする</h3>
+                <p class="scard__body">出発前に5回の事前研修があります。第1回は2026年12月13日、以降は1月・2月と続き、2月中旬には現地バディとの交流も入ります。この期間に、違和感を「誰に何を聞けば確かめられるか」まで削っていきます。</p>
+                <dl class="plate mono">
+                  <div><dt>1</dt><dd>2026.12.13</dd></div>
+                  <div><dt>2</dt><dd>01.13</dd></div>
+                  <div><dt>3</dt><dd>02.04</dd></div>
+                  <div><dt>4</dt><dd>02 中旬</dd></div>
+                  <div><dt>5</dt><dd>02.27<small>②は 03.05</small></dd></div>
+                </dl>
+              </div>
+              <figure class="scard__media">
+                <img src="img/step-02.webp" width="1200" height="900" loading="lazy" decoding="async" alt="夜の机に開いたノートと、オンライン研修が映るノートパソコン">
+              </figure>
+            </li>
+
+            <li class="scard" data-phase="us">
+              <div class="scard__detail">
+                <h3 class="scard__title"><span class="scard__no">③</span>現地校で学ぶ</h3>
+                <p class="scard__body">現地の学校で授業に入り、登校日には同世代と同じ時間を過ごします。サンフランシスコ派遣にはUnity Assembly Day（登校日）が組まれています。</p>
+              </div>
+              <figure class="scard__media">
+                <video class="clip" playsinline muted loop preload="none" poster="img/poster-clip-cafeteria.webp" data-src="video/clip-cafeteria.mp4" width="960" height="540" aria-label="現地校のカフェテリアで昼食をとる参加者たち"></video>
+              </figure>
+            </li>
+
+            <li class="scard" data-phase="us">
+              <div class="scard__detail">
+                <h3 class="scard__title"><span class="scard__no">④</span>現地バディと動く</h3>
+                <p class="scard__body">到着後に現地バディと合流し、フィールドワークや活動を一緒に進めます。通訳がつくプログラムではありません。</p>
+              </div>
+              <figure class="scard__media">
+                <video class="clip" playsinline muted loop preload="none" poster="img/poster-clip-talk.webp" data-src="video/clip-talk.mp4" width="960" height="540" aria-label="屋外で現地の生徒と話す参加者"></video>
+              </figure>
+            </li>
+
+            <li class="scard" data-phase="us">
+              <div class="scard__detail">
+                <h3 class="scard__title"><span class="scard__no">⑤</span><span class="nb">自分でアポを取って、</span><span class="nb">話を聞きに行く</span></h3>
+                <p class="scard__body">ここがこのプログラムの中心です。用意された見学先を回るのではなく、自分の問いに答えを持っていそうな相手を決め、自分でアポを取ります。過去には、米国教職員連盟の州支部に取材した参加者、ハーバード教育大学院の博士課程に話を聞きに行った参加者がいます。</p>
+              </div>
+              <figure class="scard__media">
+                <img src="img/step-03.webp" width="1600" height="900" loading="lazy" decoding="async" alt="現地の担当者が図を示しながら説明し、参加者が話を聞いている">
+              </figure>
+            </li>
+
+            <li class="scard" data-phase="us">
+              <div class="scard__detail">
+                <h3 class="scard__title"><span class="scard__no">⑥</span><span class="nb">毎晩の振り返りで</span><span class="nb">気づきを言葉にする</span></h3>
+                <p class="scard__body">その日に見たこと・感じたこと・分からなかったことを毎晩言語化し、参加者全員で共有します。否定しない場を参加者自身が育てることを前提にしていて、スタッフは事前研修の段階から伴走します。</p>
+              </div>
+              <figure class="scard__media">
+                <video class="clip" playsinline muted loop preload="none" poster="img/poster-clip-circle.webp" data-src="video/clip-circle.mp4" width="960" height="540" aria-label="滞在先で参加者が輪になって振り返りをしている"></video>
+              </figure>
+            </li>
+
+            <li class="scard" data-phase="us">
+              <div class="scard__detail">
+                <h3 class="scard__title"><span class="scard__no">⑦</span>発表として残す</h3>
+                <p class="scard__body">現地で探究発表を行い、最終日にフェアウェルパーティーがあります。帰国後にも報告会があり、2027年4月11日にオンライン、4月17日に対面。持ち帰るのは思い出ではなく、誰に何を聞き、そこから何が分かったかの記録です。</p>
+              </div>
+              <figure class="scard__media">
+                <img src="img/step-05.webp" width="1200" height="900" loading="lazy" decoding="async" alt="マイクを持って前に立ち、発表している参加者">
+              </figure>
+            </li>
+
+          </ol>
+        </div>
+
+        <div class="spiral__read">
+          <p class="spiral__big" aria-hidden="true">01</p>
+        </div>
+
+        <div class="spiral__ground" aria-hidden="true">
+          <div class="spiral__walker">
+            <div class="rig rig--walk" data-rig="assets/mascot/rig-rev.svg" data-pose="walk">
+              <img src="assets/mascot/pose-walk-a.svg" width="56" height="56" alt="" decoding="async">
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- 螺旋を抜けたあと。映像の上なので、ここで地を戻して次の章へ渡す -->
+</section>
+
+<!-- ===================== 目的（白い地が映像の上にせり上がる） ===================== -->
+<section class="ch ch--purpose" id="purpose" aria-labelledby="purpose-h">
+  <div class="wrap">
+    <h2 class="purpose__h" id="purpose-h" data-reveal>
+      <span class="purpose__line">世界をフィールドに、</span>
+      <span class="purpose__line">自分だけの問いを深める</span>
+      <span class="purpose__line purpose__line--tag">グローバル探究</span>
+    </h2>
+    <p class="purpose__lead" data-reveal>本プログラムでは、米国のイノベーションの中心地・シリコンバレーを訪れ、GoogleやAppleなどの最先端企業を見学。さらに、スタンフォード大学のキャンパスを訪問し、現役のスタンフォード大学生との交流を通して、グローバルな視野と刺激的な学びを体験します。</p>
+    <!-- 章の末尾。ここで白い章が終わり、次の黒い章がそのまま続く -->
+    <div class="purpose__tail" id="purposeTail">
+      <p class="purpose__h purpose__h--next" data-reveal>
+        <span class="purpose__line">日程や特徴から選べる</span>
+        <span class="purpose__line">3つのプログラム</span>
+      </p>
+      <p class="purpose__note" data-reveal>応募から帰国までの流れは、3つとも同じです。変わるのは、行き先と日数、そして誰とどこに泊まるか。いずれも2027年3月、10日間か14日間です。</p>
+      <div class="purpose__guide" data-reveal>
+        <p class="say say--wine">3つのコースから選べるよ！</p>
+        <!-- 左向きの完成ポーズをリグとして読み込む（rig.svg では体の向きを変えられない）。
+             ポーズはファイルの通りなので data-pose は付けない。JS が瞳・まぶた・口・腕を動かす -->
+        <div class="purpose__mascot rig rig--face rig--point" data-rig="assets/mascot/pose-l-point.svg">
+          <img src="assets/mascot/pose-l-point.svg" width="104" height="104" alt="" aria-hidden="true" decoding="async">
+        </div>
+      </div>
+      <div class="plist" id="dispatch" data-reveal>
+        <p class="plist__head" aria-hidden="true">
+          <span class="plist__h">日程</span>
+          <span class="plist__h">派遣地</span>
+          <span class="plist__h">日数</span>
+        </p>
+        <ul class="plist__rows">
+          <li class="plist__item">
+            <details class="plist__fold" id="prog-sf" open>
+              <summary class="plist__row">
+                <span class="plist__where">San Francisco</span>
+                <span class="plist__when"><b>3/6</b><small>(SAT)</small><i aria-hidden="true"></i><b>3/15</b><small>(MON)</small></span>
+                <span class="plist__days"><b>10</b><small>Days</small></span>
+                <span class="plist__mark" aria-hidden="true"></span>
+              </summary>
+              <div class="plist__body">
+                <figure class="plist__scene">
+                  <img src="img/prog-sf.webp" width="1200" height="675" loading="lazy" decoding="async" alt="サンフランシスコの街並み">
+                </figure>
+                <p class="plist__lead">西海岸の大学と企業を、自分の問いを持って回る10日間。</p>
+                <dl class="plist__facts">
+                  <div><dt>募集</dt><dd>10名</dd></div>
+            <div><dt>宿泊</dt><dd>団体宿泊（Airbnb）。ホームステイではありません</dd></div>
+            <div><dt>行程の軸</dt><dd>Stanford大学の訪問とセッション、Google訪問、Apple Park訪問、Unity Assembly Day（登校日）</dd></div>
+                </dl>
+                <div class="plist__pm">
+                  <img class="plist__pm-photo" src="img/pm-kazuki.webp" width="800" height="1000" loading="lazy" decoding="async" alt="サンフランシスコ派遣のプログラムマネージャー、Kazuki">
+                  <div class="plist__pm-body">
+                    <p class="plist__pm-role mono">PROGRAM MANAGER</p>
+                    <p class="plist__pm-name">Kazuki</p>
+                    <!-- 仮テキスト。EdFuture の確認後に差し替える -->
+                    <p class="plist__pm-text">サンフランシスコ派遣の担当です。大学や企業を訪ねる行程の準備と、滞在中の伴走を受け持ちます。問いを持って動く10日間を、一緒に組み立てましょう。</p>
+                  </div>
+                </div>
+                <table class="sched">
+                  <caption class="sr-only">サンフランシスコ派遣の日程</caption>
+                  <thead><tr><th scope="col">日付</th><th scope="col">午前</th><th scope="col">午後</th><th scope="col">宿泊</th></tr></thead>
+                  <tbody>
+                    <tr><th scope="row"><b>3/6</b><span>土</span></th><td data-l="午前">SF着 ※現地時間</td><td data-l="午後">成田発／バディと合流</td><td data-l="宿泊">団体宿泊（Airbnb）</td></tr>
+                    <tr><th scope="row"><b>3/7</b><span>日</span></th><td class="sched__all" colspan="2" data-l="終日">サンフランシスコ フィールドワーク</td><td data-l="宿泊">団体宿泊（Airbnb）</td></tr>
+                    <tr><th scope="row"><b>3/8</b><span>月</span></th><td data-l="午前">授業</td><td data-l="午後">バディと活動</td><td data-l="宿泊">団体宿泊（Airbnb）</td></tr>
+                    <tr><th scope="row"><b>3/9</b><span>火</span></th><td data-l="午前">授業</td><td data-l="午後">バディと活動</td><td data-l="宿泊">団体宿泊（Airbnb）</td></tr>
+                    <tr><th scope="row"><b>3/10</b><span>水</span></th><td data-l="午前">Stanford大学訪問</td><td data-l="午後">Stanfordセッション</td><td data-l="宿泊">団体宿泊（Airbnb）</td></tr>
+                    <tr><th scope="row"><b>3/11</b><span>木</span></th><td data-l="午前">Google訪問</td><td data-l="午後">Apple Park訪問</td><td data-l="宿泊">団体宿泊（Airbnb）</td></tr>
+                    <tr><th scope="row"><b>3/12</b><span>金</span></th><td class="sched__all" colspan="2" data-l="終日">Unity Assembly Day（登校日）／授業＆バディと活動</td><td data-l="宿泊">団体宿泊（Airbnb）</td></tr>
+                    <tr><th scope="row"><b>3/13</b><span>土</span></th><td data-l="午前">振り返り</td><td data-l="午後">フェアウェルパーティー</td><td data-l="宿泊">団体宿泊（Airbnb）</td></tr>
+                    <tr><th scope="row"><b>3/14</b><span>日</span></th><td data-l="午前">現地出発</td><td data-l="午後">飛行機</td><td data-l="宿泊">飛行機</td></tr>
+                    <tr><th scope="row"><b>3/15</b><span>月</span></th><td data-l="午前">成田着</td><td data-l="午後">&mdash;</td><td data-l="宿泊">&mdash;</td></tr>
+                  </tbody>
+                </table>
+                <div class="plist__guide" data-reveal>
+                  <p class="say say--wine">スタンフォードもGoogleも、自分の足で回るよ！</p>
+                  <!-- 左向きの完成ポーズ。吹き出しは左に置くので向きが合う -->
+                  <div class="plist__mascot rig rig--face rig--point" data-rig="assets/mascot/pose-l-point.svg">
+                    <img src="assets/mascot/pose-l-point.svg" width="104" height="104" alt="" aria-hidden="true" decoding="async">
+                  </div>
+                </div>
+              </div>
+            </details>
+          </li>
+          <li class="plist__item">
+            <details class="plist__fold" id="prog-bn1">
+              <summary class="plist__row">
+                <span class="plist__where">Boston &amp; New York ①</span>
+                <span class="plist__when"><b>3/6</b><small>(SAT)</small><i aria-hidden="true"></i><b>3/15</b><small>(MON)</small></span>
+                <span class="plist__days"><b>10</b><small>Days</small></span>
+                <span class="plist__mark" aria-hidden="true"></span>
+              </summary>
+              <div class="plist__body">
+                <figure class="plist__scene">
+                  <img src="img/prog-bn1.webp" width="1200" height="675" loading="lazy" decoding="async" alt="霧の中の自由の女神">
+                </figure>
+                <p class="plist__lead">ニューヨークで3日、ボストンで6日。都市を移りながら現地校に入る。</p>
+                <dl class="plist__facts">
+                  <div><dt>募集</dt><dd>13名</dd></div>
+            <div><dt>宿泊</dt><dd>ホテルとホームステイ</dd></div>
+            <div><dt>行程の軸</dt><dd>ニューヨーク（3月6日〜8日）からボストン（3月9日〜14日）へ移動します</dd></div>
+                </dl>
+                <div class="plist__pm">
+                  <img class="plist__pm-photo" src="img/pm-misako.webp" width="800" height="1000" loading="lazy" decoding="async" alt="ボストン・ニューヨーク①派遣のプログラムマネージャー、Misako">
+                  <div class="plist__pm-body">
+                    <p class="plist__pm-role mono">PROGRAM MANAGER</p>
+                    <p class="plist__pm-name">Misako</p>
+                    <!-- 仮テキスト。EdFuture の確認後に差し替える -->
+                    <p class="plist__pm-text">ボストン・ニューヨーク①派遣の担当です。現地校とホームステイ先との調整を受け持ち、滞在中は参加者の相談に応じます。最初の一歩を、安心して踏み出せるように。</p>
+                  </div>
+                </div>
+                <table class="sched">
+                  <caption class="sr-only">ボストン・ニューヨーク①派遣の日程</caption>
+                  <thead><tr><th scope="col">日付</th><th scope="col">午前</th><th scope="col">午後</th><th scope="col">宿泊</th></tr></thead>
+                  <tbody>
+                    <tr><th scope="row"><b>3/6</b><span>土</span></th><td data-l="午前">&mdash;</td><td data-l="午後">羽田空港発 NY到着</td><td data-l="宿泊">ホテル</td></tr>
+                    <tr><th scope="row"><b>3/7</b><span>日</span></th><td class="sched__all" colspan="2" data-l="終日">NY フィールドワーク</td><td data-l="宿泊">ホテル</td></tr>
+                    <tr><th scope="row"><b>3/8</b><span>月</span></th><td class="sched__all" colspan="2" data-l="終日">NY フィールドワーク</td><td data-l="宿泊">ホテル</td></tr>
+                    <tr><th scope="row"><b>3/9</b><span>火</span></th><td data-l="午前">ボストンへ移動</td><td data-l="午後">バディと活動</td><td data-l="宿泊">ホームステイ</td></tr>
+                    <tr><th scope="row"><b>3/10</b><span>水</span></th><td data-l="午前">学校</td><td data-l="午後">バディと活動</td><td data-l="宿泊">ホームステイ</td></tr>
+                    <tr><th scope="row"><b>3/11</b><span>木</span></th><td data-l="午前">学校</td><td data-l="午後">ハーバード大学ツアー</td><td data-l="宿泊">ホームステイ</td></tr>
+                    <tr><th scope="row"><b>3/12</b><span>金</span></th><td data-l="午前">学校</td><td data-l="午後">MIT大学ツアー／フェアウェルパーティー</td><td data-l="宿泊">ホームステイ</td></tr>
+                    <tr><th scope="row"><b>3/13</b><span>土</span></th><td data-l="午前">バディと活動</td><td data-l="午後">振り返り</td><td data-l="宿泊">ホテル</td></tr>
+                    <tr><th scope="row"><b>3/14</b><span>日</span></th><td data-l="午前">現地出発</td><td data-l="午後">飛行機</td><td data-l="宿泊">飛行機</td></tr>
+                    <tr><th scope="row"><b>3/15</b><span>月</span></th><td data-l="午前">飛行機</td><td data-l="午後">羽田到着</td><td data-l="宿泊">&mdash;</td></tr>
+                  </tbody>
+                </table>
+                <div class="plist__guide plist__guide--left" data-reveal>
+                  <p class="say say--wine">ニューヨークとボストン、2つの街で学ぶよ！</p>
+                  <!-- 左に立って右を指すポーズ。完成ポーズなので rig--face は付けない
+                       （付けると瞳と口がずれて重なり、目や口が二重に見える） -->
+                  <div class="plist__mascot rig" data-rig="assets/mascot/pose-point.svg">
+                    <img src="assets/mascot/pose-point.svg" width="104" height="104" alt="" aria-hidden="true" decoding="async">
+                  </div>
+                </div>
+              </div>
+            </details>
+          </li>
+          <li class="plist__item">
+            <details class="plist__fold" id="prog-bn2">
+              <summary class="plist__row">
+                <span class="plist__where">Boston &amp; New York ②</span>
+                <span class="plist__when"><b>3/16</b><small>(TUE)</small><i aria-hidden="true"></i><b>3/29</b><small>(MON)</small></span>
+                <span class="plist__days"><b>14</b><small>Days</small></span>
+                <span class="plist__mark" aria-hidden="true"></span>
+              </summary>
+              <div class="plist__body">
+                <figure class="plist__scene">
+                  <img src="img/prog-bn2.webp" width="1200" height="675" loading="lazy" decoding="async" alt="対岸から見たマンハッタンの街並み">
+                </figure>
+                <p class="plist__lead">3派遣でいちばん長い14日間。都市のあとに、バーモントの生活が入る。</p>
+                <dl class="plist__facts">
+                  <div><dt>募集</dt><dd>13名</dd></div>
+            <div><dt>宿泊</dt><dd>ホテルとホームステイ（ボストンとバーモント）</dd></div>
+            <div><dt>行程の軸</dt><dd>ニューヨーク（3月16日〜19日）、ボストン（3月19日〜23日）、バーモント（3月23日〜28日）</dd></div>
+                </dl>
+                <div class="plist__pm">
+                  <img class="plist__pm-photo" src="img/pm-nanako.webp" width="800" height="1000" loading="lazy" decoding="async" alt="ボストン・ニューヨーク②派遣のプログラムマネージャー、Nanako">
+                  <div class="plist__pm-body">
+                    <p class="plist__pm-role mono">PROGRAM MANAGER</p>
+                    <p class="plist__pm-name">Nanako</p>
+                    <!-- 仮テキスト。EdFuture の確認後に差し替える -->
+                    <p class="plist__pm-text">ボストン・ニューヨーク②派遣の担当です。都市のあとに続くバーモントでの生活まで、毎晩の振り返りに同席し、気づきが言葉になるまで付き合います。</p>
+                  </div>
+                </div>
+                <table class="sched">
+                  <caption class="sr-only">ボストン・ニューヨーク②派遣の日程</caption>
+                  <thead><tr><th scope="col">日付</th><th scope="col">午前</th><th scope="col">午後</th><th scope="col">宿泊</th></tr></thead>
+                  <tbody>
+                    <tr><th scope="row"><b>3/16</b><span>火</span></th><td data-l="午前">&mdash;</td><td data-l="午後">羽田発 NY到着</td><td data-l="宿泊">ホテルに宿泊</td></tr>
+                    <tr><th scope="row"><b>3/17</b><span>水</span></th><td class="sched__all" colspan="2" data-l="終日">NY フィールドワーク</td><td data-l="宿泊">ホテルに宿泊</td></tr>
+                    <tr><th scope="row"><b>3/18</b><span>木</span></th><td class="sched__all" colspan="2" data-l="終日">NY フィールドワーク</td><td data-l="宿泊">ホテルに宿泊</td></tr>
+                    <tr><th scope="row"><b>3/19</b><span>金</span></th><td data-l="午前">ボストンへ移動</td><td data-l="午後">ホストファミリーと活動</td><td data-l="宿泊">ホテルに宿泊</td></tr>
+                    <tr><th scope="row"><b>3/20</b><span>土</span></th><td class="sched__all" colspan="2" data-l="終日">ホストファミリーと活動</td><td data-l="宿泊">ホームステイ in Boston</td></tr>
+                    <tr><th scope="row"><b>3/21</b><span>日</span></th><td class="sched__all" colspan="2" data-l="終日">ホストファミリーと活動</td><td data-l="宿泊">ホームステイ in Boston</td></tr>
+                    <tr><th scope="row"><b>3/22</b><span>月</span></th><td data-l="午前">ハーバード大学訪問</td><td data-l="午後">MIT大学訪問</td><td data-l="宿泊">ホテル</td></tr>
+                    <tr><th scope="row"><b>3/23</b><span>火</span></th><td data-l="午前">バーモントへ移動</td><td data-l="午後">バディと合流</td><td data-l="宿泊">ホームステイ in Vermont</td></tr>
+                    <tr><th scope="row"><b>3/24</b><span>水</span></th><td class="sched__all" colspan="2" data-l="終日">学校</td><td data-l="宿泊">ホームステイ in Vermont</td></tr>
+                    <tr><th scope="row"><b>3/25</b><span>木</span></th><td class="sched__all" colspan="2" data-l="終日">学校</td><td data-l="宿泊">ホームステイ in Vermont</td></tr>
+                    <tr><th scope="row"><b>3/26</b><span>金</span></th><td data-l="午前">学校</td><td data-l="午後">フェアウェルパーティー</td><td data-l="宿泊">ホームステイ in Vermont</td></tr>
+                    <tr><th scope="row"><b>3/27</b><span>土</span></th><td data-l="午前">ボストンへ移動</td><td data-l="午後">フィールドワーク</td><td data-l="宿泊">ホテル</td></tr>
+                    <tr><th scope="row"><b>3/28</b><span>日</span></th><td class="sched__all" colspan="2" data-l="終日">飛行機</td><td data-l="宿泊">飛行機</td></tr>
+                    <tr><th scope="row"><b>3/29</b><span>月</span></th><td data-l="午前">羽田到着</td><td data-l="午後">&mdash;</td><td data-l="宿泊">&mdash;</td></tr>
+                  </tbody>
+                </table>
+                <div class="plist__guide plist__guide--right" data-reveal>
+                  <p class="say say--wine">いちばん長い14日間。バーモントの生活も入るよ！</p>
+                  <!-- 腕を上げたポーズ。これも完成ポーズなので rig--face は付けない -->
+                  <div class="plist__mascot rig" data-rig="assets/mascot/pose-cheer.svg">
+                    <img src="assets/mascot/pose-cheer.svg" width="104" height="104" alt="" aria-hidden="true" decoding="async">
+                  </div>
+                </div>
+              </div>
+            </details>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== 03 あなたへ（読み手別） ===================== -->
+<section class="ch ch--who" id="who" aria-labelledby="who-h">
+  <h2 class="h2 sr-only" id="who-h">あなたは、どの立場で読みますか</h2>
+
+  <div class="wrap">
+    <div class="tabs" id="tabs">
+      <div class="tabs__list" role="tablist" aria-label="読み手別の情報">
+        <button class="tab" role="tab" id="tab-student" aria-selected="true" aria-controls="panel-student" tabindex="0" data-tab="student">高校生</button>
+        <button class="tab" role="tab" id="tab-university" aria-selected="false" aria-controls="panel-university" tabindex="-1" data-tab="university">大学生</button>
+        </div>
+
+      <!-- ---------- 高校生 ---------- -->
+      <section class="panel" role="tabpanel" id="panel-student" aria-labelledby="tab-student" tabindex="0">
+        <div class="panel__head">
+          <h3 class="h3"><span class="nb">選ぶ基準は</span><span class="nb">英語でも成績でも</span><span class="nb">ありません</span></h3>
+          <figure class="ph ph--45 panel__portrait" data-ph>
+            <img src="img/student-01.webp" width="900" height="1125" loading="lazy" decoding="async" alt="現地の掲示板の前に立つ参加者">
+          </figure>
+        </div>
+        <ul class="conds">
+          <li><b>英語力は選考基準に入りません。</b> 選考は志望理由と人間性などで総合的に判断され、語学力は問われません。</li>
+          <li><b>初めての海外でも参加しています。</b> パスポートを持っていない状態から出発した参加者がいます。</li>
+          <li><b>地方から出ています。</b> 4年間で36都道府県から参加者が集まっています。北海道・高知・鹿児島から出発した参加者がいます。</li>
+          <li><b>テーマが未完成でも始められます。</b> 出発前に5回の事前研修があり、その期間で問いの形にしていきます。</li>
+          <li><b>応募できるのは、2026年10月の応募時点で高校1〜3年生。</b> 日本の高校または高等専門学校に在籍し、保護者と学校の同意が必要です。</li>
+        </ul>
+
+
+        <figure class="ph ph--169" data-ph>
+          <video class="clip" playsinline muted loop preload="none" poster="img/poster-clip-group.webp" data-src="video/clip-group.mp4" width="960" height="540" aria-label="街で集まって手を振る参加者たち"></video>
+        </figure>
+
+        <h4 class="h4">なぜ今か</h4>
+        <p>派遣は2027年3月です。高校2年生なら、高校3年生になる前に自分の問いを一度外へ持ち出せる最後の時期にあたります。高校1年生なら、ここで持った問いを2年生からの探究と進路選択にそのまま接続できます。高校3年生なら、進路が決まったあとに視野を広げる時間として使えます。</p>
+        <p class="cta-lead">自分の違和感がテーマになるのかどうかは、説明会で過去の参加者のテーマを見ると判断できます。</p>
+        <a class="btn" href="#briefing" data-cta="form" data-cta-pos="panel-student" data-magnet>説明会に申し込む</a>
+
+        <div class="schol">
+          <div class="schol__guide">
+            <p class="say say--wine">奨学金制度があるよ！</p>
+            <!-- 左向きの完成ポーズをリグとして読み込む（rig.svg では体の向きを変えられない） -->
+            <div class="schol__mascot rig rig--face rig--point" data-rig="assets/mascot/pose-l-point.svg">
+              <img src="assets/mascot/pose-l-point.svg" width="104" height="104" alt="" aria-hidden="true" decoding="async">
+            </div>
+          </div>
+          <h4 class="h4 schol__h">奨学金について</h4>
+          <p>サンフランシスコ派遣には、参加費・渡航費・宿泊費が全額免除になる枠が1名分あります。給付型なので、返す必要はありません。</p>
+          <p>対象になる条件と、申請のときに出していただく書類は、いま確定作業を進めています。決まりしだい説明会でご案内しますので、費用の面で迷っている場合も、まず説明会で聞いてください。</p>
+        </div>
+      </section>
+
+      <!-- ---------- 大学生 ---------- -->
+      <section class="panel" role="tabpanel" id="panel-university" aria-labelledby="tab-university" tabindex="0" hidden>
+        <h3 class="h3">大学生の参加枠があります</h3>
+        <p class="lead">各派遣3名程度。高校生に帯同し、その学びの過程を見届けながら、自分自身も探究を行う立場です。引率スタッフではありません。</p>
+
+        <dl class="vs">
+          <div><dt>交換留学</dt><dd>語学と単位</dd></div>
+          <div><dt>海外ボランティア</dt><dd>体験</dd></div>
+          <div><dt>インターン</dt><dd>職業理解</dd></div>
+          <div class="vs__self"><dt>ワールド寺子屋</dt><dd>自分の問いを持って会いたい相手を決め、自分でアポを取り、話を聞き、その日のうちに言語化して残す一連の手順</dd></div>
+        </dl>
+        <p>「誰に話を聞きに行けばいいか分からない」という状態のまま卒業しないための、10日前後の実地訓練だと考えてください。参加後にスタッフとして運営側に回る道もあります。</p>
+
+        <figure class="ph ph--169" data-ph>
+          <video class="clip" playsinline muted loop preload="none" poster="img/poster-clip-street.webp" data-src="video/clip-street.mp4" width="960" height="540" aria-label="街角で現地の人と話す参加者"></video>
+        </figure>
+
+        <h4 class="h4">参加条件と選考枠</h4>
+        <div class="table-scroll">
+          <table class="tbl tbl--2col">
+            <caption class="sr-only">大学生の参加条件と選考枠</caption>
+            <tbody>
+              <tr><th scope="row">募集人数</th><td>各派遣3名程度</td></tr>
+              <tr><th scope="row">含まれないもの</th><td>航空費／保険／1日3食の食費／ニューヨークのホテル／ニューヨーク〜ボストンの移動費（自己手配・自己負担）</td></tr>
+              <tr><th scope="row">宿泊</th><td>スタッフの宿舎に帯同、またはホテル。ボストン・ニューヨーク②はボストン／バーモントでのホームステイ</td></tr>
+              <tr><th scope="row">選考</th><td>書類（志望理由500字以内）＋動画選考</td></tr>
+              <tr><th scope="row">奨学金</th><td>参加費が全額免除される給付型の枠が約1名分</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="cta-lead">参加条件・選考枠・高校生との関わり方は、説明会で確認できます。</p>
+        <a class="btn" href="#briefing" data-cta="form" data-cta-pos="panel-university" data-magnet>参加枠と選考の流れを確認する</a>
+      </section>
+    </div>
+  </div>
+</section>
+
+
+<!-- ===================== 代表メッセージ（寄付LPから移植） ===================== -->
+<!-- 寄付LP の #founder をそのまま持ってきた。COO（徳永）の節は入れない。
+     見出しだけ「未来のために多様な選択肢を」に差し替えている。
+     寸法・色は css/kifu-parity.css に、寄付の値のまま置いた -->
+<!-- ===================== 参加者の声 ===================== -->
+<section class="ch ch--voices" id="voices" aria-labelledby="voices-h">
+  <div class="ch__head wrap">
+    <h2 class="h2 h2--cream" id="voices-h" data-reveal>参加者の声</h2>
+  </div>
+
+  <div class="wrap">
+    <ul class="stats" data-reveal>
+      <li class="dial" data-pct="96" style="--pct:96">
+        <span class="dial__ring" aria-hidden="true"></span>
+        <span class="dial__val"><b class="num" data-count="96">96</b><i>%</i></span>
+        <span class="dial__label">挑戦意欲の変化</span>
+      </li>
+      <li class="dial" data-pct="99" style="--pct:99">
+        <span class="dial__ring" aria-hidden="true"></span>
+        <span class="dial__val"><b class="num" data-count="99">99</b><i>%</i></span>
+        <span class="dial__label">キャリアへの影響実感</span>
+      </li>
+      <li class="dial" data-pct="91" style="--pct:91">
+        <span class="dial__ring" aria-hidden="true"></span>
+        <span class="dial__val"><b class="num" data-count="91">91</b><i>%</i></span>
+        <span class="dial__label">他者信頼の向上</span>
+      </li>
+      <li class="dial" data-pct="96" style="--pct:96">
+        <span class="dial__ring" aria-hidden="true"></span>
+        <span class="dial__val"><b class="num" data-count="4.8" data-decimals="1">4.8</b><i>/5</i></span>
+        <span class="dial__label">全体満足度</span>
+      </li>
+    </ul>
+    <p class="note">※出典: EdFuture Impact Report 2025（2022〜2025年度の累計・参加者アンケート）。個人差があり、結果を保証するものではありません。</p>
+
+    <div class="vcards" data-reveal>
+      <h4 class="h4 mono">VOICES <span>先に行った人が、何をしたか</span></h4>
+      <ul class="vcards__track">
+        <li class="vcard">
+          <img class="vcard__photo" src="img/vc-1.webp" width="1024" height="700" loading="lazy" decoding="async" alt="" style="object-position:center top">
+          <div class="vcard__body">
+            <p class="vcard__prog mono">ワールド寺子屋 2023 / サンフランシスコ</p>
+            <blockquote class="vcard__quote"><p>高校最後の春、経済的な理由で一度は諦めた留学に挑戦することができました。海外経験だけなく、「自分にも挑戦できる」という自信と、切磋琢磨しながら応援し合える仲間を得ました。参加後はEdFutureスタッフとして挑戦を支える側になりました。その後、トビタテ留学JAPANの制度を活用し、デンマークに長期留学、今はインドネシアで国連インターンに参加しています。海外経験も英語力もなかった私の最初の一歩を後押ししてくださった皆さんに心から感謝しています。</p></blockquote>
+            <p class="vcard__name">H.N さん（参加時高校3年生・東京都）</p>
+          </div>
+        </li>
+        <li class="vcard">
+          <img class="vcard__photo" src="img/vc-2.webp" width="1024" height="700" loading="lazy" decoding="async" alt="" style="object-position:center 15%">
+          <div class="vcard__body">
+            <p class="vcard__prog mono">ワールド寺子屋 2025 / サンフランシスコ</p>
+            <blockquote class="vcard__quote"><p>「お金がないから海外なんて無理。」そう思っていた私の背中を押してくれたのがEd Futureでした。経済的な理由で夢を諦めかけていた自分が、勇気を出して一歩踏み出せたのは、その支えのおかげです。サンフランシスコで出会った人々や文化、景色、そして触れた新しい価値観は、今も私の大切な財産で、挑戦を続ける原動力になっています。プログラム終了後は、地元北海道で会社を起業し、挑戦し続けています。次は自分が、誰かの背中を押せる存在になりたいです。</p></blockquote>
+            <p class="vcard__name">S.O さん（参加時高校2年生・北海道）</p>
+          </div>
+        </li>
+        <li class="vcard">
+          <img class="vcard__photo" src="img/vc-3.webp" width="1024" height="700" loading="lazy" decoding="async" alt="" style="object-position:center 30%">
+          <div class="vcard__body">
+            <p class="vcard__prog mono">ワールド寺子屋 2023 / サンフランシスコ</p>
+            <blockquote class="vcard__quote"><p>島で育った私は、自分の価値観はまだ狭いと思っていました。だからこそ留学に憧れていましたが、費用や距離の問題から、海外へ行くことを諦めかけていました。そんな中、先生の紹介でワールド寺子屋に出会いました。親を説得し、審査を通過し、海外で自ら行動した経験、そして負けたくないと思える仲間との出会いは、挑戦することへの自信を与えてくれました。今でも仲間の存在が刺激となり、新しい挑戦を続ける原動力になっています。</p></blockquote>
+            <p class="vcard__name">Y.T さん（参加時高校2年生・広島県）</p>
+          </div>
+        </li>
+        <li class="vcard">
+          <img class="vcard__photo" src="img/vc-4.webp" width="1024" height="700" loading="lazy" decoding="async" alt="" style="object-position:center 25%">
+          <div class="vcard__body">
+            <p class="vcard__prog mono">ワールド寺子屋 2022 / サンフランシスコ</p>
+            <blockquote class="vcard__quote"><p>高校3年生の私は、「世界は広い」と初めて知りました。写真や誰かの話では決して得られない、「自分で見て、感じること」がどれだけ貴重なのか。離島で育ち、夢を語ることにどこか遠慮していた私も、同じ熱量で応援し、一緒に悩み、夢を実現している大人や仲間に出会えました。4年後の今、私は児童養護施設で働いています。今の私の夢は、どんな状況にいる子どもたちにも希望を持ってもらうことです。いつか私も、あの時背中を押してくれたたくさんの大人の1人になりたいです。</p></blockquote>
+            <p class="vcard__name">K.N さん（参加時高校3年生・鹿児島県）</p>
+          </div>
+        </li>
+        <li class="vcard">
+          <img class="vcard__photo" src="img/vc-5.webp" width="1024" height="700" loading="lazy" decoding="async" alt="" style="object-position:center 48%">
+          <div class="vcard__body">
+            <p class="vcard__prog mono">ワールド寺子屋 2026 / ボストン・ニューヨーク</p>
+            <blockquote class="vcard__quote"><p>英語に自信がなく、知らない環境へ飛び込むことに大きな不安がありましたが、「挑戦してみたい」という気持ちを大切にしているEdFutureに出会い、自分の可能性を信じて参加を決意しました。現地では積極的に質問や交流を重ねることで、自分から一歩踏み出す勇気の大切さを実感しました。参加後はまず挑戦してみることが自分の成長につながると考えるようになり、新しいことに前向きに取り組めるようになりました。この経験は今後さまざまなことに挑戦していく原動力になると感じています。</p></blockquote>
+            <p class="vcard__name">S.A さん（参加時大学3年生・東京都）</p>
+          </div>
+        </li>
+      </ul>
+    </div>
+
+
+    <blockquote class="voice">
+      <p>「娘の人生に大きな影響を与えていただきました。日本中の子ども達が同等の経験や学びの機会が得られるように願っています。」</p>
+      <footer class="mono"><img class="voice__face" src="img/voice-parent.webp" width="256" height="256" loading="lazy" decoding="async" alt="">— M.T さん（過去参加者の保護者）</footer>
+    </blockquote>
+  </div>
+</section>
+
+<section class="ch ch--founder" id="founder" aria-labelledby="founder-h">
+  <div class="voices-head">
+    <h2 class="voices-title" id="founder-h">未来のために、多様な選択肢を</h2>
+  </div>
+  <div class="founder-card" data-reveal>
+    <div class="founder-card__photo-wrap">
+      <img src="img/founder.webp" alt="代表理事 中村柾" class="founder-card__photo" loading="lazy" decoding="async">
+    </div>
+    <div class="founder-card__overlay"></div>
+    <div class="founder-card__content">
+      <div class="founder-card__meta">
+        <p class="founder-card__role">代表理事</p>
+        <h3 class="founder-card__name">中村 柾</h3>
+        <ul class="founder-card__career">
+          <li>ボストン市教育委員会</li>
+          <li>スタンフォード教育大学院卒</li>
+          <li>ハーバード教育大学院卒</li>
+        </ul>
+      </div>
+      <div class="founder-card__message">
+        <p>19歳のとき初めてアメリカへ飛び出し、そこで見た景色と出会った人たちが、人生の方向を大きく変えました。挑戦に必要なのは、完璧な英語力や特別な才能ではありません。必要なのは、ただ「行ってみたい！」という気持ちだけ。皆さんが一歩踏み出すのを、EdFutureの情熱あるスタッフが全力で支えます。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== 05 説明会 ===================== -->
+<section class="ch ch--brief" id="briefing" aria-labelledby="brief-h">
+  <div class="ch__head wrap">
+    <h2 class="h2 h2--cream" id="brief-h" data-reveal>まずはオンライン説明会へ</h2>
+  </div>
+
+  <div class="wrap">
+    <ul class="tickets" data-reveal>
+      <li class="ticket" data-tilt><img src="img/ticket-1.webp?v=2026090924" width="1200" height="602" loading="lazy" decoding="async" alt="第1回 オンライン説明会 2026年9月26日（土）19:00〜20:00"></li>
+      <li class="ticket" data-tilt><img src="img/ticket-2.webp?v=2026090924" width="1200" height="604" loading="lazy" decoding="async" alt="第2回 オンライン説明会 2026年10月5日（月）19:00〜20:00"></li>
+      <li class="ticket" data-tilt><img src="img/ticket-3.webp?v=2026090924" width="1200" height="601" loading="lazy" decoding="async" alt="第3回 オンライン説明会 2026年10月16日（金）19:00〜20:00"></li>
+    </ul>
+
+    <!-- GP の LP（edfuture_gp_upload_server）の .sched-note を、この章の地に合わせて置き直した -->
+    <ul class="sched-note" data-reveal>
+      <li>保護者・友達との参加もOK</li>
+      <li>完全無料・オンライン開催</li>
+      <li>少しでも気になったら、まずは説明会へ</li>
+    </ul>
+
+  </div>
+</section>
+
+<!-- ===================== 後援・メディア ===================== -->
+<section class="ch ch--trust" id="trust" aria-label="後援・協賛・メディア掲載">
+  <!-- .wrap で囲まない。寄付LPではこの2ブロックが全幅に置かれていて、
+       自前の --px（max(32px,(100vw-720px)/2)）で 720px の柱を作る。
+       .wrap の中に入れると余白が二重にかかり、柱が 508px まで痩せる -->
+      <div class="endorsements">
+        <h3 class="endorsements__title">後援</h3>
+        <div class="endorsements__grid">
+            <div class="endorsements__row">
+              <img src="img/endorse-mext.webp" alt="文部科学省" class="endorsement-logo endorsement-logo--mext" loading="lazy" decoding="async">
+              <img src="img/endorse-ireland.webp" alt="Education in Ireland" class="endorsement-logo endorsement-logo--ireland" loading="lazy" decoding="async">
+            </div>
+            <div class="endorsements__row">
+              <img src="img/endorse-jt.webp" alt="the japan times" class="endorsement-logo endorsement-logo--jt" loading="lazy" decoding="async">
+              <ul class="endorsements__names">
+                  <li>アメリカ大使館</li>
+                  <li>在アイルランド日本国大使館</li>
+                  <li>アイルランド教育庁</li>
+              </ul>
+            </div>
+        </div>
+      </div>
+    <div class="sponsors">
+      <h3 class="media-section__title">協賛</h3>
+      <div class="sponsor-grid">
+        <img src="img/sponsor-1.webp" alt="SAP" class="sponsor-logo" width="275" height="135" loading="lazy" decoding="async">
+        <img src="img/sponsor-2.webp" alt="I'm beside you" class="sponsor-logo" width="185" height="123" loading="lazy" decoding="async">
+        <img src="img/sponsor-3.webp" alt="HR高等学院" class="sponsor-logo" width="303" height="72" loading="lazy" decoding="async">
+        <img src="img/sponsor-4.webp" alt="アクセンチュア" class="sponsor-logo" width="381" height="102" loading="lazy" decoding="async">
+        <img src="img/sponsor-5.webp" alt="Stapia" class="sponsor-logo" width="379" height="101" loading="lazy" decoding="async">
+        <img src="img/sponsor-6.webp" alt="Oh my teeth" class="sponsor-logo" width="407" height="71" loading="lazy" decoding="async">
+      </div>
+    </div>
+
+    <div class="media-section">
+      <h3 class="media-section__title">メディア掲載</h3>
+      <div class="media-grid">
+        <img src="img/media-1.webp" alt="Forbes JAPAN" class="media-logo" loading="lazy" decoding="async">
+        <img src="img/media-2.webp" alt="朝日新聞" class="media-logo" loading="lazy" decoding="async">
+        <img src="img/media-3.webp" alt="NHK" class="media-logo" loading="lazy" decoding="async">
+        <img src="img/media-4.webp" alt="TBS" class="media-logo" loading="lazy" decoding="async">
+        <img src="img/media-5.webp" alt="教育新聞" class="media-logo" loading="lazy" decoding="async">
+        <img src="img/media-6.webp" alt="The Japan Times Alpha" class="media-logo" loading="lazy" decoding="async">
+        <img src="img/media-7.webp" alt="朝日新聞EduA" class="media-logo" loading="lazy" decoding="async">
+        <img src="img/media-8.webp" alt="東洋経済" class="media-logo" loading="lazy" decoding="async">
+      </div>
+    </div>
+</section>
+
+<!-- ===================== FAQ ===================== -->
+<section class="ch ch--faq" id="faq" aria-labelledby="faq-h">
+  <div class="ch__head wrap">
+    <h2 class="h2" id="faq-h" data-reveal>よくあるご質問</h2>
+  </div>
+  <ul class="faq" data-reveal>
+      <li class="faq__item is-open"><h3><button type="button" class="faq__q" aria-expanded="true" aria-controls="fa-1"><span>英語が苦手でも参加できますか。</span><span class="faq__ico" aria-hidden="true">＋</span></button></h3><div class="faq__a" id="fa-1"><p>選考で語学力は問いません。判断されるのは志望理由と人間性などです。現地での通訳はつきません。バディの役割の範囲は説明会で案内します。</p></div></li>
+      <li class="faq__item"><h3><button type="button" class="faq__q" aria-expanded="false" aria-controls="fa-2"><span>探究テーマが決まっていません。</span><span class="faq__ico" aria-hidden="true">＋</span></button></h3><div class="faq__a" id="fa-2" hidden><p>決まっていなくて構いません。出発前に5回の事前研修があり、その期間に自分の問いの形にしていきます。</p></div></li>
+      <li class="faq__item"><h3><button type="button" class="faq__q" aria-expanded="false" aria-controls="fa-3"><span>高校1年生・3年生でも応募できますか。</span><span class="faq__ico" aria-hidden="true">＋</span></button></h3><div class="faq__a" id="fa-3" hidden><p>できます。2026年10月の応募時点で高校1〜3年生、日本の高校または高等専門学校に在籍していることが条件です。</p></div></li>
+      <li class="faq__item"><h3><button type="button" class="faq__q" aria-expanded="false" aria-controls="fa-4"><span>選考はありますか。</span><span class="faq__ico" aria-hidden="true">＋</span></button></h3><div class="faq__a" id="fa-4" hidden><p>あります。書類（志望理由800〜1000字）と、11月15日のWEB個人面接30分の二次選考です。派遣候補者の発表は11月24日です。</p></div></li>
+      <li class="faq__item"><h3><button type="button" class="faq__q" aria-expanded="false" aria-controls="fa-5"><span>ホームステイですか。</span><span class="faq__ico" aria-hidden="true">＋</span></button></h3><div class="faq__a" id="fa-5" hidden><p>派遣先で違います。サンフランシスコは団体宿泊（Airbnb）でホームステイはありません。ボストン・NY①②はホテルとホームステイの併用です。</p></div></li>
+      <li class="faq__item"><h3><button type="button" class="faq__q" aria-expanded="false" aria-controls="fa-6"><span>部活や模試と重なりませんか。</span><span class="faq__ico" aria-hidden="true">＋</span></button></h3><div class="faq__a" id="fa-6" hidden><p>派遣は2027年3月の春休みです。事前研修は12月13日、1月13日、2月4日、2月中旬、2月27日（②は3月5日）に行います。</p></div></li>
+      <li class="faq__item"><h3><button type="button" class="faq__q" aria-expanded="false" aria-controls="fa-7"><span>奨学金はありますか。</span><span class="faq__ico" aria-hidden="true">＋</span></button></h3><div class="faq__a" id="fa-7" hidden><p>サンフランシスコ派遣に全額免除の給付型が1名分あります。応募条件と提出書類は説明会で案内します。</p></div></li>
+  </ul>
+</section>
+
+</main>
+
+<!-- ===================== 最終CTA（扉がもう一度） ===================== -->
+<section class="final" id="cta-final" aria-labelledby="final-h">
+  <div class="final__inner wrap">
+    <p class="ch__num ch__num--cream mono" data-reveal><span>07</span><em>THE DOOR, AGAIN</em></p>
+    <h2 class="h2 h2--cream final__h" id="final-h" data-reveal><span class="nb">迷っているうちは、</span><br><span class="nb">説明会で聞くのが</span><span class="nb">いちばん早いです</span></h2>
+    <div class="final__ctas" data-reveal>
+      <a class="btn btn--lg" href="#" data-todo="form-url" data-cta="form" data-cta-pos="final" data-magnet>説明会に申し込む<small>9.26 / 10.5 / 10.16 — オンライン・無料・60分</small></a>
+    </div>
+    <div class="final__mascot" data-reveal>
+      <div class="rig rig--bow" data-rig="assets/mascot/rig-rev.svg" data-pose="bow">
+        <img src="assets/mascot/pose-bow-rev.svg" width="88" height="88" alt="" aria-hidden="true" decoding="async">
+      </div>
+      <p class="say say--dark">まずは話を聞きに来てね</p>
+    </div>
+  </div>
+</section>
+
+<!-- 紹介者向け。扉の描画に重ねると読めないので、地の色を持つ帯として独立させる -->
+<section class="ch ch--handoff" aria-label="教職員・教育関係者の方へ">
+  <div class="wrap foot__blocks">
+      <div class="foot__block">
+        <h2 class="h4">生徒に紹介したい教職員の方へ</h2>
+        <p>プログラムの概要・実績・安全体制をまとめた資料を準備しています。ご希望の方はお問い合わせください。</p>
+        <a class="btn-line btn-line--cream" href="mailto:info@edfuture2022.org?subject=%E6%95%99%E8%81%B7%E5%93%A1%E5%90%91%E3%81%91%E8%B3%87%E6%96%99%E3%81%AE%E3%81%94%E4%BE%9D%E9%A0%BC" data-cta="teacher-doc" data-cta-pos="footer">教職員の方へ（資料）<svg class="ico" width="16" height="16"><use href="#ico-arrow"/></svg></a>
+      </div>
+      <div class="foot__block">
+        <h2 class="h4">視察参加を検討される教育関係者の方へ</h2>
+        <p>2026年度の受け入れ枠・参加形態・費用・活動範囲は現在確認中です。確定後にこのページで案内します。</p>
+        <a class="btn-line btn-line--cream" href="mailto:info@edfuture2022.org?subject=%E8%A6%96%E5%AF%9F%E5%8F%82%E5%8A%A0%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6" data-cta="edu-visit" data-cta-pos="footer">視察参加について問い合わせる<svg class="ico" width="16" height="16"><use href="#ico-arrow"/></svg></a>
+      </div>
+  </div>
+</section>
+
+<footer class="s-foot" role="contentinfo" id="foot">
+  <div class="foot-brandzone">
+    <div class="foot-brandrow">
+      <img src="img/logo-edfuture.webp" width="48" height="48" alt="EdFuture ロゴ" class="foot-logo" loading="lazy" decoding="async">
+      <p class="foot-brand">NPO法人 EdFuture</p>
+    </div>
+    <p class="foot-tagline">すべての学生に、挑戦できる機会を。</p>
+  </div>
+
+  <div class="foot-social">
+      <a href="https://www.facebook.com/profile.php?id=100063545013511" class="foot-social__link" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+      </a>
+      <a href="https://x.com/npo_edfuture" class="foot-social__link" target="_blank" rel="noopener noreferrer" aria-label="X">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+      </a>
+      <a href="https://www.instagram.com/npo_edfuture/" class="foot-social__link" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+      </a>
+      <a href="https://lin.ee/e29aXVo" class="foot-social__link" target="_blank" rel="noopener noreferrer" aria-label="LINE">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M19.365 9.863c.349 0 .63.285.63.631 0 .345-.281.63-.63.63H17.61v1.125h1.755c.349 0 .63.283.63.63 0 .344-.281.629-.63.629h-2.386c-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63h2.386c.346 0 .627.285.627.63 0 .349-.281.63-.63.63H17.61v1.125h1.755zm-3.855 3.016c0 .27-.174.51-.432.596-.064.021-.133.031-.199.031-.211 0-.391-.09-.51-.25l-2.443-3.317v2.94c0 .344-.279.629-.631.629-.346 0-.626-.285-.626-.629V8.108c0-.27.173-.51.43-.595.06-.023.136-.033.194-.033.195 0 .375.104.495.254l2.462 3.33V8.108c0-.345.282-.63.63-.63.345 0 .63.285.63.63v4.771zm-5.741 0c0 .344-.282.629-.631.629-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63.346 0 .628.285.628.63v4.771zm-2.466.629H4.917c-.345 0-.63-.285-.63-.629V8.108c0-.345.285-.63.63-.63.348 0 .63.285.63.63v4.141h1.756c.348 0 .629.283.629.63 0 .344-.282.629-.629.629M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.078 9.436-6.975C23.176 14.393 24 12.458 24 10.314"/></svg>
+      </a>
+      <a href="mailto:info@edfuture2022.org" class="foot-social__link" aria-label="お問い合わせ">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+      </a>
+    </div>
+
+  <div class="foot-about">
+    <p class="foot-about__label">団体概要</p>
+    <dl class="foot-about__list">
+      <div class="foot-about__row"><dt>正式名称</dt><dd>NPO法人EdFuture</dd></div>
+      <div class="foot-about__row"><dt>代表理事</dt><dd>中村 柾</dd></div>
+      <div class="foot-about__row"><dt>設立</dt><dd>2023年1月16日</dd></div>
+      <div class="foot-about__row"><dt>所在地</dt><dd>〒270-2224<br>千葉県松戸市大橋280番地の6</dd></div>
+      <div class="foot-about__row"><dt>連絡先</dt><dd><a href="mailto:info@edfuture2022.org">info@edfuture2022.org<svg class="foot-about__ext" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3zm5 16H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2v-7h-2z"/></svg></a></dd></div>
+      <div class="foot-about__row"><dt>公式サイト</dt><dd><a href="https://edfuture.jp/" target="_blank" rel="noopener noreferrer">edfuture.jp<svg class="foot-about__ext" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3zm5 16H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2v-7h-2z"/></svg></a></dd></div>
+    </dl>
+    <p class="todo" data-todo="privacy-policy"><!-- TODO(要確認): プライバシーポリシー。申込フォームで個人情報を取得するため、公開時点でリンク先が必要 --></p>
+  </div>
+
+  <div class="foot-bottom">
+    <p class="foot-copy">© 2026 NPO法人EdFuture. All Rights Reserved.</p>
+  </div>
+</footer>
+
+<!-- 追従CTA（右端・現行版と同一意匠） -->
+<a class="side-cta" id="sideCta" href="#briefing" data-cta="form" data-cta-pos="side">
+  <span class="side-cta__sub">無料・60分</span>
+  <span class="side-cta__main">説明会に申し込む</span>
+</a>
+
+<!-- カーソル（PC・fine pointer のときだけ JS が有効化） -->
+<div class="cursor" id="cursor" aria-hidden="true"><i></i><span></span></div>
+
+<script type="module" src="js/main.js?v=2026090924"></script>
+</body>
+</html>

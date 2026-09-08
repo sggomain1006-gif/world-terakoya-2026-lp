@@ -1,0 +1,313 @@
+/* 寄付LP（edfuture.kifu）の「後援・メディア掲載」と「フッター」を節ごと移植。
+   値は style.css / desktop.css の原文のまま。変えたのは次の3点だけ。
+     1) 変数名を Fable 側の同値へ読み替え
+     2) footer 型セレクタを .s-foot に、.footer-/.social- を Fable の命名に
+     3) --px と line-height をこの3ブロックだけ寄付LPの値に固定
+        （寄付LP は --px が「中央720pxカラムのガター」、body の行送りが 1.8。
+          Fable は --px が 20/40/56px、行送り 1.9。合わせないと 1〜3px ずつずれる） */
+.endorsements,.media-section,.s-foot{--px:20px;line-height:1.8;font-size:15px;letter-spacing:normal}
+
+.endorsements { padding: 0 var(--px); margin-bottom: 36px; }
+.endorsements__title {
+  font-size: 18px; font-weight: 700; color: var(--wine);
+  letter-spacing: 0.12em; text-align: center; margin-bottom: 16px;
+}
+.endorsements__grid { display: flex; flex-direction: column; gap: 24px; }
+.endorsements__row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+.endorsement-logo { height: 56px; width: auto; object-fit: contain; flex-shrink: 0; }
+.endorsement-logo--jt { height: 72px; transform: translateX(-20px); }
+.endorsement-logo--mext { transform: translateX(-20px) scale(1.4); }
+.endorsement-logo--ireland { transform: translateX(70px); }
+.endorsements__names {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 72px;
+  margin: 0 0 0 -30px;
+  padding: 0;
+  font-size: 12px;
+  color: var(--text-2);
+  line-height: 1.4;
+  transform: translateX(43px);
+  align-items: center;
+}
+.media-section,.sponsors { padding: 0 var(--px); }
+/* 協賛。ロゴは縦横比がばらばら（1.5:1 〜 5.7:1）なので、枠を揃えて
+   その中で contain させる。枠の高さと中央が揃い、絵の中心も枠の中心に来る。
+   元画像の白い余白は書き出し時に切ってあるので、絵の重心が枠の中心と一致する */
+.sponsors{margin-bottom:44px}
+.sponsor-grid{
+  display:grid;grid-template-columns:repeat(2,1fr);
+  gap:26px 18px;align-items:center;justify-items:center;
+}
+.sponsor-logo{width:100%;height:40px;object-fit:contain;object-position:center}
+.media-section__title {
+  font-size: 18px; font-weight: 700; color: var(--wine);
+  letter-spacing: 0.12em; text-align: center; margin-bottom: 16px;
+}
+.media-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px 16px;
+  align-items: center;
+}
+.media-logo { width: 100%; height: 40px; object-fit: contain; }
+
+/* ===========================
+   S10: IMPACT
+=========================== */
+.s-foot {
+  width: 100%;
+  background: linear-gradient(180deg, var(--wine) 0%, var(--wine-2) 100%);
+  color: #fff;
+  padding: 48px var(--px) 0;
+  text-align: center;
+}
+
+/* Zone 1: brand */
+.foot-brandzone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 22px;
+}
+.foot-brandrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+}
+.foot-logo { width: 48px; height: 48px; }
+.foot-brand {
+  font-family: var(--ff-serif);
+  font-size: 1.2rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+.foot-tagline {
+  font-size: 0.8125rem;
+  letter-spacing: 0.06em;
+  color: var(--yellow);
+  opacity: 0.92;
+}
+
+/* Zone 2: social */
+.foot-social {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  padding-bottom: 30px;
+  margin-bottom: 30px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+.foot-social__link {
+  color: #fff;
+  opacity: 0.85;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+.foot-social__link:hover { opacity: 1; transform: translateY(-2px); }
+.foot-social__link svg { width: 26px; height: 26px; }
+
+/* Zone 3: 団体概要 panel */
+.foot-about {
+  max-width: 360px;
+  margin: 0 auto;
+  text-align: left;
+}
+.foot-about__label {
+  font-family: var(--ff-serif);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-align: center;
+  color: #fff;
+  margin-bottom: 18px;
+}
+.foot-about__list {
+  font-size: 0.75rem;
+  line-height: 1.65;
+}
+.foot-about__row {
+  display: flex;
+  gap: 14px;
+  padding: 9px 0 9px 44px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+.foot-about__row:last-child { border-bottom: none; }
+.foot-about dt {
+  flex: 0 0 72px;
+  opacity: 0.5;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+.foot-about dd {
+  flex: 1;
+  opacity: 0.9;
+}
+.foot-about dd a {
+  color: #fff;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  transition: opacity 0.3s ease;
+}
+.foot-about dd a:hover { opacity: 0.7; }
+.foot-about__ext {
+  width: 11px;
+  height: 11px;
+  flex-shrink: 0;
+  opacity: 0.6;
+}
+
+/* Zone 4: bottom bar */
+.foot-bottom {
+  margin-top: 36px;
+  padding: 18px var(--px);
+  margin-left: calc(var(--px) * -1);
+  margin-right: calc(var(--px) * -1);
+  background: rgba(0, 0, 0, 0.25);
+  text-align: center;
+}
+.foot-copy {
+  font-size: 0.6875rem;
+  letter-spacing: 0.03em;
+  opacity: 0.55;
+}
+
+@media (min-width:768px){
+/* FAQ（寄付 desktop.css と同じ値） */
+.faq{width:min(960px,calc(100% - 64px));margin:0 auto;padding:0}
+.faq__q{font-size:20px;padding:28px 0}
+.faq__ico{font-size:26px}
+.faq__a > p{font-size:17px}
+.faq__item.is-open .faq__a > p{padding-bottom:28px}
+
+.endorsements,.media-section,.s-foot{--px:max(32px,calc((100vw - 720px) / 2))}
+.endorsements { margin-bottom: 48px; }
+.endorsements__title,
+.media-section__title {
+  font-size: 22px;
+  margin-bottom: 22px;
+}
+.endorsements__grid { gap: 30px; }
+.endorsements__row { gap: 24px; }
+.endorsement-logo { height: 68px; }
+.endorsement-logo--jt { height: 86px; }
+.endorsements__names {
+  height: 86px;
+  font-size: 15px;
+}
+.media-grid {
+  grid-template-columns: repeat(4, 1fr);
+  gap: 34px 24px;
+}
+.sponsors{margin-bottom:56px}
+.sponsor-grid{grid-template-columns:repeat(3,1fr);gap:36px 26px}
+.sponsor-logo{height:48px}
+.media-logo { height: 54px; }
+
+.s-foot { padding-top: 72px; }
+.foot-brandzone { gap: 16px; margin-bottom: 32px; }
+.foot-logo { width: 64px; height: 64px; }
+.foot-brand { font-size: 1.6rem; }
+.foot-tagline { font-size: 1rem; }
+.foot-social { gap: 32px; padding-bottom: 40px; margin-bottom: 40px; }
+.foot-social__link svg { width: 32px; height: 32px; }
+.foot-about { max-width: 560px; }
+.foot-about__label { font-size: 0.9rem; margin-bottom: 24px; }
+.foot-about__list { font-size: 0.9rem; line-height: 1.75; }
+.foot-about__row { padding: 13px 0 13px 60px; }
+.foot-about dt { flex-basis: 90px; }
+.foot-about__ext { width: 13px; height: 13px; }
+.foot-bottom { margin-top: 48px; padding: 24px var(--px); }
+.foot-copy { font-size: 0.8rem; }
+}
+
+/* ==========================================================================
+   代表メッセージ（寄付LP #founder の移植）
+   組みは寄付のまま。地をクリームにしたので、色だけ反転させている
+   （寄付は暗い地に白抜き＋影。ここは明るい地なのでワイン系の文字・影なし）
+   本文は寄付と同じ 15px・行間1.8・字間なしに揃える（このLPの既定は16px）
+   ========================================================================== */
+.ch--founder{
+  --px:20px;line-height:1.8;font-size:15px;letter-spacing:normal;color:var(--text);
+  background:#fff;padding:0;
+}
+.voices-head{text-align:center;padding:76px var(--px) 26px}
+.voices-title{
+  font-family:var(--ff-serif);font-weight:700;color:var(--wine);
+  font-size:clamp(19px,5.6vw,34px);line-height:1.4;margin:0;white-space:nowrap;
+}
+.founder-card{position:relative;margin:0;border-radius:0;overflow:hidden;text-align:left}
+.founder-card__photo-wrap{width:auto;height:auto;aspect-ratio:16/10;margin:0 var(--px);border-radius:14px;overflow:hidden;background:var(--cream-3)}
+.founder-card__photo{
+  width:100%;height:100%;object-fit:cover;object-position:center 22%;
+  transform:none;filter:none;
+}
+.founder-card__overlay{display:none}
+.founder-card__content{position:static;padding:22px calc(var(--px) + 2px) 0}
+/* 章の下の余白。ここが 0 だと本文の面が章の端で切られる（カードは overflow:hidden） */
+.ch--founder{padding-bottom:72px}
+.founder-card__meta{
+  display:block;margin:0 0 16px;transform:none;padding:0;background:none;
+  -webkit-backdrop-filter:none;backdrop-filter:none;
+}
+.founder-card__role{
+  font-size:12px;color:var(--wine);font-weight:700;letter-spacing:.12em;line-height:1.5;
+  margin:0 0 8px;opacity:.85;
+}
+.founder-card__name{
+  font-size:28px;font-weight:700;color:var(--wine);margin:0 0 14px;
+  font-family:var(--ff-serif);line-height:1.25;
+}
+.founder-card__career{
+  list-style:none;display:flex;flex-direction:column;align-items:flex-start;gap:4px;
+  padding-left:12px;margin:0;border-left:2px solid rgba(85,22,31,.4);
+}
+.founder-card__career li{
+  font-size:13px;font-weight:700;color:var(--text);position:relative;
+  display:inline-block;line-height:1.55;
+}
+/* 本文は GP の LP（.rep-message）と同じく、地より一段沈んだ面に載せる。
+   章の地が白なので、沈める色はクリーム */
+.founder-card__message{
+  text-align:left;background:var(--cream);border-radius:12px;
+  padding:20px;margin-top:20px;
+}
+.founder-card__message p{font-size:13.5px;color:var(--text-2);line-height:1.9;margin:0 0 14px}
+.founder-card__message p:last-child{margin-bottom:0}
+
+@media (min-width:768px){
+  .voices-head{padding-top:104px;padding-bottom:8px}
+  .founder-card{
+    display:flex;align-items:center;min-height:0;width:100%;
+    max-width:1160px;margin-left:auto;margin-right:auto;
+  }
+  .founder-card__photo-wrap{
+    order:2;flex:1 1 0;position:relative;aspect-ratio:auto;height:400px;
+    margin:56px 48px 56px 0;border-radius:20px;overflow:hidden;
+  }
+  .founder-card__photo{
+    position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
+    object-position:35% center;
+  }
+  .founder-card__content{
+    order:1;position:static;flex:1 1 0;padding:56px 56px 56px 48px;
+    display:flex;flex-direction:column;justify-content:center;
+  }
+  .founder-card__meta{margin:0 0 24px}
+  .founder-card__role{font-size:15px}
+  .founder-card__name{font-size:35px}
+  .founder-card__career li{font-size:16px}
+  .founder-card__message{padding:26px;margin-top:26px;border-radius:14px}
+  .ch--founder{padding-bottom:24px}
+  .founder-card__message p{font-size:16px}
+}

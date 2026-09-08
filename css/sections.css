@@ -1,0 +1,383 @@
+@charset "utf-8";
+/* ==========================================================================
+   章: 01 流れ（足あとの道） / 02 3つの扉 / 03 あなたへ / 04 費用 / 後援 / 05 説明会 / FAQ / 最終 / フッター
+   ========================================================================== */
+
+main{position:relative;z-index:2}
+
+/* ========== 01 流れ ========== */
+/* overflow:hidden を置くと sticky（歩くマスコット）がこの要素基準になって効かなくなる。置かない */
+.ch--flow{background:var(--cream);color:var(--text);padding-bottom:0}
+.ch--flow::before{content:'';position:absolute;inset:0;background-image:var(--paper);opacity:.05;pointer-events:none;mix-blend-mode:multiply}
+.ch--flow .ch__head{padding-left:calc(var(--px) + 64px)}
+
+/* 流れの章は spiral.css へ移した（足あとの道・phase・step は廃止）。
+   マスコットが置く .trail__print だけは spiral.css の .spiral__ground 側で持っている */
+
+/* ========== 02 3つのプログラム ========== */
+/* 扉のカード（.gate）は廃止。黒い舞台の上で板を回す作りに変えた。css/screens.css へ */
+
+/* ========== 03 あなたへ ========== */
+.ch--who{background:var(--cream);color:var(--text)}
+.ch--who::before{content:'';position:absolute;inset:0;background-image:var(--paper);opacity:.05;pointer-events:none;mix-blend-mode:multiply}
+.tabs{position:relative}
+/* 下線のタブからボタンに変えた。選んだ方をワインで塗り、もう一方は線だけにする */
+.tabs__list{
+  position:relative;display:flex;flex-wrap:wrap;gap:10px;margin-bottom:36px;
+}
+.tab{
+  display:inline-flex;align-items:center;justify-content:center;
+  flex:none;white-space:nowrap;
+  min-height:48px;padding:10px 26px;border-radius:999px;
+  background:transparent;color:var(--wine);
+  box-shadow:0 0 0 1.5px rgba(85,22,31,.38) inset;
+  font-family:var(--ff-sans);font-size:15.5px;font-weight:700;letter-spacing:.04em;
+  transition:background-color .3s,color .3s,box-shadow .3s;
+}
+.tab[aria-selected=true]{
+  background:var(--wine);color:var(--cream);
+  box-shadow:0 0 0 1.5px var(--wine) inset,0 10px 24px -14px rgba(26,5,8,.5);
+}
+.panel{max-width:var(--col)}
+.js .panel{animation:panel-in .8s var(--ease-out)}
+@keyframes panel-in{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.panel__head{display:flex;flex-direction:column;gap:24px}
+.panel__portrait{max-width:280px;margin-top:0}
+.conds{margin-top:26px;display:flex;flex-direction:column}
+.conds li{position:relative;padding:14px 0 14px 26px;border-top:1px solid var(--line);font-size:15px;line-height:1.85}
+.conds li:last-child{border-bottom:1px solid var(--line)}
+.conds li::before{content:'';position:absolute;left:2px;top:26px;width:8px;height:8px;border-radius:50%;background:var(--yellow);box-shadow:0 0 0 1.5px var(--wine)}
+.conds b{color:var(--wine)}
+.cases{margin-top:48px}
+.case{padding:18px 0;border-top:1px solid var(--line)}
+.case:last-child{border-bottom:1px solid var(--line)}
+.case h5{font-family:var(--ff-mono);font-size:14px;letter-spacing:.16em;color:var(--wine);display:flex;flex-wrap:wrap;align-items:baseline;gap:10px}
+.case h5 span{font-family:var(--ff-sans);font-size:11.5px;letter-spacing:.02em;color:var(--text-2);font-weight:400}
+.case p{margin-top:8px;font-size:14.5px;line-height:1.85}
+/* 4つのデータは円グラフで見せる。円弧は conic-gradient で描き、
+   --pct（0〜100）を JS が 0 から実値へ動かす。数字はカウントアップと同じ仕組み */
+.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:26px 18px;margin-top:28px}
+.dial{
+  position:relative;display:flex;flex-direction:column;align-items:center;text-align:center;
+  --pct:0;--size:104px;--thick:9px;
+}
+.dial__ring{
+  position:relative;display:block;width:var(--size);height:var(--size);border-radius:50%;
+  background:conic-gradient(var(--wine) calc(var(--pct) * 1%), rgba(85,22,31,.14) 0);
+  transition:background .1s linear;
+}
+.dial__ring::after{
+  content:'';position:absolute;inset:var(--thick);border-radius:50%;background:var(--cream);
+}
+.dial__val{
+  position:absolute;top:0;left:0;right:0;height:var(--size);
+  display:flex;align-items:center;justify-content:center;gap:1px;
+}
+.dial .num{font-size:26px;line-height:1;color:var(--wine)}
+.dial i{font-style:normal;font-family:var(--ff-serif);font-size:12px;color:var(--wine);font-weight:700}
+.dial__label{margin-top:10px;font-size:12px;line-height:1.5;color:var(--text-2);letter-spacing:.04em}
+.bignum{display:flex;align-items:baseline;gap:12px;margin-top:8px;flex-wrap:wrap}
+.bignum .num{font-size:64px;line-height:1;color:var(--wine)}
+.bignum span{font-size:13px;color:var(--text-2)}
+.quote{margin-top:16px;padding:22px 24px;border-left:2px solid var(--wine);background:rgba(85,22,31,.04);font-size:14.5px;line-height:1.9}
+.voice{margin-top:28px;font-family:var(--ff-serif);font-size:17px;line-height:1.9;color:var(--wine);letter-spacing:.02em}
+.voice footer{margin-top:10px;font-size:11px;color:var(--text-2);text-transform:none;letter-spacing:.14em}
+.vs{margin-top:22px;display:grid;gap:10px}
+.vs > div{display:grid;grid-template-columns:118px 1fr;gap:10px;padding:10px 0;border-bottom:1px solid var(--line);font-size:14.5px;align-items:baseline}
+.vs dt{font-weight:700;color:var(--text-2);font-size:13px}
+.vs .vs__self{border-bottom:2px solid var(--wine);padding:14px 0}
+.vs .vs__self dt{color:var(--wine)}
+.vs .vs__self dd{color:var(--wine);font-weight:500}
+
+@media (min-width:768px){
+  .tabs__list{margin-bottom:52px;gap:12px}
+  .tab{min-height:54px;padding:12px 36px;font-size:17px}
+  .panel__head{flex-direction:row;align-items:flex-start;justify-content:space-between;gap:40px}
+  .panel__head .h3{flex:1}
+  .panel__portrait{width:220px;flex:none}
+  .panel{max-width:820px}
+  .stats{grid-template-columns:repeat(4,1fr);gap:0 20px}
+  .dial{--size:132px;--thick:11px}
+  .dial .num{font-size:34px}
+  .dial i{font-size:14px}
+  .dial__label{margin-top:14px;font-size:13px}
+  .case p{font-size:15px}
+}
+
+.ruled{margin-top:12px;font-size:14.5px}
+.ruled li{padding:9px 0;border-bottom:1px solid var(--line);line-height:1.7}
+@media (min-width:768px){
+}
+
+/* ========== 後援・メディア ========== */
+/* ロゴはどれも白地の画像なので、地を白にすると継ぎ目が出ない */
+.ch--trust{background:#fff;padding:72px 0 64px;color:var(--text)}
+@media (min-width:768px){
+}
+
+/* ========== 05 説明会 ========== */
+.ch--brief{background:var(--wine);color:var(--on-dark)}
+.ch--brief::before{content:'';position:absolute;inset:0;background:radial-gradient(90% 60% at 50% 0%,rgba(255,216,62,.08),transparent 60%);pointer-events:none}
+.tickets{display:grid;gap:16px;margin-bottom:44px}
+/* 支給画像をクリームの台紙に載せる。台紙の形（角丸・両脇の切り欠き・影）は
+   差し替え前のカードのまま。切り欠きは枠の外に出るので overflow は切らない */
+.ticket{
+  position:relative;padding:10px;border-radius:8px;line-height:0;
+  background:var(--cream);
+  box-shadow:0 24px 50px -30px rgba(0,0,0,.7);
+  transform-style:preserve-3d;transition:transform .8s var(--ease-out),box-shadow .8s;
+  --tx:0deg;--ty:0deg;
+  transform:perspective(900px) rotateX(var(--tx)) rotateY(var(--ty));
+}
+/* 触れているあいだは枠を出す。影に足すので切り欠きに切られない。
+   .is-touched は JS が指で触れている間だけ付ける（触ると :hover が残る機種があるため） */
+.ticket:hover,
+.ticket.is-touched{
+  box-shadow:0 0 0 2.5px var(--yellow),0 24px 50px -30px rgba(0,0,0,.7);
+}
+.ticket::before{content:'';position:absolute;left:-8px;top:50%;width:16px;height:16px;border-radius:50%;background:var(--wine);transform:translateY(-50%)}
+.ticket::after{content:'';position:absolute;right:-8px;top:50%;width:16px;height:16px;border-radius:50%;background:var(--wine);transform:translateY(-50%)}
+/* 3枚で縦横比が0.5%だけ違う。段を揃えたいので 2:1 に切り詰める */
+.ticket img{display:block;width:100%;height:auto;aspect-ratio:2/1;object-fit:cover;border-radius:2px}
+.reasons{display:grid;gap:22px;margin-top:44px}
+.reasons > div{border-top:1px solid var(--line-cream);padding-top:16px}
+.reasons .h4{margin-top:0;color:var(--cream)}
+.reasons .h4 span{color:var(--cream)}
+.reasons p{margin-top:8px;font-size:14.5px;line-height:1.85;color:var(--on-dark)}
+.ch--brief .ch__cta{margin-top:64px}
+@media (min-width:768px){
+  .tickets{grid-template-columns:repeat(3,1fr);gap:24px;margin-bottom:64px}
+  .ticket{padding:12px}
+  .reasons{grid-template-columns:repeat(3,1fr);gap:40px}
+  .ch--brief .facts--cream{max-width:820px}
+}
+
+/* ========== FAQ ========== */
+.ch--faq{background:var(--cream);color:var(--text)}
+.ch--faq::before{content:'';position:absolute;inset:0;background-image:var(--paper);opacity:.05;pointer-events:none;mix-blend-mode:multiply}
+/* FAQ は寄付LPと同じ見た目にする（css/kifu-parity.css で寸法を合わせる）。
+   開閉は grid-template-rows で高さを測らずに動かす。中身は hidden で外す */
+.faq{list-style:none;margin:0;padding:0 var(--px);font-size:15px;line-height:1.8;letter-spacing:normal;color:#1a1a1a}
+.faq__item{border-bottom:1px solid rgba(85,22,31,.12)}
+.faq__item h3{margin:0;font-weight:400}
+.faq__q{
+  width:100%;display:flex;justify-content:space-between;align-items:center;gap:12px;
+  padding:20px 0;text-align:left;
+  font-family:var(--ff-sans);font-size:15px;font-weight:500;line-height:normal;
+  letter-spacing:normal;color:#1a1a1a;
+}
+.faq__ico{
+  font-size:20px;color:var(--wine);font-weight:300;flex-shrink:0;line-height:1;
+  transition:transform .25s;
+}
+.faq__item.is-open .faq__ico{transform:rotate(45deg)}
+.faq__a{display:grid;grid-template-rows:0fr;transition:grid-template-rows .35s cubic-bezier(.22,1,.36,1)}
+.faq__a > p{
+  overflow:hidden;min-height:0;margin:0;padding:0;
+  font-size:14px;line-height:1.8;color:#4a4a4a;letter-spacing:normal;
+  transition:padding .35s cubic-bezier(.22,1,.36,1);
+}
+.faq__a[hidden]{display:none}
+.faq__item.is-open .faq__a{grid-template-rows:1fr}
+.faq__item.is-open .faq__a > p{padding-bottom:20px}
+.no-js .faq__a[hidden]{display:grid}
+.no-js .faq__a{grid-template-rows:1fr}
+.no-js .faq__a > p{padding-bottom:22px}
+@media (min-width:768px){.faq__q{font-size:18px;padding:22px 0}.faq__a > p{font-size:15.5px}}
+
+/* ========== 最終CTA（扉の前） ========== */
+.final{
+  position:relative;z-index:1;
+  min-height:100vh;min-height:100svh;
+  display:flex;align-items:flex-start;
+  color:var(--cream);
+  padding:calc(var(--bar-h) + 40px) 0 46vh;
+}
+.final__inner{width:100%;text-align:center;display:flex;flex-direction:column;align-items:center}
+.final__h{max-width:720px;text-shadow:0 2px 30px rgba(26,5,8,.6);font-size:clamp(24px,6.6vw,30px)}
+.final__ctas{margin-top:28px}
+.final__mascot{position:absolute;left:var(--px);bottom:22px;display:flex;flex-direction:column;align-items:flex-start;gap:6px;pointer-events:none}
+.final__mascot .rig{width:78px}
+.final__mascot .say::after{right:auto;left:22px;bottom:-5px}
+.final__mascot .say{order:-1;margin-bottom:8px}
+@media (min-width:768px){
+  .final{padding-top:calc(var(--bar-h) + 56px);padding-bottom:40vh}
+  .final__h{font-size:clamp(34px,3.4vw,44px)}
+  .final__mascot{left:auto;right:calc(var(--px) + 40px);bottom:40px;align-items:flex-end}
+  .final__mascot .say::after{left:auto;right:22px}
+  .final__mascot .rig{width:104px}
+}
+
+/* ========== フッター ========== */
+@media (min-width:768px){
+  .foot__grid{grid-template-columns:1fr 1.4fr;grid-template-areas:'brand blocks' 'about about';gap:56px 72px}
+  .foot__brand{grid-area:brand}
+  .foot__about{grid-area:about;grid-template-columns:repeat(3,1fr);gap:12px 32px}
+}
+
+/* 紹介者向けの帯。扉の描画（fixed）より前に出し、地の色を持たせる */
+.ch--handoff{position:relative;z-index:2;background:var(--wine);color:var(--on-dark);padding:64px 0 72px}
+.ch--handoff .foot__blocks{display:flex;flex-direction:column;gap:24px;text-align:left}
+/* .h4 の既定色は --wine で、この帯の地と同じになる。地の上で読める色に戻す */
+.ch--handoff .foot__block{border-top:1px solid var(--line-cream);padding-top:20px}
+.ch--handoff .foot__block .h4{margin:0;color:var(--cream);font-size:17px}
+.ch--handoff .foot__block p{margin-top:10px;font-size:14px;line-height:1.85}
+.ch--handoff .foot__block .btn-line{margin-top:14px;font-size:13.5px}
+@media (min-width:768px){
+  .ch--handoff .foot__blocks{flex-direction:row;gap:40px;align-items:flex-start}
+  .ch--handoff .foot__block{flex:1 1 0}
+}
+
+/* FV の背景写真は position:fixed / z-index:0 で画面全体を覆っている。
+   main（z-index:2）の外にある要素は、指定しないと写真の裏に回って透ける。
+   フッターの見た目そのものは kifu-parity.css が持っているので、ここでは重ね順だけ与える。 */
+.s-foot{position:relative;z-index:2}
+
+/* 説明会の章の締め。ワイン地に薄い面を敷くだけだと沈むので、チケットと同じ
+   クリームの台紙にして前へ出す。✓ は字ではなく丸と線で描く（▶ と同じ理由で、
+   書体のサブセットに記号を足さずに済み、大きさも自由に決められる） */
+.sched-note{
+  list-style:none;max-width:var(--col);margin:32px 0 0;
+  padding:18px 16px 20px;
+  background:var(--cream);color:var(--wine);
+  box-shadow:0 24px 50px -30px rgba(0,0,0,.7);
+}
+/* いちばん長い「少しでも気になったら、まずは説明会へ」は19字。和文は1字=1em、
+   字送り .01em を足した 19.2em ぶんが必ず1行に収まる大きさに頭を押さえる。
+   引いているのは 章の左右余白(--px×2)・台紙の左右padding(32)・チェックの字下げ(20) */
+.sched-note li{
+  position:relative;padding-left:20px;
+  font-family:var(--ff-sans);font-weight:700;
+  font-size:min(15.5px, calc((100vw - var(--px) * 2 - 52px) / 19.2));
+  line-height:1.55;letter-spacing:.01em;white-space:nowrap;
+}
+.sched-note li + li{margin-top:14px}
+/* チェックは字ではなく線で描く（▶ と同じ理由。書体に記号を足さずに済む） */
+.sched-note li::after{
+  content:'';position:absolute;left:1px;top:.3em;
+  width:6px;height:12px;
+  border:solid var(--wine);border-width:0 2.4px 2.4px 0;
+  transform:rotate(45deg);
+}
+
+@media (min-width:768px){
+  .sched-note{margin:44px auto 0;padding:28px 30px 30px}
+  .sched-note li{padding-left:34px;font-size:19px;line-height:1.5}
+  .sched-note li + li{margin-top:20px}
+  .sched-note li::after{left:4px;top:.34em;width:8px;height:16px;border-width:0 3px 3px 0}
+}
+
+/* ---------- 奨学金（高校生の欄・CTAの下） ---------- */
+.schol{margin-top:40px;padding-top:26px;border-top:1px solid var(--line)}
+.schol__guide{display:flex;align-items:flex-end;gap:8px;margin:0 0 6px}
+.schol__guide .say{margin:0 0 22px;max-width:none;font-size:13px}
+.schol__mascot{flex:0 0 auto;display:block;width:88px;height:auto}
+.schol__h{margin-top:0}
+@media (min-width:768px){
+  .schol{margin-top:52px;padding-top:32px}
+  .schol__guide{gap:12px;margin-bottom:10px}
+  .schol__guide .say{font-size:14px;margin-bottom:28px}
+  .schol__mascot{width:112px}
+}
+
+/* ========== 参加者の声（バーガンディ地） ==========
+   中の部品（.stats / .case / .quote / .voice）はクリーム地向けに作ってあり、
+   線も文字もワイン色を使う。地が反転するので、この章の中だけ色を差し替える */
+.ch--voices{background:var(--wine);color:var(--on-dark)}
+.ch--voices::before{content:'';position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(90% 60% at 50% 0%,rgba(255,216,62,.07),transparent 60%)}
+.ch--voices .h4{color:var(--cream)}
+.ch--voices .note{color:rgba(245,239,230,.62)}
+
+/* 円グラフはバーガンディの地に載る。弧・溝・内側の抜きを地に合わせて反転させる。
+   既定（クリーム地）の色のままだと、弧が地と同色になって円が塗り潰れて見える */
+.ch--voices .dial__ring{
+  background:conic-gradient(var(--yellow) calc(var(--pct) * 1%), rgba(245,239,230,.18) 0);
+}
+.ch--voices .dial__ring::after{background:var(--wine)}
+.ch--voices .dial .num,
+.ch--voices .dial i{color:var(--yellow)}
+.ch--voices .dial__label{color:var(--on-dark)}
+
+.ch--voices .cases{margin-top:44px}
+.ch--voices .case{border-top-color:var(--line-cream)}
+.ch--voices .case:last-child{border-bottom-color:var(--line-cream)}
+.ch--voices .case h5{color:var(--cream)}
+.ch--voices .case h5 span{color:rgba(245,239,230,.62)}
+.ch--voices .case p{color:var(--on-dark)}
+
+.ch--voices .quote{
+  border-left-color:var(--yellow);
+  background:rgba(245,239,230,.06);color:var(--on-dark);
+}
+.ch--voices .quote b{color:var(--cream)}
+.ch--voices .voice{color:var(--cream)}
+.ch--voices .voice footer{color:rgba(245,239,230,.62)}
+@media (min-width:768px){
+  .ch--voices .cases{margin-top:56px}
+}
+
+/* 顔写真つきの声。人物が特定できているものだけに付ける */
+.voice footer{display:flex;align-items:center;gap:14px;font-size:13px;letter-spacing:.08em}
+.voice__face{flex:none;width:64px;height:64px;object-fit:cover;border-radius:50%}
+@media (min-width:768px){
+  .voice footer{gap:18px;font-size:15px}
+  .voice__face{width:84px;height:84px}
+}
+
+/* ---------- 参加者の声のカード（横スライド） ----------
+   寄付LPの並びをそのまま持ってきた。あちらの「紐でぶら下げる」飾りは付けない。
+   指で送るだけの素直な横スクロールで、1枚ずつ吸い付く */
+.vcards{margin-top:44px}
+.vcards .h4{margin-top:0;color:var(--cream)}
+.vcards .h4 span{font-family:var(--ff-sans);font-size:12px;letter-spacing:.02em;color:rgba(245,239,230,.7);font-weight:400}
+/* 幅・間隔・写真の高さ・内側の余白は、寄付LPで実際に効いている値
+   （.stories-section.is-gallery のブロック）に合わせてある。
+   SP: 札 clamp(252,74vw,300)・間16・写真220・余白20
+   PC: 札 336・間22・写真208・余白22 */
+/* ★ 送り箱は画面いっぱいに広げる。.wrap の中に置いたままだと、
+   隣の札が画面の端まで見えず、柱の内側で切られてしまう（寄付LPは全幅）。
+   左右に負のマージンを当てて柱の外へ出し、内側の余白で頭出しを作る。
+   右端の 14vw / 22vw は、最後の1枚も左に来られるようにするためのもの */
+.vcards__track{
+  list-style:none;margin:18px calc(-1 * var(--px)) 0;
+  /* 左右の余白は JS が実測して入れる（--edge = (送り箱の幅 - 札の幅) / 2）。
+     これがないと最初と最後の札だけ画面の中心に来られない。
+     JS が動く前と、動かない環境のための控えも書いておく */
+  padding:0 var(--edge,14vw) 6px var(--edge,var(--px));
+  display:flex;gap:16px;
+  overflow-x:auto;overscroll-behavior-x:contain;
+  scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;
+  scrollbar-width:none;
+}
+.vcards__track::-webkit-scrollbar{display:none}
+/* 札の中心を画面の中心に合わせる。端の札も中心に来られるよう、
+   送り箱の左右に (箱の幅 - 札の幅)/2 の余白を JS が入れている */
+.vcard{
+  flex:0 0 clamp(252px,74vw,300px);scroll-snap-align:center;
+  display:flex;flex-direction:column;
+  background:var(--cream);border-radius:14px;overflow:hidden;
+  box-shadow:0 24px 50px -30px rgba(0,0,0,.7);
+}
+.vcard__photo{width:100%;height:220px;object-fit:cover;flex:none;display:block;background:var(--cream-3)}
+/* 本文はクリームの地。地が反転するので、文字と罫もワイン側に寄せる */
+.vcard__body{padding:20px;display:flex;flex-direction:column;gap:9px;flex:1;background:var(--cream)}
+.vcard__prog{margin:0;font-size:10px;font-weight:700;letter-spacing:.1em;color:var(--wine)}
+.vcard__quote{margin:0;flex:1;padding-left:14px;border-left:2px solid rgba(85,22,31,.28)}
+.vcard__quote p{margin:0;font-size:13px;line-height:1.85;color:var(--text)}
+.vcard__name{margin:2px 0 0;font-size:11px;color:var(--text-2)}
+/* 背の低い機種は札が画面に収まらないので、寄付LPと同じく幅を広げて行数を減らす。
+   高さの条件だけだと横長のPCにも当たるため、幅の条件を併記する */
+@media (max-width:767px) and (max-height:720px){
+  .vcard{flex-basis:min(88vw,330px)}
+  .vcard__photo{height:190px}
+}
+@media (min-width:768px){
+  .vcards{margin-top:56px}
+  .vcards__track{gap:22px;margin-top:22px;padding:0 var(--edge,22vw) 10px var(--edge,var(--px))}
+  .vcard{flex-basis:336px}
+  .vcard__photo{height:208px}
+  .vcard__body{padding:22px;gap:10px}
+  .vcard__prog{font-size:11px}
+  .vcard__quote p{font-size:13px;line-height:1.8}
+}
