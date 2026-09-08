@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<script src="js/sp-force.js?v=2026090701"></script><!-- ★一時措置：PCでもSP版 -->
 <script>
 /* 起動の最小限。JS が動く印と、幕（veil）の制御だけをここに置く。
    本体は js/main.js（ES Modules・defer）。低速回線で動画に帯域を取られても
@@ -31,22 +32,23 @@
   root.classList.add('is-veiled');
 }());
 </script>
-<link rel="stylesheet" href="fonts/fonts.css?v=2026090924">
-<link rel="stylesheet" href="css/base.css?v=2026090924">
-<link rel="stylesheet" href="css/fv.css?v=2026090924">
-<link rel="stylesheet" href="css/sections.css?v=2026090924">
-<link rel="stylesheet" href="css/spiral.css?v=2026090924">
-<link rel="stylesheet" href="css/kifu-parity.css?v=2026090924">
+<link rel="stylesheet" href="fonts/fonts.css?v=2026090701">
+<link rel="stylesheet" href="css/base.css?v=2026090701">
+<link rel="stylesheet" href="css/fv.css?v=2026090701">
+<link rel="stylesheet" href="css/sections.css?v=2026090701">
+<link rel="stylesheet" href="css/spiral.css?v=2026090701">
+<link rel="stylesheet" href="css/kifu-parity.css?v=2026090701">
+<link rel="stylesheet" href="css/sp-force.css?v=2026090701"><!-- ★一時措置：PCでもSP版 -->
 <link rel="preload" as="image" href="img/poster-door.webp" fetchpriority="high">
-<link rel="modulepreload" href="js/main.js?v=2026090924">
-<link rel="modulepreload" href="js/door.js?v=2026090924">
-<link rel="modulepreload" href="js/ui.js?v=2026090924">
-<link rel="modulepreload" href="js/mascot.js?v=2026090924">
-<link rel="modulepreload" href="js/eye.js?v=2026090924">
-<link rel="modulepreload" href="js/lib/gl.js?v=2026090924">
-<link rel="modulepreload" href="js/lib/mat4.js?v=2026090924">
-<link rel="modulepreload" href="js/lib/spring.js?v=2026090924">
-<link rel="modulepreload" href="js/lib/geom.js?v=2026090924">
+<link rel="modulepreload" href="js/main.js?v=2026090701">
+<link rel="modulepreload" href="js/door.js?v=2026090701">
+<link rel="modulepreload" href="js/ui.js?v=2026090701">
+<link rel="modulepreload" href="js/mascot.js?v=2026090701">
+<link rel="modulepreload" href="js/eye.js?v=2026090701">
+<link rel="modulepreload" href="js/lib/gl.js?v=2026090701">
+<link rel="modulepreload" href="js/lib/mat4.js?v=2026090701">
+<link rel="modulepreload" href="js/lib/spring.js?v=2026090701">
+<link rel="modulepreload" href="js/lib/geom.js?v=2026090701">
 <title>ワールド寺子屋プログラム2026（第5回）｜NPO法人EdFuture</title>
 <meta name="description" content="高校生が自分の探究テーマを持って渡米し、現地校で学び、自分でアポを取って大学や企業を訪ね、探究発表を行う海外探究プログラム。2027年3月派遣・3便。説明会は無料・オンライン・全3回。">
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
@@ -82,8 +84,8 @@
 <!-- 扉の向こうの映像。WebGL のテクスチャとして使う。CSS 版の扉（WebGL 無し）でも同じ要素を使う -->
 <!-- SP の地。横幅を画面幅に合わせ、上はサンフランシスコ、下はボストンを置く。
      どちらも画面の端に合わせ、曲線の帯はこの上に乗る -->
-<img class="fv-bg fv-bg--top" src="img/fv-sf.webp?v=2026090924" width="900" height="599" decoding="async" alt="" aria-hidden="true">
-<img class="fv-bg fv-bg--bottom" src="img/fv-bn.webp?v=2026090924" width="900" height="600" decoding="async" alt="" aria-hidden="true">
+<img class="fv-bg fv-bg--top" src="img/fv-sf.webp?v=2026090701" width="900" height="599" decoding="async" alt="" aria-hidden="true">
+<img class="fv-bg fv-bg--bottom" src="img/fv-bn.webp?v=2026090701" width="900" height="600" decoding="async" alt="" aria-hidden="true">
 <div class="stage-band" id="stageBand" aria-hidden="true">
   <video class="stage-video" id="doorVideo" playsinline muted loop preload="none"
        width="1280" height="720" poster="img/poster-door.webp" data-src="video/door.mp4"
@@ -682,9 +684,9 @@
 
   <div class="wrap">
     <ul class="tickets" data-reveal>
-      <li class="ticket" data-tilt><img src="img/ticket-1.webp?v=2026090924" width="1200" height="602" loading="lazy" decoding="async" alt="第1回 オンライン説明会 2026年9月26日（土）19:00〜20:00"></li>
-      <li class="ticket" data-tilt><img src="img/ticket-2.webp?v=2026090924" width="1200" height="604" loading="lazy" decoding="async" alt="第2回 オンライン説明会 2026年10月5日（月）19:00〜20:00"></li>
-      <li class="ticket" data-tilt><img src="img/ticket-3.webp?v=2026090924" width="1200" height="601" loading="lazy" decoding="async" alt="第3回 オンライン説明会 2026年10月16日（金）19:00〜20:00"></li>
+      <li class="ticket" data-tilt><img src="img/ticket-1.webp?v=2026090701" width="1200" height="602" loading="lazy" decoding="async" alt="第1回 オンライン説明会 2026年9月26日（土）19:00〜20:00"></li>
+      <li class="ticket" data-tilt><img src="img/ticket-2.webp?v=2026090701" width="1200" height="604" loading="lazy" decoding="async" alt="第2回 オンライン説明会 2026年10月5日（月）19:00〜20:00"></li>
+      <li class="ticket" data-tilt><img src="img/ticket-3.webp?v=2026090701" width="1200" height="601" loading="lazy" decoding="async" alt="第3回 オンライン説明会 2026年10月16日（金）19:00〜20:00"></li>
     </ul>
 
     <!-- GP の LP（edfuture_gp_upload_server）の .sched-note を、この章の地に合わせて置き直した -->
@@ -851,6 +853,6 @@
 <!-- カーソル（PC・fine pointer のときだけ JS が有効化） -->
 <div class="cursor" id="cursor" aria-hidden="true"><i></i><span></span></div>
 
-<script type="module" src="js/main.js?v=2026090924"></script>
+<script type="module" src="js/main.js?v=2026090701"></script>
 </body>
 </html>

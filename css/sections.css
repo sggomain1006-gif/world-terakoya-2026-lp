@@ -89,7 +89,7 @@ main{position:relative;z-index:2}
 .vs .vs__self dt{color:var(--wine)}
 .vs .vs__self dd{color:var(--wine);font-weight:500}
 
-@media (min-width:768px){
+@media (min-width:100000px){
   .tabs__list{margin-bottom:52px;gap:12px}
   .tab{min-height:54px;padding:12px 36px;font-size:17px}
   .panel__head{flex-direction:row;align-items:flex-start;justify-content:space-between;gap:40px}
@@ -106,13 +106,13 @@ main{position:relative;z-index:2}
 
 .ruled{margin-top:12px;font-size:14.5px}
 .ruled li{padding:9px 0;border-bottom:1px solid var(--line);line-height:1.7}
-@media (min-width:768px){
+@media (min-width:100000px){
 }
 
 /* ========== 後援・メディア ========== */
 /* ロゴはどれも白地の画像なので、地を白にすると継ぎ目が出ない */
 .ch--trust{background:#fff;padding:72px 0 64px;color:var(--text)}
-@media (min-width:768px){
+@media (min-width:100000px){
 }
 
 /* ========== 05 説明会 ========== */
@@ -145,7 +145,7 @@ main{position:relative;z-index:2}
 .reasons .h4 span{color:var(--cream)}
 .reasons p{margin-top:8px;font-size:14.5px;line-height:1.85;color:var(--on-dark)}
 .ch--brief .ch__cta{margin-top:64px}
-@media (min-width:768px){
+@media (min-width:100000px){
   .tickets{grid-template-columns:repeat(3,1fr);gap:24px;margin-bottom:64px}
   .ticket{padding:12px}
   .reasons{grid-template-columns:repeat(3,1fr);gap:40px}
@@ -183,7 +183,7 @@ main{position:relative;z-index:2}
 .no-js .faq__a[hidden]{display:grid}
 .no-js .faq__a{grid-template-rows:1fr}
 .no-js .faq__a > p{padding-bottom:22px}
-@media (min-width:768px){.faq__q{font-size:18px;padding:22px 0}.faq__a > p{font-size:15.5px}}
+@media (min-width:100000px){.faq__q{font-size:18px;padding:22px 0}.faq__a > p{font-size:15.5px}}
 
 /* ========== 最終CTA（扉の前） ========== */
 .final{
@@ -194,22 +194,22 @@ main{position:relative;z-index:2}
   padding:calc(var(--bar-h) + 40px) 0 46vh;
 }
 .final__inner{width:100%;text-align:center;display:flex;flex-direction:column;align-items:center}
-.final__h{max-width:720px;text-shadow:0 2px 30px rgba(26,5,8,.6);font-size:clamp(24px,6.6vw,30px)}
+.final__h{max-width:720px;text-shadow:0 2px 30px rgba(26,5,8,.6);font-size:clamp(24px,calc(6.6 * var(--vw)),30px)}
 .final__ctas{margin-top:28px}
 .final__mascot{position:absolute;left:var(--px);bottom:22px;display:flex;flex-direction:column;align-items:flex-start;gap:6px;pointer-events:none}
 .final__mascot .rig{width:78px}
 .final__mascot .say::after{right:auto;left:22px;bottom:-5px}
 .final__mascot .say{order:-1;margin-bottom:8px}
-@media (min-width:768px){
+@media (min-width:100000px){
   .final{padding-top:calc(var(--bar-h) + 56px);padding-bottom:40vh}
-  .final__h{font-size:clamp(34px,3.4vw,44px)}
+  .final__h{font-size:clamp(34px,calc(3.4 * var(--vw)),44px)}
   .final__mascot{left:auto;right:calc(var(--px) + 40px);bottom:40px;align-items:flex-end}
   .final__mascot .say::after{left:auto;right:22px}
   .final__mascot .rig{width:104px}
 }
 
 /* ========== フッター ========== */
-@media (min-width:768px){
+@media (min-width:100000px){
   .foot__grid{grid-template-columns:1fr 1.4fr;grid-template-areas:'brand blocks' 'about about';gap:56px 72px}
   .foot__brand{grid-area:brand}
   .foot__about{grid-area:about;grid-template-columns:repeat(3,1fr);gap:12px 32px}
@@ -223,7 +223,7 @@ main{position:relative;z-index:2}
 .ch--handoff .foot__block .h4{margin:0;color:var(--cream);font-size:17px}
 .ch--handoff .foot__block p{margin-top:10px;font-size:14px;line-height:1.85}
 .ch--handoff .foot__block .btn-line{margin-top:14px;font-size:13.5px}
-@media (min-width:768px){
+@media (min-width:100000px){
   .ch--handoff .foot__blocks{flex-direction:row;gap:40px;align-items:flex-start}
   .ch--handoff .foot__block{flex:1 1 0}
 }
@@ -248,7 +248,7 @@ main{position:relative;z-index:2}
 .sched-note li{
   position:relative;padding-left:20px;
   font-family:var(--ff-sans);font-weight:700;
-  font-size:min(15.5px, calc((100vw - var(--px) * 2 - 52px) / 19.2));
+  font-size:min(15.5px, calc((calc(100 * var(--vw)) - var(--px) * 2 - 52px) / 19.2));
   line-height:1.55;letter-spacing:.01em;white-space:nowrap;
 }
 .sched-note li + li{margin-top:14px}
@@ -260,7 +260,7 @@ main{position:relative;z-index:2}
   transform:rotate(45deg);
 }
 
-@media (min-width:768px){
+@media (min-width:100000px){
   .sched-note{margin:44px auto 0;padding:28px 30px 30px}
   .sched-note li{padding-left:34px;font-size:19px;line-height:1.5}
   .sched-note li + li{margin-top:20px}
@@ -273,7 +273,7 @@ main{position:relative;z-index:2}
 .schol__guide .say{margin:0 0 22px;max-width:none;font-size:13px}
 .schol__mascot{flex:0 0 auto;display:block;width:88px;height:auto}
 .schol__h{margin-top:0}
-@media (min-width:768px){
+@media (min-width:100000px){
   .schol{margin-top:52px;padding-top:32px}
   .schol__guide{gap:12px;margin-bottom:10px}
   .schol__guide .say{font-size:14px;margin-bottom:28px}
@@ -313,14 +313,14 @@ main{position:relative;z-index:2}
 .ch--voices .quote b{color:var(--cream)}
 .ch--voices .voice{color:var(--cream)}
 .ch--voices .voice footer{color:rgba(245,239,230,.62)}
-@media (min-width:768px){
+@media (min-width:100000px){
   .ch--voices .cases{margin-top:56px}
 }
 
 /* 顔写真つきの声。人物が特定できているものだけに付ける */
 .voice footer{display:flex;align-items:center;gap:14px;font-size:13px;letter-spacing:.08em}
 .voice__face{flex:none;width:64px;height:64px;object-fit:cover;border-radius:50%}
-@media (min-width:768px){
+@media (min-width:100000px){
   .voice footer{gap:18px;font-size:15px}
   .voice__face{width:84px;height:84px}
 }
@@ -333,18 +333,18 @@ main{position:relative;z-index:2}
 .vcards .h4 span{font-family:var(--ff-sans);font-size:12px;letter-spacing:.02em;color:rgba(245,239,230,.7);font-weight:400}
 /* 幅・間隔・写真の高さ・内側の余白は、寄付LPで実際に効いている値
    （.stories-section.is-gallery のブロック）に合わせてある。
-   SP: 札 clamp(252,74vw,300)・間16・写真220・余白20
+   SP: 札 clamp(252,calc(74 * var(--vw)),300)・間16・写真220・余白20
    PC: 札 336・間22・写真208・余白22 */
 /* ★ 送り箱は画面いっぱいに広げる。.wrap の中に置いたままだと、
    隣の札が画面の端まで見えず、柱の内側で切られてしまう（寄付LPは全幅）。
    左右に負のマージンを当てて柱の外へ出し、内側の余白で頭出しを作る。
-   右端の 14vw / 22vw は、最後の1枚も左に来られるようにするためのもの */
+   右端の calc(14 * var(--vw)) / calc(22 * var(--vw)) は、最後の1枚も左に来られるようにするためのもの */
 .vcards__track{
   list-style:none;margin:18px calc(-1 * var(--px)) 0;
   /* 左右の余白は JS が実測して入れる（--edge = (送り箱の幅 - 札の幅) / 2）。
      これがないと最初と最後の札だけ画面の中心に来られない。
      JS が動く前と、動かない環境のための控えも書いておく */
-  padding:0 var(--edge,14vw) 6px var(--edge,var(--px));
+  padding:0 var(--edge,calc(14 * var(--vw))) 6px var(--edge,var(--px));
   display:flex;gap:16px;
   overflow-x:auto;overscroll-behavior-x:contain;
   scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;
@@ -354,7 +354,7 @@ main{position:relative;z-index:2}
 /* 札の中心を画面の中心に合わせる。端の札も中心に来られるよう、
    送り箱の左右に (箱の幅 - 札の幅)/2 の余白を JS が入れている */
 .vcard{
-  flex:0 0 clamp(252px,74vw,300px);scroll-snap-align:center;
+  flex:0 0 clamp(252px,calc(74 * var(--vw)),300px);scroll-snap-align:center;
   display:flex;flex-direction:column;
   background:var(--cream);border-radius:14px;overflow:hidden;
   box-shadow:0 24px 50px -30px rgba(0,0,0,.7);
@@ -368,13 +368,13 @@ main{position:relative;z-index:2}
 .vcard__name{margin:2px 0 0;font-size:11px;color:var(--text-2)}
 /* 背の低い機種は札が画面に収まらないので、寄付LPと同じく幅を広げて行数を減らす。
    高さの条件だけだと横長のPCにも当たるため、幅の条件を併記する */
-@media (max-width:767px) and (max-height:720px){
-  .vcard{flex-basis:min(88vw,330px)}
+@media (max-width:100000px) and (max-height:720px){
+  .vcard{flex-basis:min(calc(88 * var(--vw)),330px)}
   .vcard__photo{height:190px}
 }
-@media (min-width:768px){
+@media (min-width:100000px){
   .vcards{margin-top:56px}
-  .vcards__track{gap:22px;margin-top:22px;padding:0 var(--edge,22vw) 10px var(--edge,var(--px))}
+  .vcards__track{gap:22px;margin-top:22px;padding:0 var(--edge,calc(22 * var(--vw))) 10px var(--edge,var(--px))}
   .vcard{flex-basis:336px}
   .vcard__photo{height:208px}
   .vcard__body{padding:22px;gap:10px}
