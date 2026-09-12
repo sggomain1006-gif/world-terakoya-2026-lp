@@ -4,7 +4,7 @@
    マグネットボタン / チケットの傾き / カーソル / 共有 / 計測
    ============================================================================= */
 
-import { Spring, expSmooth, safeDt } from './lib/spring.js?v=2026091197';
+import { Spring, expSmooth, safeDt } from './lib/spring.js?v=2026091198';
 
 export const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 export const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)');

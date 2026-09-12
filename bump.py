@@ -35,7 +35,12 @@ def main():
     # 版付きの import と別物として二重に取りに行くので、ここでも揃える
     h2 = re.sub(r'(<link rel="modulepreload" href="[^"]+?\.js)(\?v=\d+)?"',
                 lambda m: f'{m.group(1)}?v={ver}"', h2)
+    # ★版を meta と version.txt にも書く。GitHub Pages は HTML に
+    #   cache-control: max-age=600 を付けるので、押した直後は古い HTML が出る。
+    #   js/fresh.js がこの2つを突き合わせ、食い違ったら1回だけ読み直す
+    h2 = re.sub(r'<meta name="build" content="\d*">', f'<meta name="build" content="{ver}">', h2)
     HTML.write_text(h2, encoding='utf-8')
+    (HERE / 'version.txt').write_text(ver + '\n', encoding='utf-8')
     n_html = len(re.findall(r'\?v=\d+', h2))
 
     # 2) JS どうしの相対 import

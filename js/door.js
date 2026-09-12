@@ -26,10 +26,10 @@
 import {
   createProgram, createMesh, drawMesh, createMsaaTarget, createTexTarget,
   createVideoTexture, FULLSCREEN_VS,
-} from './lib/gl.js?v=2026091197';
-import * as M from './lib/mat4.js?v=2026091197';
-import { Spring, expSmooth, safeDt } from './lib/spring.js?v=2026091197';
-import { chamferBox, sphere, cylinder, merge, plane } from './lib/geom.js?v=2026091197';
+} from './lib/gl.js?v=2026091198';
+import * as M from './lib/mat4.js?v=2026091198';
+import { Spring, expSmooth, safeDt } from './lib/spring.js?v=2026091198';
+import { chamferBox, sphere, cylinder, merge, plane } from './lib/geom.js?v=2026091198';
 
 // ---------------------------------------------------------------------------
 // 寸法・色（1 単位 ≒ 50cm。扉は 1m × 2.1m）
