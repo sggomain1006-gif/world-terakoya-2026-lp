@@ -15,7 +15,7 @@
    文字が DOM のまま残るので読めるし選択もできる。ライブラリを足す必要もない。
    ============================================================================= */
 
-import { expSmooth, safeDt } from './lib/spring.js?v=2026090924';
+import { expSmooth, safeDt } from './lib/spring.js?v=2026091192';
 
 /* ------------------------------- 螺旋の形 -------------------------------- */
 const PHASE = 1.32;     // カード1枚あたりの位相（ラジアン）。本家は 1.0。離して見せるため広げた
@@ -33,6 +33,13 @@ const EXIT_STEP = 1.6;  // 抜けに充てるスクロール量（1段ぶんの�
 const EXIT_FADE = 0.055;// 章の終わりで見出し・本文・目盛りが消える割合
 const DROP = 0.07;      // 螺旋ぜんたいを下げる量（区画の高さに対する割合）
 
+/* 段ごとのカラーオーバーレイ。色相だけを 46 度ずつ回す7点。
+   赤・橙・黄緑・緑・水色・青・紫。明度と彩度は7色とも同じなので、
+   どの段でも同じ濃さの色が乗って見える（CSS 側は OKLCH で描く）。
+   段と段の間は色相を線形に補間する。等間隔なので速さも一定になる */
+const HUES = [29, 75, 121, 167, 213, 259, 305];
+const TINT_A = 0.60;    // 幕の濃さ。映像が透けて見える範囲に留める（実測で確認）
+
 const clamp = (v, a, b) => (v < a ? a : v > b ? b : v);
 const smoothstep = (e0, e1, v) => {
   const t = clamp((v - e0) / (e1 - e0), 0, 1);
@@ -49,9 +56,10 @@ function measure(view) {
   const twoCol = win >= 1024;      // 左に本文・右に螺旋の2カラム
   const wide = win >= 768;
 
-  const cw = twoCol ? Math.min(w * 0.60, 452)
-    : wide ? Math.min(w * 0.56, 400)
-      : Math.min(w * 0.77, 308);
+  // 2026-09-11: 比はそのままで 5% 拡大（0.64→0.672 / 0.60→0.63 / 0.82→0.861）
+  const cw = twoCol ? Math.min(w * 0.672, 504)
+    : wide ? Math.min(w * 0.63, 445)
+      : Math.min(w * 0.861, 342);
 
   return {
     cw,
@@ -81,6 +89,7 @@ export function initSpiral({ reduceMotion = false } = {}) {
   const ground = root.querySelector('.spiral__ground');
   const walker = root.querySelector('.spiral__walker');
   const big = root.querySelector('.spiral__big');
+  const tint = root.querySelector('.spiral__tint');
   const cards = Array.from(root.querySelectorAll('.scard'));
   if (!track || !view || !list || !read || cards.length === 0) return null;
 
@@ -108,6 +117,10 @@ export function initSpiral({ reduceMotion = false } = {}) {
   /* --------------------------- 寸法とスクロール量 --------------------------- */
   let dim = measure(view);
   let stepPx = 0;
+  /* 吹き出しのしっぽをマスコットに合わせるための下ごしらえ。
+     毎フレーム getBoundingClientRect を読むと重いので、動かない差だけ layout で取る */
+  let tailBase = 0;     // 足あと段の左端 − 吹き出しの左端
+  let bubbleW = 0;      // 吹き出しの幅（しっぽを外へ出さないための上限）
 
   function layout() {
     dim = measure(view);
@@ -127,6 +140,10 @@ export function initSpiral({ reduceMotion = false } = {}) {
       b.style.position = ''; b.style.visibility = '';
     });
     root.style.setProperty('--read-h', `${Math.ceil(max)}px`);
+    if (ground && bodyBoxes[0]) {
+      tailBase = ground.getBoundingClientRect().left - bodyBoxes[0].getBoundingClientRect().left;
+      bubbleW = bodyBoxes[0].clientWidth;
+    }
   }
 
   /* ------------------------------ 状態 ------------------------------ */
@@ -153,6 +170,17 @@ export function initSpiral({ reduceMotion = false } = {}) {
     const entryPx = (1 - ease) * view.clientWidth * ENTRY_X;
     const entryA = smoothstep(0.04, 0.55, pin);
     if (stage) stage.style.setProperty('--in', fade.toFixed(3));
+
+    /* 段ごとのカラーオーバーレイ。色相は段の間を線形に渡り、濃さは
+       見出しと同じ fade に乗せる。fade は入りで 0→1、抜けで 1→0 なので、
+       1段目が現れる前と7段目が消えたあとは自然に色が消える */
+    if (tint) {
+      const t = clamp(u, 0, N - 1);
+      const i0 = Math.min(Math.floor(t), N - 2);
+      const h = N > 1 ? HUES[i0] + (HUES[i0 + 1] - HUES[i0]) * (t - i0) : HUES[0];
+      tint.style.setProperty('--tint-h', h.toFixed(1));
+      tint.style.setProperty('--tint-a', (fade * TINT_A).toFixed(3));
+    }
 
     for (let i = 0; i < N; i++) {
       const card = cards[i];
@@ -195,14 +223,29 @@ export function initSpiral({ reduceMotion = false } = {}) {
         stage.style.setProperty('--scrim',
           phase === 'us' ? 'rgba(58,15,21,.58)' : 'rgba(18,5,8,.76)');
       }
+      /* PC の語り手は読み物欄の下端からの距離で置く。本文の長さで吹き出しの下端が
+         変わるので、切り替わったときだけ測り直す（変形中の値を拾わないよう offset 系で読む） */
+      const activeBody = bodyBoxes[now] && bodyBoxes[now].querySelector('.scard__body');
+      if (activeBody) {
+        const gap = read.clientHeight - (activeBody.offsetTop + activeBody.offsetHeight);
+        read.style.setProperty('--sp-b', `${Math.max(0, Math.round(gap))}px`);
+      }
       playFront(now);
     }
 
     // マスコットは進んだぶんだけ足あとを置きながら歩く
     if (walker && ground) {
-      const span = ground.clientWidth - 56;
+      const ww = walker.offsetWidth || 68;   // ★CSS で大きさを変えても歩ける距離が追従する
+      const span = ground.clientWidth - ww;
       const p = N > 1 ? clamp(u / (N - 1), 0, 1) : 0;
-      walker.style.setProperty('--walk', `${(span * p).toFixed(1)}px`);
+      const walk = span * p;
+      walker.style.setProperty('--walk', `${walk.toFixed(1)}px`);
+      /* SP の吹き出しのしっぽを、歩いているマスコットの中心へ合わせる。
+         端では吹き出しの外へ出てしまうので、左右 22px の内側で止める */
+      if (bubbleW > 60) {
+        const tx = clamp(tailBase + walk + ww / 2, 22, bubbleW - 22);
+        read.style.setProperty('--walk-x', `${tx.toFixed(1)}px`);
+      }
     }
   }
 

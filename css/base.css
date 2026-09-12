@@ -24,7 +24,12 @@
 
   --ff-serif:'Noto Serif JP','Hiragino Mincho ProN','Yu Mincho','YuMincho',serif;
   --ff-sans:'Zen Kaku Gothic New','Hiragino Kaku Gothic ProN','Hiragino Sans','Yu Gothic',sans-serif;
-  --ff-mono:'IBM Plex Mono',ui-monospace,'SF Mono',Menlo,Consolas,monospace;
+  /* 手書きの数字。支給の参考画像（sankou.png）の 01 に近い書体 */
+  --ff-hand:'Kalam','Bradley Hand','Segoe Print',cursive;
+  /* 和文は Plex に無いので、控えの先頭に和文書体を置く（既定の monospace に落ちると Osaka になる） */
+  /* 見出し用の細長いサンセリフ。Oswald はサブセットに WORLD TERAKOYA の字だけ入る */
+  --ff-cond:'Oswald','Helvetica Neue Condensed','Arial Narrow','Zen Kaku Gothic New',sans-serif;
+  --ff-mono:'IBM Plex Mono','Zen Kaku Gothic New',ui-monospace,'SF Mono',Menlo,Consolas,monospace;
 
   --px:20px;
   --bar-h:64px;
@@ -93,6 +98,10 @@ html.is-veiled body{overflow:hidden;height:100vh}
 .nb{white-space:nowrap}
 .h2{font-family:var(--ff-serif);font-size:clamp(25px,6.9vw,32px);line-height:1.4;letter-spacing:.02em;color:var(--wine);text-wrap:balance;font-weight:700}
 .h2--cream{color:var(--cream)}
+/* よくあるご質問だけ見出しを中央に置く。
+   .ch__head は max-width:var(--col) で左に寄っているので、幅の制限も外す */
+.ch--faq .ch__head,
+.ch--voices .ch__head{max-width:none;text-align:center}
 .h3{font-family:var(--ff-serif);font-size:clamp(21px,5.4vw,26px);line-height:1.45;letter-spacing:.02em;color:var(--wine);text-wrap:balance}
 .h4{font-family:var(--ff-serif);font-size:18px;line-height:1.5;letter-spacing:.02em;color:var(--wine);margin-top:44px}
 .h4.mono{font-family:var(--ff-mono);font-size:11px;letter-spacing:.2em;color:var(--wine);display:flex;align-items:baseline;gap:12px;font-weight:500}
@@ -125,6 +134,8 @@ p + p{margin-top:1em}
   min-height:56px;padding:12px 30px;gap:1px;
   background:var(--yellow);color:var(--wine-2);
   border-radius:999px;border:0;
+  /* ★書体はよくあるご質問の見出しと同じ明朝に統一。右端の追従CTA(.side-cta)は .btn ではないので対象外 */
+  font-family:var(--ff-serif);
   font-size:15.5px;font-weight:700;line-height:1.3;letter-spacing:.04em;text-decoration:none;
   box-shadow:0 0 0 1.5px rgba(85,22,31,.25) inset,0 12px 30px -14px rgba(26,5,8,.55);
   transition:transform .55s var(--ease-out),background-color .25s,box-shadow .35s;
@@ -141,6 +152,13 @@ p + p{margin-top:1em}
 .btn small{font-family:var(--ff-mono);font-size:10px;font-weight:400;letter-spacing:.14em;text-transform:uppercase;opacity:.72}
 .btn--lg{min-height:64px;padding:14px 36px;font-size:16.5px}
 .btn--sm{min-height:40px;padding:6px 18px;font-size:13px}
+/* FV のボタンと同じ大きさ。高校生・大学生どちらのタブの CTA にも当てている。
+   ★.btn は inline-flex なので、そのままだと左に付く。中央に置くには
+     flex にして幅を中身ぶんにし、左右のマージンを auto にする */
+.btn--fv{
+  min-height:68px;padding:16px 62px;font-size:18px;
+  display:flex;width:fit-content;margin-left:auto;margin-right:auto;
+}
 .btn--sm small{display:none}
 .btn-line{
   display:inline-flex;align-items:center;gap:10px;min-height:44px;
@@ -220,7 +238,17 @@ p + p{margin-top:1em}
 
 /* ---------- マスコットのリグ ---------- */
 .rig{position:relative;line-height:0}
-.rig svg{width:100%;height:auto;overflow:visible}
+/* ★残像（二重に見える）対策。
+   リグの SVG は overflow:visible が要る（歩きの局面で足が viewBox の下へ 43 単位はみ出す。
+   実測で確認済み）。ところが再描画の範囲を要素の箱で決めるブラウザでは、
+   箱の外に描いた古い絵が消されずに残り、動かすと二重に見える。
+   自前の合成層へ載せると、はみ出しも含めて層ごと描き直されるので残らない。
+   ★transform を消すときは overflow:visible も一緒に見直すこと（片方だけ戻すと再発する）*/
+.rig svg{
+  width:100%;height:auto;overflow:visible;
+  transform:translateZ(0);
+  -webkit-backface-visibility:hidden;backface-visibility:hidden;
+}
 .rig img{width:100%;height:auto}
 .rig svg #trail{display:none}
 

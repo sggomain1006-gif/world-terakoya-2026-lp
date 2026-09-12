@@ -35,6 +35,8 @@ FAMILIES = {
     "Noto Serif JP": "noto-serif-jp",
     "Zen Kaku Gothic New": "zen-kaku-gothic-new",
     "IBM Plex Mono": "ibm-plex-mono",
+    "Kalam": "kalam",
+    "Oswald": "oswald",
 }
 
 COLLECT_JS = r"""() => {
@@ -44,7 +46,20 @@ COLLECT_JS = r"""() => {
     acc[k] = acc[k] || new Set();
     for (const c of txt) acc[k].add(c);
   };
-  const route = (stack, w, txt) => { add(stack[0], w, txt); };
+  /* ★欧文だけの書体（IBM Plex Mono / Kalam）に和文を投げてはいけない。
+     投げると、その字はどの subset にも入らないまま落ち、実機では Osaka や
+     MS ゴシックで描かれる。指定と違う書体になるが、
+     ローカルに和文が入っている Mac では気づけない。
+     和文はスタックの中で最初に見つかった和文書体へ渡す */
+  const JP_FAMS = ['Zen Kaku Gothic New', 'Noto Serif JP'];
+  const isJP = (c) => /[^\u0000-\u024F\u2000-\u206F\u20A0-\u20CF]/.test(c);
+  const route = (stack, w, txt) => {
+    const jpFam = stack.find((f) => JP_FAMS.indexOf(f) >= 0) || JP_FAMS[0];
+    let latin = '', jp = '';
+    for (const c of txt) { if (isJP(c)) jp += c; else latin += c; }
+    if (latin) add(stack[0], w, latin);
+    if (jp) add(JP_FAMS.indexOf(stack[0]) >= 0 ? stack[0] : jpFam, w, jp);
+  };
   const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
   let n;
   while ((n = walker.nextNode())) {

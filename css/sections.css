@@ -22,8 +22,20 @@ main{position:relative;z-index:2}
 .ch--who::before{content:'';position:absolute;inset:0;background-image:var(--paper);opacity:.05;pointer-events:none;mix-blend-mode:multiply}
 .tabs{position:relative}
 /* 下線のタブからボタンに変えた。選んだ方をワインで塗り、もう一方は線だけにする */
+/* ボタンの上の案内。吹き出しの尻尾が右向きなので、札は吹き出しの右に置く。
+   ボタンが中央寄せなので、この一組も中央に揃える */
+.tabs__guide{display:flex;align-items:flex-end;justify-content:center;gap:8px;margin:0 0 12px}
+/* ★2026-09-11: この案内はキャラクターごと一回り大きくして強調する。
+   .say の基底は他でも使うので、ここは上書きだけにとどめる */
+.tabs__guide .say{margin:0 0 20px;max-width:none;font-size:16px;font-weight:700;padding:12px 18px;border-radius:17px}
+.tabs__guide .say::after{right:-7px;bottom:14px;width:15px;height:15px}
+.tabs__mascot{flex:0 0 auto;display:block;width:120px;height:auto}
+.tabs__mascot svg,.tabs__mascot img{display:block;width:100%;height:auto}
+
+/* 2つのボタンの中心を画面の中心に合わせる。柱（.wrap）はPCでも中央寄せなので、
+   ここで中央に寄せれば SP・PC とも画面の中心に来る */
 .tabs__list{
-  position:relative;display:flex;flex-wrap:wrap;gap:10px;margin-bottom:36px;
+  position:relative;display:flex;flex-wrap:wrap;justify-content:center;gap:16px;margin-bottom:36px;
 }
 .tab{
   display:inline-flex;align-items:center;justify-content:center;
@@ -42,7 +54,8 @@ main{position:relative;z-index:2}
 .js .panel{animation:panel-in .8s var(--ease-out)}
 @keyframes panel-in{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
 .panel__head{display:flex;flex-direction:column;gap:24px}
-.panel__portrait{max-width:280px;margin-top:0}
+/* ★横位置の写真に替えたので、縦位置向けの幅（280/220px）だと小さすぎる。両方広げる */
+.panel__portrait{max-width:none;margin-top:0}
 .conds{margin-top:26px;display:flex;flex-direction:column}
 .conds li{position:relative;padding:14px 0 14px 26px;border-top:1px solid var(--line);font-size:15px;line-height:1.85}
 .conds li:last-child{border-bottom:1px solid var(--line)}
@@ -90,11 +103,14 @@ main{position:relative;z-index:2}
 .vs .vs__self dd{color:var(--wine);font-weight:500}
 
 @media (min-width:768px){
-  .tabs__list{margin-bottom:52px;gap:12px}
+  .tabs__guide{gap:12px;margin-bottom:16px}
+  .tabs__guide .say{font-size:18px;margin-bottom:26px;padding:14px 22px;border-radius:19px}
+  .tabs__mascot{width:150px}
+  .tabs__list{margin-bottom:52px;gap:24px}
   .tab{min-height:54px;padding:12px 36px;font-size:17px}
   .panel__head{flex-direction:row;align-items:flex-start;justify-content:space-between;gap:40px}
   .panel__head .h3{flex:1}
-  .panel__portrait{width:220px;flex:none}
+  .panel__portrait{width:340px;flex:none}
   .panel{max-width:820px}
   .stats{grid-template-columns:repeat(4,1fr);gap:0 20px}
   .dial{--size:132px;--thick:11px}
@@ -186,26 +202,39 @@ main{position:relative;z-index:2}
 @media (min-width:768px){.faq__q{font-size:18px;padding:22px 0}.faq__a > p{font-size:15.5px}}
 
 /* ========== 最終CTA（扉の前） ========== */
+/* 締めの章。地は参加者の集合カット。★写真の上に文字を置くので必ず幕を重ねる
+   （クリームの文字を明るい空や白い服の上に直に置くと読めない）。
+   幕は上下を濃く、中ほどを薄くして、写真の顔がいちばん見える帯を残す */
 .final{
   position:relative;z-index:1;
   min-height:100vh;min-height:100svh;
-  display:flex;align-items:flex-start;
+  display:flex;
   color:var(--cream);
-  padding:calc(var(--bar-h) + 40px) 0 46vh;
+  /* ★見出しと CTA を縦の中ほどへ。上寄せ＋下に 46vh の空きだと、写真の中で
+     文字とボタンだけが上に固まって見えた */
+  align-items:center;
+  padding:calc(var(--bar-h) + 40px) 0 22vh;
+  background:
+    linear-gradient(rgba(26,5,8,.86) 0%,rgba(26,5,8,.70) 26%,
+                    rgba(26,5,8,.58) 52%,rgba(26,5,8,.80) 78%,rgba(26,5,8,.93) 100%),
+    url(../img/poster-clip-group.webp) center 32%/cover no-repeat;
 }
 .final__inner{width:100%;text-align:center;display:flex;flex-direction:column;align-items:center}
 .final__h{max-width:720px;text-shadow:0 2px 30px rgba(26,5,8,.6);font-size:clamp(24px,6.6vw,30px)}
 .final__ctas{margin-top:28px}
 .final__mascot{position:absolute;left:var(--px);bottom:22px;display:flex;flex-direction:column;align-items:flex-start;gap:6px;pointer-events:none}
-.final__mascot .rig{width:78px}
+.final__mascot .rig{width:112px}
 .final__mascot .say::after{right:auto;left:22px;bottom:-5px}
-.final__mascot .say{order:-1;margin-bottom:8px}
+/* ★セリフも他の案内と同じ大きさに揃える */
+.final__mascot .say{order:-1;margin-bottom:10px;font-size:16px;font-weight:700;padding:12px 18px;border-radius:17px;max-width:none}
+.final__mascot .say::after{width:15px;height:15px}
 @media (min-width:768px){
-  .final{padding-top:calc(var(--bar-h) + 56px);padding-bottom:40vh}
+  .final{padding-top:calc(var(--bar-h) + 56px);padding-bottom:20vh}
   .final__h{font-size:clamp(34px,3.4vw,44px)}
   .final__mascot{left:auto;right:calc(var(--px) + 40px);bottom:40px;align-items:flex-end}
   .final__mascot .say::after{left:auto;right:22px}
-  .final__mascot .rig{width:104px}
+  .final__mascot .rig{width:150px}
+  .final__mascot .say{font-size:18px;padding:14px 22px;border-radius:19px}
 }
 
 /* ========== フッター ========== */
@@ -247,11 +276,20 @@ main{position:relative;z-index:2}
    引いているのは 章の左右余白(--px×2)・台紙の左右padding(32)・チェックの字下げ(20) */
 .sched-note li{
   position:relative;padding-left:20px;
-  font-family:var(--ff-sans);font-weight:700;
+  /* 2026-09-11: よくあるご質問の見出しと同じ明朝へ */
+  font-family:var(--ff-serif);font-weight:700;
   font-size:min(15.5px, calc((100vw - var(--px) * 2 - 52px) / 19.2));
   line-height:1.55;letter-spacing:.01em;white-space:nowrap;
 }
 .sched-note li + li{margin-top:14px}
+/* 章の締めの CTA。注記と同じ左寄せの列に合わせつつ、ボタンだけ中央に置く */
+.brief__cta{max-width:var(--col);margin:36px 0 0;text-align:center}
+/* ボタンの字は明朝。副文を外したので、横に伸ばして押しやすい面積を作る */
+.brief__cta .btn{min-width:min(100%,360px);padding-inline:44px}
+@media (min-width:768px){
+  .brief__cta{margin-top:44px}
+  .brief__cta .btn{min-width:min(100%,440px)}
+}
 /* チェックは字ではなく線で描く（▶ と同じ理由。書体に記号を足さずに済む） */
 .sched-note li::after{
   content:'';position:absolute;left:1px;top:.3em;
@@ -270,14 +308,39 @@ main{position:relative;z-index:2}
 /* ---------- 奨学金（高校生の欄・CTAの下） ---------- */
 .schol{margin-top:40px;padding-top:26px;border-top:1px solid var(--line)}
 .schol__guide{display:flex;align-items:flex-end;gap:8px;margin:0 0 6px}
-.schol__guide .say{margin:0 0 22px;max-width:none;font-size:13px}
-.schol__mascot{flex:0 0 auto;display:block;width:88px;height:auto}
-.schol__h{margin-top:0}
+/* ★2026-09-11: 奨学金の案内も同じ扱いで強調する */
+.schol__guide .say{margin:0 0 22px;max-width:none;font-size:16px;font-weight:700;padding:12px 18px;border-radius:17px}
+.schol__guide .say::after{right:-7px;bottom:14px;width:15px;height:15px}
+.schol__mascot{flex:0 0 auto;display:block;width:120px;height:auto}
+/* ★奨学金は cream の地に本文と同じ扱いで置いていたので、まったく気づかれなかった。
+   ワインの札として地を反転させ、章の中でここだけ色が変わるようにする。
+   マスコットは札の外（.schol__guide のまま）。赤い体をワインに載せると溶ける */
+.schol__card{
+  background:var(--wine);color:var(--cream);
+  border-radius:22px;padding:22px 20px 26px;
+  box-shadow:0 26px 54px -28px rgba(26,5,8,.72);
+}
+/* ★2026-09-11: 黄色のバッジは廃止し、見出しそのものを大きくして目印にした */
+.schol__h{margin-top:0;color:var(--cream);font-size:26px;line-height:1.35;margin-bottom:16px}
+.schol__card p{color:rgba(245,239,230,.94)}
+.schol__card p + p{margin-top:14px}
+/* 重要な部分の下線。黄色で引くと地のワインから離れて拾える。
+   skip-ink を切るのは、和文の下に出る字（ぐ・す など）で線が途切れないようにするため */
+.schol__card strong{
+  font-weight:700;color:var(--cream);
+  text-decoration:underline;
+  text-decoration-color:var(--yellow);
+  text-decoration-thickness:3px;
+  text-underline-offset:5px;
+  text-decoration-skip-ink:none;
+}
 @media (min-width:768px){
   .schol{margin-top:52px;padding-top:32px}
+  .schol__card{padding:28px 30px 32px;border-radius:26px}
+  .schol__h{font-size:32px;margin-bottom:20px}
   .schol__guide{gap:12px;margin-bottom:10px}
-  .schol__guide .say{font-size:14px;margin-bottom:28px}
-  .schol__mascot{width:112px}
+  .schol__guide .say{font-size:18px;margin-bottom:28px;padding:14px 22px;border-radius:19px}
+  .schol__mascot{width:150px}
 }
 
 /* ========== 参加者の声（バーガンディ地） ==========
@@ -339,42 +402,83 @@ main{position:relative;z-index:2}
    隣の札が画面の端まで見えず、柱の内側で切られてしまう（寄付LPは全幅）。
    左右に負のマージンを当てて柱の外へ出し、内側の余白で頭出しを作る。
    右端の 14vw / 22vw は、最後の1枚も左に来られるようにするためのもの */
+.vcards__pin{position:relative}
+/* 帯は画面に貼り付けたまま、縦スクロールの分だけ札を横へ流す。
+   貼り付ける位置（--vc-top）と pin の高さは JS が実測して入れる */
+.vcards__stage{position:sticky;top:var(--vc-top,96px)}
 .vcards__track{
   list-style:none;margin:18px calc(-1 * var(--px)) 0;
-  /* 左右の余白は JS が実測して入れる（--edge = (送り箱の幅 - 札の幅) / 2）。
-     これがないと最初と最後の札だけ画面の中心に来られない。
-     JS が動く前と、動かない環境のための控えも書いておく */
-  padding:0 var(--edge,14vw) 6px var(--edge,var(--px));
-  display:flex;gap:16px;
+  padding:0 var(--px) 6px;
+  display:flex;align-items:flex-start;gap:16px;
   overflow-x:auto;overscroll-behavior-x:contain;
   scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;
   scrollbar-width:none;
 }
 .vcards__track::-webkit-scrollbar{display:none}
+/* JS が動く環境では横スクロールをやめ、transform で送る */
+.js .vcards__track{width:max-content;overflow:visible;scroll-snap-type:none;will-change:transform}
+/* モーション低減のときは横スクロールに戻す。紐はそのまま残す */
+.js .vcards__pin.is-static{height:auto !important}
+.js .vcards__pin.is-static .vcards__stage{position:static}
+.js .vcards__pin.is-static .vcards__track{width:auto;overflow-x:auto;scroll-snap-type:x mandatory;transform:none}
+.js .vcards__pin.is-static .vcard{transform:none}
 /* 札の中心を画面の中心に合わせる。端の札も中心に来られるよう、
    送り箱の左右に (箱の幅 - 札の幅)/2 の余白を JS が入れている */
 .vcard{
   flex:0 0 clamp(252px,74vw,300px);scroll-snap-align:center;
+  position:relative;
   display:flex;flex-direction:column;
-  background:var(--cream);border-radius:14px;overflow:hidden;
+  background:var(--cream);border-radius:14px;
   box-shadow:0 24px 50px -30px rgba(0,0,0,.7);
+  /* 紐は札の外側（上）に描くので overflow:hidden は使えない。角は中身側で丸める。
+     支点を紐の上端に置くと、回したときに振り子のように見える */
+  margin-top:var(--cord);
+  transform-origin:center calc(-1 * var(--cord));
+  will-change:transform;
 }
-.vcard__photo{width:100%;height:220px;object-fit:cover;flex:none;display:block;background:var(--cream-3)}
+.vcard__photo{width:100%;height:220px;object-fit:cover;flex:none;display:block;background:var(--cream-3);border-radius:14px 14px 0 0}
 /* 本文はクリームの地。地が反転するので、文字と罫もワイン側に寄せる */
-.vcard__body{padding:20px;display:flex;flex-direction:column;gap:9px;flex:1;background:var(--cream)}
+.vcard__body{padding:20px;display:flex;flex-direction:column;gap:9px;flex:1;background:var(--cream);border-radius:0 0 14px 14px}
 .vcard__prog{margin:0;font-size:10px;font-weight:700;letter-spacing:.1em;color:var(--wine)}
 .vcard__quote{margin:0;flex:1;padding-left:14px;border-left:2px solid rgba(85,22,31,.28)}
 .vcard__quote p{margin:0;font-size:13px;line-height:1.85;color:var(--text)}
 .vcard__name{margin:2px 0 0;font-size:11px;color:var(--text-2)}
+/* ---- 吊り下げの紐（寄付LPの展示と同じ作り） ----
+   札ごとに紐の長さと傾きを変えて吊り位置をずらす。地がワインなので紐はクリーム側 */
+.vcard::before{
+  content:'';position:absolute;left:50%;bottom:100%;
+  width:2px;height:var(--cord);margin-left:-1px;
+  background:linear-gradient(to bottom,rgba(245,239,230,.55),rgba(245,239,230,.26));
+  transform:skewX(var(--cord-skew));transform-origin:top center;
+}
+/* 吊り元の留め具 */
+.vcard::after{
+  content:'';position:absolute;left:50%;bottom:calc(100% + var(--cord) - 6px);
+  width:11px;height:11px;margin-left:-5.5px;border-radius:50%;
+  background:var(--yellow);box-shadow:0 2px 5px rgba(0,0,0,.4);
+}
+/* 6枚目以降が足されても壊れないための既定値。下の :nth-child の方が強い */
+.vcard{--cord:34px;--cord-skew:-1deg}
+.vcard:nth-child(1){--cord:26px;--cord-skew:-1.5deg}
+.vcard:nth-child(2){--cord:62px;--cord-skew:1deg}
+.vcard:nth-child(3){--cord:38px;--cord-skew:-.8deg}
+.vcard:nth-child(4){--cord:74px;--cord-skew:2deg}
+.vcard:nth-child(5){--cord:32px;--cord-skew:-1.2deg}
 /* 背の低い機種は札が画面に収まらないので、寄付LPと同じく幅を広げて行数を減らす。
    高さの条件だけだと横長のPCにも当たるため、幅の条件を併記する */
 @media (max-width:767px) and (max-height:720px){
   .vcard{flex-basis:min(88vw,330px)}
   .vcard__photo{height:190px}
+  /* 背の低い機種では紐も短くしないと帯が画面に収まらない */
+  .vcard:nth-child(1){--cord:15px}
+  .vcard:nth-child(2){--cord:34px}
+  .vcard:nth-child(3){--cord:21px}
+  .vcard:nth-child(4){--cord:41px}
+  .vcard:nth-child(5){--cord:18px}
 }
 @media (min-width:768px){
   .vcards{margin-top:56px}
-  .vcards__track{gap:22px;margin-top:22px;padding:0 var(--edge,22vw) 10px var(--edge,var(--px))}
+  .vcards__track{gap:22px;margin-top:22px;padding:0 var(--px) 10px}
   .vcard{flex-basis:336px}
   .vcard__photo{height:208px}
   .vcard__body{padding:22px;gap:10px}

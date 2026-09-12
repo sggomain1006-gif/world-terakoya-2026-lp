@@ -8,7 +8,9 @@
 .endorsements,.media-section,.s-foot{--px:20px;line-height:1.8;font-size:15px;letter-spacing:normal}
 
 .endorsements { padding: 0 var(--px); margin-bottom: 36px; }
-.endorsements__title {
+.endorsements__title,.media-section__title {
+  /* 2026-09-11: よくあるご質問の見出しと同じ明朝へ */
+  font-family: var(--ff-serif);
   font-size: 18px; font-weight: 700; color: var(--wine);
   letter-spacing: 0.12em; text-align: center; margin-bottom: 16px;
 }
@@ -284,6 +286,10 @@
 }
 .founder-card__message p{font-size:13.5px;color:var(--text-2);line-height:1.9;margin:0 0 14px}
 .founder-card__message p:last-child{margin-bottom:0}
+/* COO（徳永）のカード。組みは代表カードと同一。上との間だけ空ける。
+   写真は代表と被写体の位置が違うので、寄せる先だけ変える */
+.founder-card--coo{margin-top:44px}
+.founder-card--coo .founder-card__photo{object-position:center 20%}
 
 @media (min-width:768px){
   .voices-head{padding-top:104px;padding-bottom:8px}
@@ -310,4 +316,6 @@
   .founder-card__message{padding:26px;margin-top:26px;border-radius:14px}
   .ch--founder{padding-bottom:24px}
   .founder-card__message p{font-size:16px}
+  .founder-card--coo{margin-top:0;padding-top:26px}
+  .founder-card--coo .founder-card__photo{object-position:58% center}
 }

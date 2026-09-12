@@ -28,9 +28,18 @@
   display:flex;flex-direction:column;gap:64px;max-width:var(--col);
 }
 .scard{position:relative}
+/* ★見出しは支給された参考画像（sankou.png）に合わせて、明朝からゴシックへ。
+   番号は手書きの 01〜07。番号を別の列に出すので、折り返した2行目の頭が
+   1行目の文字の頭に揃う（番号の下にもぐり込まない） */
 .scard__title{
-  margin:0 0 14px;font-family:var(--ff-serif);font-size:clamp(21px,5.4vw,26px);
-  line-height:1.42;letter-spacing:.02em;color:var(--wine);text-wrap:balance;
+  margin:0 0 14px;font-family:var(--ff-sans);font-weight:500;font-size:clamp(21px,5.4vw,26px);
+  line-height:1.42;letter-spacing:.02em;color:var(--wine);
+  display:flex;align-items:baseline;gap:.26em;
+}
+.scard__t{flex:1;min-width:0;text-wrap:balance}
+.scard__no{
+  flex:none;font-family:var(--ff-hand);font-weight:400;font-size:1.5em;line-height:1;
+  opacity:1;letter-spacing:.03em;
 }
 .scard__media{
   margin:20px 0 0;position:relative;overflow:hidden;border-radius:0;
@@ -47,14 +56,9 @@
 .scard__body + .scard__body{margin-top:.8em}
 
 /* 研修日程のプレート。地の色に関わらず読めるよう currentColor で組む */
-.plate{margin:14px 0 0;padding:0;display:flex;flex-wrap:wrap;gap:6px}
-.plate > div{
   display:flex;align-items:baseline;gap:6px;padding:5px 9px;
   border:1px solid currentColor;border-radius:3px;opacity:.88;
 }
-.plate dt{font-size:10px;letter-spacing:.16em;opacity:.7}
-.plate dd{margin:0;font-size:11px;letter-spacing:.04em}
-.plate dd small{font-size:9px;opacity:.75;margin-left:3px}
 
 /* HUD・足あと・読み物は螺旋のときだけ出す */
 .spiral__ground,.spiral__read{display:none}
@@ -69,13 +73,46 @@
   position:sticky;top:0;height:100vh;height:100dvh;
   display:grid;
   grid-template-columns:1fr;
-  grid-template-rows:minmax(0,1fr) auto auto;
-  grid-template-areas:'view' 'read' 'ground';
+  grid-template-rows:auto minmax(0,1fr) auto auto;
+  grid-template-areas:'head' 'view' 'read' 'ground';
   overflow:clip;
   background:transparent;
   color:var(--on-dark);
   --ink:var(--cream);
   --rule:var(--line-cream);
+}
+/* --- 7段のカラーオーバーレイ ------------------------------------------------
+   段が進むごとに色相だけを動かす。明度と彩度は7色とも同じ値にしてあるので、
+   どの段でも「同じ濃さの色が乗っている」ように見える（色相だけを等間隔で回す）。
+   HSL で組むと明るさが色相で何倍も動いてしまうため、OKLCH で作る。
+   色相 29→305 は 46 度ずつの7点。赤・橙・黄緑・緑・水色・青・紫の順で、
+   どの隣り合わせも同じ距離だけ離れているので、移り変わりに段差が出ない。
+   明度 .42・彩度 .07 は最初に決めた落ち着いた側の設定。
+   （明るい案は 明度 .72・彩度 .125・濃さ .58。7色が sRGB に収まる中で
+   いちばん彩度を高く取れる点で、色は約1.3倍濃く画面は約1.5倍明るくなる。
+   戻すときはこの3つの数値だけ差し替える）
+   非対応のブラウザでは地を敷かない（今までどおりの見た目のまま） */
+.spiral__tint{display:none}
+.is-3d .spiral__tint{
+  display:block;position:absolute;inset:0;z-index:0;pointer-events:none;
+  opacity:var(--tint-a,0);
+}
+@supports (background:oklch(.55 .095 29)){
+  .is-3d .spiral__tint{background:oklch(var(--tint-l,.42) var(--tint-c,.07) var(--tint-h,29))}
+}
+/* 章の名札。ロゴ横の EdFuture と同じ書体（--ff-serif の 700）。
+   グリッドの1行目なので、カードの区画（view）とは構造的に重ならない。
+   上部バーは螺旋の間ずっと出ているので、その高さぶん下げる */
+.spiral__head{display:none}
+.is-3d .spiral__head{
+  display:block;grid-area:head;z-index:2;margin:0;
+  padding:calc(var(--bar-h) + 88px) var(--px) 0;
+  text-align:center;
+  font-family:var(--ff-serif);font-weight:700;
+  font-size:13px;line-height:1.4;letter-spacing:.3em;
+  /* 字間は最後の1字のあとにも入る。中央揃えだとその半分ぶん左へずれるので戻す */
+  text-indent:.15em;
+  color:var(--cream);opacity:var(--in,1);pointer-events:none;
 }
 .is-3d .spiral__view{position:relative;z-index:1}
 /* 入り: 幕を張らないぶん、中身は右から入ってきて濃くなる */
@@ -100,7 +137,7 @@
   --bow-edge-us:url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 120' preserveAspectRatio='none'%3E%3Cpath d='M4 4 Q100 0 196 4 L196 116 Q100 120 4 116 Z' fill='none' stroke='%23FFD83E' stroke-opacity='.58' stroke-width='1.4' vector-effect='non-scaling-stroke'/%3E%3C/svg%3E");
 }
 .is-3d .scard{
-  position:absolute;left:50%;top:50%;width:var(--cw,300px);aspect-ratio:4/3;
+  position:absolute;left:50%;top:50%;width:var(--cw,300px);aspect-ratio:3/2;
   margin:0;padding:0;transform-origin:50% 50%;
   backface-visibility:hidden;
   will-change:transform,opacity;
@@ -161,40 +198,63 @@
   transition:opacity .34s var(--ease-out),transform .34s var(--ease-out);
 }
 .spiral__read .scard__detail.is-on{opacity:1;transform:none;pointer-events:auto}
-.scard__no{margin-right:.14em;opacity:.72;font-feature-settings:normal}
+/* 螺旋の中でも同じ組み。袋文字（縁取りの影）は参考に無いので外す。
+   下段に帯を敷いたので、影が無くてもクリーム文字は読める（実測で確認） */
 .spiral__read .scard__title{
+  /* 2026-09-11: よくあるご質問の見出しと同じ明朝へ。番号(.scard__no)は --ff-hand なので変わらない */
   margin:0 0 12px;font-family:var(--ff-serif);font-weight:700;
-  font-size:clamp(19px,5.2vw,23px);line-height:1.4;letter-spacing:.02em;
-  color:var(--cream);text-wrap:balance;
-  text-shadow:
-    -1.2px -1.2px 0 rgba(4,1,2,.94),1.2px -1.2px 0 rgba(4,1,2,.94),
-    -1.2px 1.2px 0 rgba(4,1,2,.94),1.2px 1.2px 0 rgba(4,1,2,.94),
-    -1.6px 0 0 rgba(4,1,2,.94),1.6px 0 0 rgba(4,1,2,.94),
-    0 -1.6px 0 rgba(4,1,2,.94),0 1.6px 0 rgba(4,1,2,.94),
-    0 0 7px rgba(4,1,2,.96),0 0 18px rgba(4,1,2,.8);
+  font-size:clamp(19px,5.2vw,23px);line-height:1.4;letter-spacing:.01em;
+  color:var(--cream);text-shadow:none;
 }
+/* --- 説明文はマスコットのセリフ。吹き出しに入れる ----------------------------
+   SP は下の足あとを歩くマスコットがそのまま話し手なので、しっぽの横位置を
+   マスコットに合わせて動かす（--tail-x は spiral.js が毎フレーム書く）。
+   PC は読み物欄の左に語り手を固定し、しっぽを左へ倒す。
+
+   ★しっぽは padding-bottom の内側に描く。外へ出すと --read-h（いちばん長い本文で
+     測って固定する高さ）に入らず、下の足あとの段へ刺さる。
+   ★この基底ルールは媒体クエリより前に置くこと。後ろに置くと同詳細度で後勝ちし、
+     PC の上書きが一度も効かなくなる */
+.spiral__read{--tail-x:var(--walk-x,26px)}
+.spiral__read .scard__detail{--tail:13px;padding-bottom:var(--tail)}
 .spiral__read .scard__body{
-  font-size:14px;line-height:1.9;color:rgba(245,239,230,.94);
-  /* 幕を張らないので、輪郭は文字の影だけで持たせる。
-     細かくずらした影を輪から重ねて、明るいコマでも字の縁が残るようにする */
-  text-shadow:
-    -1.2px -1.2px 0 rgba(4,1,2,.94),1.2px -1.2px 0 rgba(4,1,2,.94),
-    -1.2px 1.2px 0 rgba(4,1,2,.94),1.2px 1.2px 0 rgba(4,1,2,.94),
-    -1.6px 0 0 rgba(4,1,2,.94),1.6px 0 0 rgba(4,1,2,.94),
-    0 -1.6px 0 rgba(4,1,2,.94),0 1.6px 0 rgba(4,1,2,.94),
-    0 0 7px rgba(4,1,2,.96),0 0 18px rgba(4,1,2,.8);
+  position:relative;
+  padding:13px 16px;
+  font-size:14px;line-height:1.9;
+  background:var(--cream);color:var(--wine-2);
+  border-radius:16px;
+  text-shadow:none;
+  box-shadow:0 10px 22px rgba(4,1,2,.42);
+  /* 見出しが出たあとに、しっぽの根もとから膨らむ */
+  opacity:0;transform:scale(.94);
+  transform-origin:var(--tail-x,26px) 100%;
+  transition:opacity .3s var(--ease-out) .26s,transform .42s var(--ease-out) .26s;
 }
+.spiral__read .scard__detail.is-on .scard__body{opacity:1;transform:none}
+/* しっぽ。正方形を45°倒す。辺長 = はみ出し量 ÷ cos45° なので 1.42倍、
+   中心を縁に載せるため上下・左右に半分（0.71倍）ずらす */
+.spiral__read .scard__body::after{
+  content:'';position:absolute;
+  left:var(--tail-x,26px);bottom:calc(var(--tail) * -0.71);
+  width:calc(var(--tail) * 1.42);height:calc(var(--tail) * 1.42);
+  margin-left:calc(var(--tail) * -0.71);
+  background:var(--cream);transform:rotate(45deg);border-radius:3px;
+}
+/* 語り手は PC だけ。SP は下のマスコットが話す */
+.spiral__speaker{display:none}
+.spiral__speaker img{display:block;width:100%;height:auto}
 
 .is-3d .spiral__ground{
   grid-area:ground;z-index:2;
   display:block;position:relative;height:62px;margin-top:8px;
   border-top:1px solid var(--rule,var(--line));
 }
+/* ★幅を変えたら spiral.js の歩ける距離も変わる。JS は offsetWidth を読むので追従する */
 .spiral__walker{
-  position:absolute;left:0;bottom:0;width:56px;
+  position:absolute;left:0;bottom:0;width:84px;
   transform:translateX(var(--walk,0px));will-change:transform;
 }
-.spiral__walker .rig{width:56px;display:block}
+.spiral__walker .rig{width:84px;display:block}
 .spiral__walker img,.spiral__walker svg{display:block;width:100%;height:auto}
 .spiral__ground .trail__print{
   position:absolute;width:17px;height:auto;opacity:0;
@@ -222,7 +282,26 @@
     --gut-r:max(var(--px),calc((100vw - var(--wrap)) / 2));
     padding-left:max(var(--px),calc((100vw - var(--wrap)) / 2));
   }
-  .spiral__read .scard__detail{left:max(var(--px),calc((100vw - var(--wrap)) / 2))}
+  .spiral__read .scard__detail,
+  .spiral__read .spiral__speaker{left:max(var(--px),calc((100vw - var(--wrap)) / 2))}
+
+  /* --- PC: 語り手を説明文のとなりに固定し、しっぽを左へ倒す -------------------
+     縦は JS が --sp-b（読み物欄の下端から吹き出しの下端までの距離）を書くので、
+     本文の長さが変わっても語り手の頭が吹き出しの高さに揃う */
+  .spiral__read .scard__detail{padding-bottom:0}
+  .spiral__read .scard__body{
+    margin-left:calc(var(--sp-w,124px) + 12px);
+    transform-origin:0 64%;
+  }
+  .spiral__read .scard__body::after{
+    left:calc(var(--tail) * -0.71);
+    bottom:30%;margin-left:0;
+  }
+  .spiral__speaker{
+    display:block;position:absolute;
+    bottom:var(--sp-b,0px);width:var(--sp-w,124px);
+    pointer-events:none;
+  }
   .is-3d .spiral__ground{
     height:70px;margin:0 max(var(--px),calc((100vw - var(--wrap)) / 2)) 26px;
   }
@@ -234,15 +313,32 @@
   .spiral__read .scard__title{font-size:24px;margin-bottom:14px}
   .is-3d .spiral__stage{
     grid-template-columns:minmax(280px,34%) 1fr;
-    grid-template-rows:minmax(0,1fr) auto;
-    grid-template-areas:'read view' 'ground ground';
+    grid-template-rows:auto minmax(0,1fr) auto;
+    grid-template-areas:'head head' 'read view' 'ground ground';
   }
   .is-3d .spiral__read{
     --gut-r:28px;align-self:center;
     padding:0 28px 0 max(120px,calc((100vw - var(--wrap)) / 2));
   }
-  .spiral__read .scard__detail{left:max(120px,calc((100vw - var(--wrap)) / 2))}
+  .spiral__read .scard__detail,
+  .spiral__read .spiral__speaker{left:max(120px,calc((100vw - var(--wrap)) / 2))}
   .spiral__read .scard__body{font-size:15.5px}
+  /* ★左カラムでは語り手を横に並べる余地が無い。実測で 1024px のとき吹き出しが
+     84px まで潰れて22行になった（768/900px では 572/704px あるので横並びのままでよい）。
+     ここだけ語り手を吹き出しの下へ回し、しっぽを下向きに戻す。
+     読み物欄は縦中央なので、語り手が下へはみ出してもぶつかる相手がいない */
+  .spiral__read{--tail-x:34px}
+  .spiral__read .scard__body{margin-left:0;transform-origin:var(--tail-x) 100%}
+  .spiral__read .scard__body::after{
+    left:var(--tail-x);top:auto;bottom:calc(var(--tail) * -0.71);
+    margin-left:calc(var(--tail) * -0.71);
+  }
+  .spiral__read .scard__detail{padding-bottom:var(--tail)}
+  .spiral__speaker{
+    --sp-w:112px;
+    bottom:calc(var(--sp-b,0px) - var(--sp-w) - 6px);
+    transform:translateX(calc(var(--tail-x) - var(--sp-w) / 2));
+  }
   /* 左の余白に段数を大きく置く。カードの番号と同じものを飾りとして重ねる */
   .is-3d .spiral__big{
     display:block;position:absolute;margin:0;
@@ -392,12 +488,10 @@
 }
 .plist__fold[open] .plist__mark{background-size:14px 1.6px,1.6px 0}
 
-/* 開いた中身はクリームの地。風景写真 → 概要 → 事実 → 担当者 の順 */
-.plist__body{
-  background:var(--cream);color:var(--text);padding:20px 0;
-  animation:plist-in .34s var(--ease-out) both;
-}
-@keyframes plist-in{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+/* 開いた中身はクリームの地。風景写真 → 概要 → 事実 → 担当者 の順。
+   ★開くときの動きは js/ui.js の openFoldAnimated が高さごと動かす。
+     ここに中身だけのフェードを置くと、枠は即座に伸びて中身だけ遅れて出るので不具合に見える */
+.plist__body{background:var(--cream);color:var(--text);padding:20px 0}
 /* 写真は少し縮めて、まわりにクリームの余白を残す（本文の左右の余白と揃える） */
 /* ★上下の margin は親（padding なし）をすり抜けて外に出る。
    写真の上のクリームが消えて、代わりにワインの帯が出た。
@@ -407,6 +501,9 @@
   border-radius:0;background:var(--cream-3);
 }
 .plist__scene img{display:block;width:100%;height:100%;object-fit:cover}
+/* 自由の女神は縦に長い。16/9 で切ると高さの 75% しか映らないので、
+   既定の中央だと松明が切れる。上寄せにして松明を残す */
+.plist__scene .plist__scene--liberty{object-position:center 20%}
 .plist__lead{
   margin:18px 20px 0;
   font-size:13.5px;line-height:1.8;color:var(--text);
@@ -415,14 +512,28 @@
 .plist__facts > div{display:grid;grid-template-columns:64px 1fr;gap:10px;align-items:baseline}
 .plist__facts dt{font-size:10.5px;letter-spacing:.14em;color:var(--wine);opacity:.85}
 .plist__facts dd{margin:0;font-size:13px;line-height:1.75;color:var(--text)}
+/* ★写真の高さは本文に合わせて伸ばす。固定値だと本文と縦の範囲が合わず、
+   実測で SP は本文が写真より 47px 下へはみ出し、PC は写真が本文より 74px 下へ余っていた。
+   上端は元から1px以内で揃っていたので、ずれて見えていたのは下端。
+   stretch にすると上下とも本文と同じ範囲に収まる（幅は固定なので切り取り位置で顔を残す）*/
 .plist__pm{
   margin:20px 20px 0;padding:18px 0;
   border-top:1px solid var(--line);border-bottom:1px solid var(--line);
-  display:flex;gap:16px;align-items:flex-start;
+  display:flex;gap:16px;align-items:stretch;
 }
+/* ★伸ばすのは囲みのほう。img を直接 flex の子にすると、画像自身の高さ
+   （幅×元の縦横比）が行の高さを決めてしまい、本文より背が高いときに縮まない。
+   実測で PC は写真が本文より 74px 余っていた。高さを持たない囲みなら行の高さを
+   本文が決め、囲みが stretch でそれに合う */
+.plist__pm-figure{
+  flex:0 0 auto;width:120px;min-height:120px;align-self:stretch;
+  position:relative;overflow:hidden;background:var(--cream-3);
+}
+/* ★画像は絶対配置にして囲みの高さから切り離す。ふつうに置くと
+   「幅×元の縦横比」で囲みが伸び、結局それが行の高さを決めてしまう */
 .plist__pm-photo{
-  flex:0 0 auto;width:120px;height:150px;object-fit:cover;
-  border-radius:0;background:var(--cream-3);
+  position:absolute;inset:0;width:100%;height:100%;
+  object-fit:cover;object-position:center 18%;border-radius:0;
 }
 .plist__pm-body{min-width:0}
 /* 折りたたみの締め。そのプログラムらしさを一言で置く。
@@ -444,7 +555,7 @@
 .plist__pm-text{margin:8px 0 0;font-size:13px;line-height:1.85;color:var(--text-2)}
 
 @media (max-height:700px) and (max-width:767px){
-  .plist__pm-photo{width:104px;height:130px}
+  .plist__pm-figure{width:104px}
 }
 
 @media (min-width:768px){
@@ -477,7 +588,7 @@
   .plist__facts > div{grid-template-columns:84px 1fr;gap:14px}
   .plist__facts dd{font-size:14px}
   .plist__pm{margin:24px 28px 0;padding:22px 0;gap:22px}
-  .plist__pm-photo{width:170px;height:212px}
+  .plist__pm-figure{width:170px}
   .plist__guide{margin:32px 28px 0;gap:12px}
   .plist__guide .say{font-size:14px;margin-bottom:26px}
   .plist__mascot{width:104px}

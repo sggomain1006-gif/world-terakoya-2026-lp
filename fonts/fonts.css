@@ -1,9 +1,11 @@
 @font-face{font-family:'IBM Plex Mono';font-style:normal;font-weight:400;font-display:swap;src:url(ibm-plex-mono-400.woff2?v=4dda6b16) format('woff2');}
 @font-face{font-family:'IBM Plex Mono';font-style:normal;font-weight:500;font-display:swap;src:url(ibm-plex-mono-500.woff2?v=95cb469b) format('woff2');}
 @font-face{font-family:'IBM Plex Mono';font-style:normal;font-weight:700;font-display:swap;src:url(ibm-plex-mono-700.woff2?v=7cd66485) format('woff2');}
+@font-face{font-family:'Kalam';font-style:normal;font-weight:400;font-display:swap;src:url(kalam-400.woff2?v=24840660) format('woff2');}
 @font-face{font-family:'Noto Serif JP';font-style:normal;font-weight:400;font-display:swap;src:url(noto-serif-jp-400.woff2?v=05064e2c) format('woff2');}
-@font-face{font-family:'Noto Serif JP';font-style:normal;font-weight:700;font-display:swap;src:url(noto-serif-jp-700.woff2?v=5e414cfb) format('woff2');}
+@font-face{font-family:'Noto Serif JP';font-style:normal;font-weight:700;font-display:swap;src:url(noto-serif-jp-700.woff2?v=44a7672d) format('woff2');}
+@font-face{font-family:'Oswald';font-style:normal;font-weight:700;font-display:swap;src:url(oswald-700.woff2?v=bbfdea35) format('woff2');}
 @font-face{font-family:'Zen Kaku Gothic New';font-style:normal;font-weight:300;font-display:swap;src:url(zen-kaku-gothic-new-300.woff2?v=3883e4a8) format('woff2');}
-@font-face{font-family:'Zen Kaku Gothic New';font-style:normal;font-weight:400;font-display:swap;src:url(zen-kaku-gothic-new-400.woff2?v=b3387747) format('woff2');}
-@font-face{font-family:'Zen Kaku Gothic New';font-style:normal;font-weight:500;font-display:swap;src:url(zen-kaku-gothic-new-500.woff2?v=c84a589e) format('woff2');}
-@font-face{font-family:'Zen Kaku Gothic New';font-style:normal;font-weight:700;font-display:swap;src:url(zen-kaku-gothic-new-700.woff2?v=730234da) format('woff2');}
+@font-face{font-family:'Zen Kaku Gothic New';font-style:normal;font-weight:400;font-display:swap;src:url(zen-kaku-gothic-new-400.woff2?v=62f49789) format('woff2');}
+@font-face{font-family:'Zen Kaku Gothic New';font-style:normal;font-weight:500;font-display:swap;src:url(zen-kaku-gothic-new-500.woff2?v=bfe562cf) format('woff2');}
+@font-face{font-family:'Zen Kaku Gothic New';font-style:normal;font-weight:700;font-display:swap;src:url(zen-kaku-gothic-new-700.woff2?v=11393f14) format('woff2');}

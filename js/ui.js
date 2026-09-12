@@ -4,7 +4,7 @@
    マグネットボタン / チケットの傾き / カーソル / 共有 / 計測
    ============================================================================= */
 
-import { Spring, expSmooth, safeDt } from './lib/spring.js?v=2026090924';
+import { Spring, expSmooth, safeDt } from './lib/spring.js?v=2026091192';
 
 export const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 export const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)');
@@ -241,11 +241,16 @@ export function initCounters() {
       if (d) d.style.setProperty('--pct', '0');
     });
   }
+  /* ★参加者の声の数字は4つが同じマスに重なっているので、交差監視だと一度に4つとも
+     走ってしまう（3つは見えないまま数え終わる）。data-count-defer の中は監視から外し、
+     表に出た最初の一度だけ外から呼べるようにする */
+  els.forEach((el) => { el.runCount = () => run(el); });
+  const deferred = (el) => !!el.closest('[data-count-defer]');
   if (!('IntersectionObserver' in window)) { els.forEach(run); return; }
   const io = new IntersectionObserver((entries) => {
     entries.forEach((en) => { if (en.isIntersecting) { run(en.target); io.unobserve(en.target); } });
   }, { threshold: 0.6 });
-  els.forEach((el) => io.observe(el));
+  els.forEach((el) => { if (!deferred(el)) io.observe(el); });
   document.addEventListener('lp:panelchange', () => els.forEach((el) => { if (el.textContent === '0') io.observe(el); }));
 }
 
@@ -389,99 +394,200 @@ export function initCtas() {
   });
 }
 
-/* --------------------------- 参加者の声の自動送り ---------------------------
-   4秒ごとに1枚ぶん進む。5枚目のあとも同じ向きに動いて1枚目へ戻る。
-   戻りを見せないために、札を1組ぶん複製して後ろに並べておき、
-   複製側へ入った瞬間に1組ぶんだけ引き算する。中身は同じなので継ぎ目は出ない。
-   指で送っている間と、画面に無い間、別のタブにいる間は止める */
-export function initVoiceSlider() {
-  const track = document.querySelector('.vcards__track');
-  if (!track) return;
-  const originals = Array.from(track.children);
-  if (originals.length < 2) return;
+/* --------------------------- 参加者の声（紐で吊るした札） ---------------------------
+   縦にスクロールすると札が横へ流れる。
+   ★2026-09-11 に振り子の揺れ（速さに応じた回転）を外した。単純な横移動だけにしている。
+     札の意匠・位置・段差は CSS 側なので、そのまま残っている。
 
-  // 複製は読み上げから外す（同じ話が二度読まれないように）
-  originals.forEach((li) => {
-    const clone = li.cloneNode(true);
-    clone.setAttribute('aria-hidden', 'true');
-    clone.classList.add('is-clone');
-    clone.querySelectorAll('a,button').forEach((el) => el.setAttribute('tabindex', '-1'));
-    track.appendChild(clone);
-  });
+   帯は sticky で画面に貼り付け、pin の高さで「横に流すぶんの縦の距離」を確保する。
+   sticky はブラウザ自身が固定するので、毎フレーム transform で留めるのと違って
+   スクロールと1フレームもずれない */
+export function initVoiceGallery() {
+  const pin = document.querySelector('.vcards__pin');
+  if (!pin) return;
+  const stage = pin.querySelector('.vcards__stage');
+  const track = pin.querySelector('.vcards__track');
+  if (!stage || !track) return;
+  const cards = Array.from(track.children);
+  if (cards.length < 2) return;
 
-  const step = () => {
-    const a = originals[0].getBoundingClientRect().left;
-    const b = originals[1].getBoundingClientRect().left;
-    return b - a;
+  /* モーション低減の設定では動かさない。横スクロールで全部読める形に戻す（紐は残る） */
+  if (reduceMotion.matches) { pin.classList.add('is-static'); return; }
+
+  /* ★追従は「1フレームごとに何割詰めるか」でなく半減期で書く。
+     割合だと 60Hz と 120Hz で追従が倍違い、同じ指の動きでも機種によって重さが変わる
+     （実測: 旧 SCRUB=0.14 は 60Hz で半減期 77ms、120Hz で 38ms）*/
+  const HALF_LIFE = 0.045; // 秒。小さいほど指にぴったり付く
+  const TAIL = 1.04;       // 横に流す距離に対する縦の余裕。1.15 だと最後の2割が動かない帯になっていた
+
+  const clamp01 = (v) => (v < 0 ? 0 : v > 1 ? 1 : v);
+
+  let maxShift = 0, travel = 0, pinTop = 0;
+  let rendered = 0;
+  let lastNow = 0;
+  let snapNext = true;     // 画面に入った最初の1フレームは追従させず即座に合わせる
+
+  const barH = () =>
+    parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--bar-h')) || 64;
+
+  /* 帯の貼り付け位置と pin の高さを実測して入れる。
+     帯は画面の中ほどに置く。上部バーの下にはもぐらせない */
+  const layout = () => {
+    pin.style.height = '';
+    const stageH = stage.offsetHeight;
+    const centre = Math.round((window.innerHeight - stageH) / 2);
+    /* 上部バーの下に収まる高さなら、バーを避けて中ほどに置く。
+       収まらない背の低い機種（SEなど）では、下がはみ出す方が読めないので上へ詰める */
+    pinTop = stageH <= window.innerHeight - barH() - 24
+      ? Math.max(barH() + 12, centre)
+      : Math.max(8, centre);
+    stage.style.setProperty('--vc-top', pinTop + 'px');
+    /* 送り箱の左端は画面の左端とは限らない（PCでは .wrap が中央寄せなので内側から始まる）。
+       0 と決めつけると、最後の札が画面の右へはみ出したまま止まる。
+       いま当てている送り量を足し戻して、変形なしの左端を出してから測る */
+    const left = track.getBoundingClientRect().left + maxShift * rendered;
+    /* ★端の札も画面の中心に来られるよう、送り箱の左右に余白を入れる。
+       入れないと1枚目と最後の札は中心に届かず、そこに対応する数字が一度も出ない
+       （実測: PC で 1つ目「挑戦意欲の変化」と4つ目「全体満足度」が出なかった）。
+       余白は padding なので、ここで測った border box の左端（left）は動かない */
+    const cw = cards[0].getBoundingClientRect().width;
+    const pad = Math.max(0, Math.round(window.innerWidth / 2 - cw / 2 - left));
+    track.style.paddingLeft = pad + 'px';
+    track.style.paddingRight = pad + 'px';
+    maxShift = Math.max(0, Math.round(left + track.scrollWidth - document.documentElement.clientWidth));
+    travel = Math.round(maxShift * TAIL);
+    pin.style.height = (stageH + travel) + 'px';
   };
-  const setWidth = () => step() * originals.length;
 
-  /* 端の札も画面の中心に来られるよう、送り箱の左右に余白を入れる。
-     (箱の幅 - 札の幅) / 2。vw で書くと縦スクロールバーのぶんずれるので実測する */
-  const fitEdge = () => {
-    const boxW = track.getBoundingClientRect().width;
-    const cardW = originals[0].getBoundingClientRect().width;
-    track.style.setProperty('--edge', Math.max(0, (boxW - cardW) / 2).toFixed(1) + 'px');
-  };
-  fitEdge();
-  let rt = 0;
-  window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(fitEdge, 120); }, { passive: true });
-
-  const INTERVAL = 4000;
-  let timer = 0, paused = false, onScreen = false, holding = false, restUntil = 0;
-
-  const wrap = () => {
-    const w = setWidth();
-    if (w > 0 && track.scrollLeft >= w - 1) {
-      const prev = track.style.scrollSnapType;
-      track.style.scrollSnapType = 'none';       // 引き算の瞬間に吸い付かせない
-      track.scrollLeft -= w;
-      // 次のフレームで戻す（同じフレームだと吸い付きが走る）
-      requestAnimationFrame(() => { track.style.scrollSnapType = prev; });
-    }
+  /* 送り箱ごと横へ動かすだけ。札には何も書かない（回転を外したのはここ） */
+  const paint = () => {
+    track.style.transform = 'translate3d(' + (-maxShift * rendered).toFixed(1) + 'px,0,0)';
   };
 
-  /* 1歩の量を足し算で積むとずれていくので、毎回いちばん近い右の札の中心を狙う */
-  const advance = () => {
-    if (paused || holding || !onScreen || document.hidden) return;
-    if (performance.now() < restUntil) return;   // 手で送った直後は休む
-    wrap();
-    const box = track.getBoundingClientRect();
-    const mid = box.left + box.width / 2;
-    const centreOf = (el) => { const b = el.getBoundingClientRect(); return b.left + b.width / 2; };
-    const next = Array.from(track.children).find((el) => centreOf(el) - mid > 4);
-    const to = next ? track.scrollLeft + (centreOf(next) - mid) : track.scrollLeft + step();
-    track.scrollTo({ left: to, behavior: 'smooth' });
+  let near = false;
+  let rafId = null;
+
+  /* 1フレームにつき読み取りを先にまとめ、そのあとに書き込む。
+     交互にやると強制同期レイアウトでスクロールがカクつく */
+  const frame = (now) => {
+    rafId = null;
+    if (!near) return;
+
+    const top = pin.getBoundingClientRect().top;      // 読み取り
+    const target = travel > 0 ? clamp01((pinTop - top) / travel) : 0;
+    const dt = lastNow ? Math.min(0.1, (now - lastNow) / 1000) : 0;
+    lastNow = now;
+    /* ★入り直したときは詰めずに合わせる。詰めると、前に見終わった位置（右端）から
+       左へ巻き戻る動きが見えてしまう */
+    if (snapNext || dt === 0) { rendered = target; snapNext = false; }
+    else rendered += (target - rendered) * (1 - Math.pow(0.5, dt / HALF_LIFE));
+    if (Math.abs(rendered - target) < 0.0002) rendered = target;
+
+    paint();                                          // 書き込み
+    rafId = requestAnimationFrame(frame);
   };
 
-  const start = () => { if (!timer) timer = setInterval(advance, INTERVAL); };
-  const stop = () => { clearInterval(timer); timer = 0; };
+  const sync = () => {
+    if (near && rafId === null) rafId = requestAnimationFrame(frame);
+    else if (!near && rafId !== null) { cancelAnimationFrame(rafId); rafId = null; }
+  };
 
-  if (reduceMotion.matches) { paused = true; } else { start(); }
+  layout();
+  paint();
 
-  // 指やマウスで触っている間は止める。離れて2周期ぶん待ってから再開する
-  const hold = () => { holding = true; };
-  const release = () => { holding = false; restUntil = performance.now() + INTERVAL; };
-  track.addEventListener('pointerdown', hold, { passive: true });
-  window.addEventListener('pointerup', release, { passive: true });
-  track.addEventListener('pointercancel', release, { passive: true });
-  track.addEventListener('mouseenter', hold);
-  track.addEventListener('mouseleave', release);
-  track.addEventListener('focusin', hold);
-  track.addEventListener('focusout', release);
-
-  let stz = 0;
-  track.addEventListener('scroll', () => {
-    clearTimeout(stz);
-    stz = setTimeout(wrap, 140);   // 手で送ったときも継ぎ目で戻す
-  }, { passive: true });
-
-  document.addEventListener('visibilitychange', () => { if (document.hidden) stop(); else if (!reduceMotion.matches) start(); });
-
+  /* 画面から遠い間はループごと止める */
   if ('IntersectionObserver' in window) {
-    new IntersectionObserver((es) => es.forEach((e) => { onScreen = e.isIntersecting; }),
-      { rootMargin: '0px 0px -10% 0px' }).observe(track);
-  } else { onScreen = true; }
+    new IntersectionObserver((es) => {
+      es.forEach((e) => {
+        if (e.isIntersecting && !near) { snapNext = true; lastNow = 0; }
+        near = e.isIntersecting;
+      });
+      sync();
+    }, { rootMargin: '300px 0px 300px 0px' }).observe(pin);
+  } else {
+    near = true;
+    sync();
+  }
+
+  let rt = 0;
+  const relayout = () => { clearTimeout(rt); rt = setTimeout(() => { layout(); paint(); }, 120); };
+  window.addEventListener('resize', relayout, { passive: true });
+  window.addEventListener('orientationchange', relayout, { passive: true });
+  /* 写真とフォントが入ると札の高さが変わる。変わったら測り直す */
+  if ('ResizeObserver' in window) new ResizeObserver(relayout).observe(stage);
+  track.querySelectorAll('img').forEach((img) => {
+    if (!img.complete) img.addEventListener('load', relayout, { once: true });
+  });
+}
+
+/* --------------------------- 折りたたみを開くときの動き ---------------------------
+   <details> は open を付けた瞬間に高さが確定するので、何もしないと中身が一段で
+   飛び出す。中身側に 0.34s のフェードだけ掛けてあったため、枠は即座に伸びて
+   中身だけ遅れて現れ、不具合のように見えていた。
+   高さを実測して 0 から本来の高さまで動かし、枠と中身を同じ時間で揃える。
+   ★閉じるほうは触らない（閉じるのは待たされないほうがよい）。
+   ★動きを減らす設定では即開きにする */
+const FOLD_MS = 560;
+function openFoldAnimated(fold, body) {
+  fold.open = true;
+  if (!body || reduceMotion.matches || typeof body.animate !== 'function') return;
+  const h = body.scrollHeight;
+  if (!h) return;
+  const prev = body.style.overflow;
+  body.style.overflow = 'hidden';   // 伸びきる前の中身を枠から出さない
+  const a = body.animate(
+    [{ height: '0px', opacity: 0, transform: 'translateY(-8px)' },
+     { height: `${h}px`, opacity: 1, transform: 'none' }],
+    { duration: FOLD_MS, easing: 'cubic-bezier(.22,.61,.36,1)' },
+  );
+  const done = () => { body.style.overflow = prev; };
+  a.addEventListener('finish', done);
+  a.addEventListener('cancel', done);
+}
+
+/* 手で開くときも同じ動きにする。閉じるのは既定のまま */
+export function initProgramFolds() {
+  document.querySelectorAll('.plist__fold').forEach((fold) => {
+    const summary = fold.querySelector('summary');
+    const body = fold.querySelector('.plist__body');
+    if (!summary || !body) return;
+    summary.addEventListener('click', (e) => {
+      if (fold.open) return;
+      e.preventDefault();
+      openFoldAnimated(fold, body);
+    });
+  });
+}
+
+/* --------------------------- 最初のプログラムの自動展開 ---------------------------
+   サンフランシスコの錠剤は、以前は open を付けて最初から開いていた。
+   スクロールが行に届いたときに開くようにする。開くのは一度だけで、
+   手で開け閉めしたあとは触らない（読み手の操作を上書きしない）。
+   行が画面の下寄りに入った時点で開くので、伸びるのは画面の外。
+   読んでいる位置が飛ばない */
+export function initProgramAutoOpen() {
+  const fold = document.getElementById('prog-sf');
+  if (!fold || fold.open) return;
+  if (!('IntersectionObserver' in window)) { fold.open = true; return; }
+
+  let done = false;
+  const finish = () => {
+    if (done) return;
+    done = true;
+    io.disconnect();
+    fold.removeEventListener('toggle', finish);
+  };
+  /* 先に手で触られたら、こちらからは開けない */
+  fold.addEventListener('toggle', finish);
+
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach((e) => {
+      if (!e.isIntersecting || done) return;
+      finish();
+      openFoldAnimated(fold, fold.querySelector('.plist__body'));
+    });
+  }, { rootMargin: '0px 0px -20% 0px', threshold: 0.4 });
+  io.observe(fold.querySelector('summary') || fold);
 }
 
 /* --------------------------- チケットの枠（触れている間） ---------------------------

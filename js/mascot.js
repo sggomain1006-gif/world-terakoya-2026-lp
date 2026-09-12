@@ -11,7 +11,7 @@
    - #trail は隠す（動的に置く足あとと二重になる）
    ============================================================================= */
 
-import { Spring, expSmooth, safeDt } from './lib/spring.js?v=2026090924';
+import { Spring, expSmooth, safeDt } from './lib/spring.js?v=2026091192';
 
 const rigCache = new Map();
 
@@ -127,7 +127,7 @@ export function attachFace(host, { reduceMotion = false } = {}) {
 // ---------------------------------------------------------------------------
 // 歩き: スクロール量で歩く。着地のたびに足あとを置く
 // ---------------------------------------------------------------------------
-export function attachWalker(host, { column, footprintSrc, reduceMotion = false, maxPrints = 90 } = {}) {
+export function attachWalker(host, { column, footprintSrc, reduceMotion = false, maxPrints = 90, strideX = 46 } = {}) {
   const svg = host.querySelector('svg');
   if (!svg || !column) return () => {};
   const L = q(svg, 'leg-left'), R = q(svg, 'leg-right');
@@ -138,9 +138,14 @@ export function attachWalker(host, { column, footprintSrc, reduceMotion = false,
   const shoeL = L.lastElementChild, shoeR = R.lastElementChild;
 
   const LEG = 17, ARM = 15, BOB = 6;
-  const STRIDE_PX = 96;          // 1 周期（2歩）に要するスクロール量
+  /* ★2026-09-11: 脚の周期をスクロール量でなく「実際に横へ進んだ距離」で回す。
+     以前はスクロール 96px ごとに1周期だったが、この子が横へ進むのは螺旋ぜんたいで
+     320px 前後しかない。スクロール 5600px では 58 周期＝1歩あたり 5.5px しか進まず、
+     その場で脚だけが高速回転し、足あとも 3〜4px 間隔で敷き詰められていた。
+     横の移動量で回せば、どの画面幅でも歩幅が一定になる（PC は横が広いぶん歩数も増える）*/
+  const STRIDE_X = strideX;      // 1 周期（2歩）で横に進む距離
   let phase = 0;                 // 周期 [0,1)
-  let lastY = window.scrollY;
+  let lastX = null;
   let amp = 0;                   // 動いている度合い（止まると脚が戻る）
   let vel = 0;
   let lastLand = -1;
@@ -171,13 +176,16 @@ export function attachWalker(host, { column, footprintSrc, reduceMotion = false,
   function tick(now) {
     if (!alive) return;
     const dt = safeDt((now - lastNow) / 1000); lastNow = now;
-    const y = window.scrollY;
-    const dy = y - lastY; lastY = y;
-    vel = expSmooth(vel, dy / Math.max(dt, 1e-3), 0.08, dt);
-    const moving = Math.abs(vel) > 40 ? 1 : 0;
+    const hr = host.getBoundingClientRect();
+    const cr = column.getBoundingClientRect();
+    const x = hr.left - cr.left;                 // 足あとの列の中での横位置
+    if (lastX === null) lastX = x;
+    const dx = x - lastX; lastX = x;
+    vel = expSmooth(vel, dx / Math.max(dt, 1e-3), 0.08, dt);
+    const moving = Math.abs(vel) > 6 ? 1 : 0;
     amp = expSmooth(amp, moving, 0.14, dt);
     // 進んだぶんだけ歩く（戻るときも脚は動くが足あとは置かない）
-    if (dy !== 0) phase = ((phase + dy / STRIDE_PX) % 1 + 1) % 1;
+    if (dx !== 0) phase = ((phase + dx / STRIDE_X) % 1 + 1) % 1;
     const sw = Math.sin(phase * Math.PI * 2) * amp;
     L.style.transform = `rotate(${LEG * sw}deg)`;
     R.style.transform = `rotate(${-LEG * sw}deg)`;
@@ -187,16 +195,13 @@ export function attachWalker(host, { column, footprintSrc, reduceMotion = false,
     T.style.transform = `rotate(${vel > 0 ? 3 * amp : -2 * amp}deg) translateY(${bob}px)`;
 
     // 着地 = sin が ±1 の位相（0.25: 右足前, 0.75: 左足前）。前進中のみ置く
-    if (dy > 0 && amp > 0.35) {
-      const k = Math.floor(phase * 2 - 0.5);
-      const landIndex = Math.floor((y + STRIDE_PX * 0.25) / (STRIDE_PX / 2));
+    if (dx > 0 && amp > 0.35) {
+      const landIndex = Math.floor((x + STRIDE_X * 0.25) / (STRIDE_X / 2));
       if (landIndex !== lastLand) {
         lastLand = landIndex;
-        const r = host.getBoundingClientRect();
-        const inView = r.bottom > 0 && r.top < window.innerHeight;
+        const inView = hr.bottom > 0 && hr.top < window.innerHeight;
         if (inView) stamp(landIndex % 2 ? shoeL : shoeR, landIndex % 2 ? -1 : 1);
       }
-      void k;
     }
     raf = requestAnimationFrame(tick);
   }

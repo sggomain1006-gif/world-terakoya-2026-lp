@@ -31,22 +31,22 @@
   root.classList.add('is-veiled');
 }());
 </script>
-<link rel="stylesheet" href="fonts/fonts.css?v=2026090924">
-<link rel="stylesheet" href="css/base.css?v=2026090924">
-<link rel="stylesheet" href="css/fv.css?v=2026090924">
-<link rel="stylesheet" href="css/sections.css?v=2026090924">
-<link rel="stylesheet" href="css/spiral.css?v=2026090924">
-<link rel="stylesheet" href="css/kifu-parity.css?v=2026090924">
+<link rel="stylesheet" href="fonts/fonts.css?v=2026091192">
+<link rel="stylesheet" href="css/base.css?v=2026091192">
+<link rel="stylesheet" href="css/fv.css?v=2026091192">
+<link rel="stylesheet" href="css/sections.css?v=2026091192">
+<link rel="stylesheet" href="css/spiral.css?v=2026091192">
+<link rel="stylesheet" href="css/kifu-parity.css?v=2026091192">
 <link rel="preload" as="image" href="img/poster-door.webp" fetchpriority="high">
-<link rel="modulepreload" href="js/main.js?v=2026090924">
-<link rel="modulepreload" href="js/door.js?v=2026090924">
-<link rel="modulepreload" href="js/ui.js?v=2026090924">
-<link rel="modulepreload" href="js/mascot.js?v=2026090924">
-<link rel="modulepreload" href="js/eye.js?v=2026090924">
-<link rel="modulepreload" href="js/lib/gl.js?v=2026090924">
-<link rel="modulepreload" href="js/lib/mat4.js?v=2026090924">
-<link rel="modulepreload" href="js/lib/spring.js?v=2026090924">
-<link rel="modulepreload" href="js/lib/geom.js?v=2026090924">
+<link rel="modulepreload" href="js/main.js?v=2026091192">
+<link rel="modulepreload" href="js/door.js?v=2026091192">
+<link rel="modulepreload" href="js/ui.js?v=2026091192">
+<link rel="modulepreload" href="js/mascot.js?v=2026091192">
+<link rel="modulepreload" href="js/eye.js?v=2026091192">
+<link rel="modulepreload" href="js/lib/gl.js?v=2026091192">
+<link rel="modulepreload" href="js/lib/mat4.js?v=2026091192">
+<link rel="modulepreload" href="js/lib/spring.js?v=2026091192">
+<link rel="modulepreload" href="js/lib/geom.js?v=2026091192">
 <title>ワールド寺子屋プログラム2026（第5回）｜NPO法人EdFuture</title>
 <meta name="description" content="高校生が自分の探究テーマを持って渡米し、現地校で学び、自分でアポを取って大学や企業を訪ね、探究発表を行う海外探究プログラム。2027年3月派遣・3便。説明会は無料・オンライン・全3回。">
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
@@ -80,15 +80,34 @@
 <!-- 固定の舞台。扉の WebGL はここに描く（FV と最終CTA の背後に見える） -->
 <canvas class="stage" id="stage" aria-hidden="true"></canvas>
 <!-- 扉の向こうの映像。WebGL のテクスチャとして使う。CSS 版の扉（WebGL 無し）でも同じ要素を使う -->
-<!-- SP の地。横幅を画面幅に合わせ、上はサンフランシスコ、下はボストンを置く。
-     どちらも画面の端に合わせ、曲線の帯はこの上に乗る -->
-<img class="fv-bg fv-bg--top" src="img/fv-sf.webp?v=2026090924" width="900" height="599" decoding="async" alt="" aria-hidden="true">
-<img class="fv-bg fv-bg--bottom" src="img/fv-bn.webp?v=2026090924" width="900" height="600" decoding="async" alt="" aria-hidden="true">
-<div class="stage-band" id="stageBand" aria-hidden="true">
+<!-- SP の地。1枚で画面いっぱいを覆う。支給の fv2.png（8304x5527）から
+     電話の縦横比へ切り出し済みなので、object-position で寄せる必要はない。
+     柱は切り出しの時点で右寄りに置いてある。
+     曲線の帯（映像）はこの上に乗り、スクロールで広がって覆い隠す -->
+<img class="fv-bg" src="img/fv-bg.webp?v=2026091192" width="1290" height="2796" decoding="async" alt="" aria-hidden="true">
+<!-- 覗き穴。2人の顔の真ん中が円の中心。層は2人より後ろなので、ここに置く -->
+
+<!-- ★前後は DOM の順で決まる（どれも z-index:0）。いまは fv6(女子) → 水晶玉 → fv7(男子) の順。
+     ★玉は2人の手のあいだ（女子の体の上）に置いてあるので、女子より後ろに回すと完全に隠れる。
+       男子の手の下端は床から 31.75vw、玉の上端は 30.9vw で触れていないため前後を入れても欠けない -->
+<!-- 画面の下、左右に立つ参加者（支給の fv7.png / fv6.png。どちらも支給時点で背景が抜いてある）。
+     ★前面は DOM の後ろ。fv7（右・男子）を後ろに書いて前に出している。
+       fv7 は右端を画面の右端に合わせ、fv6 より 1.08 倍だけ大きい（手前にいる分）。
+       横位置と高さは「顔を狙った vw に置く」逆算値（式は css/fv.css） -->
+<img class="fv-person fv-person--l" src="img/fv-left.webp?v=2026091192" width="880" height="1173" decoding="async" alt="" aria-hidden="true">
+<div class="fv-scope" id="stageBand" aria-hidden="true">
   <video class="stage-video" id="doorVideo" playsinline muted loop preload="none"
        width="1280" height="720" poster="img/poster-door.webp" data-src="video/door.mp4"
        aria-label="現地校の廊下を、参加者が現地の生徒たちと歩いている映像"></video>
+  <!-- 映像の上に重ねる順: 粒子 → 縁の暗がり → ガラスの照り返し → 色ずれ → 黒枠 -->
+  <span class="fv-scope__lens"></span>
+  <span class="fv-scope__grain"></span>
+  <span class="fv-scope__rim"></span>
+  <span class="fv-scope__glass"></span>
+  <span class="fv-scope__ca"></span>
+  <span class="fv-scope__edge"></span>
 </div>
+<img class="fv-person fv-person--r" src="img/fv-right.webp?v=2026091192" width="880" height="1173" decoding="async" alt="" aria-hidden="true">
 
 <!-- SVG シンボル（ロゴマーク・足あと・矢印） -->
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -123,22 +142,28 @@
 <!-- ===================== FV: 曲線の帯（映像はマスクで抜く） ===================== -->
 <section class="fv" id="top" aria-labelledby="fv-h">
   <div class="fv__sticky">
+    <!-- FV 上部の名札と派遣先。1つの塊としてまとめて傾ける。
+         ★別々に傾けると、回す中心の高さが違うぶん左端がずれる。1つの箱に入れて1回だけ回す -->
+    <div class="fv__lockup" aria-hidden="true">
+      <p class="fv__eyebrow">WORLD TERAKOYA</p>
+      <p class="fv__places"><span>SAN FRANCISCO</span><span>BOSTON&amp;NEW YORK</span></p>
+    </div>
+    <!-- ページの h1。縦書きで FV の中央に出す。
+         2列に分けているのは、SE の空（人物の頭より上）が 250px しかなく、
+         1列 15字だと入らないため。縦書きは右の列から読むので、DOM の先頭が右に来る -->
+    <h1 class="fv__vtitle" id="fv-h"><span>あなたの一歩で、</span><span>世界は近づく。</span></h1>
     <div class="fv__copy" id="fvCopy">
-      <h1 class="fv__title" id="fv-h">
-        <span class="fv__line"><span class="fv__word" data-split>あなたの一歩で、</span></span>
-        <span class="fv__line"><span class="fv__word fv__word--ink" data-split>世界は広がる</span></span>
-      </h1>
       <p class="fv__lead" data-fade>高校生が自分の問いを持って渡米し、現地校で学び、自分でアポを取って人に会いに行く。<br class="pc">2027年3月、サンフランシスコ／ボストン・ニューヨークへ。</p>
       <div class="fv__ctas" data-fade>
-        <a class="btn btn--lg" href="#briefing" data-cta="form" data-cta-pos="fv" data-magnet>説明会に申し込む<small>無料・オンライン・60分</small></a>
+        <a target="_blank" rel="noopener" class="btn btn--lg" href="https://forms.gle/aiwPwzEzKZAgK7mAA" data-cta="form" data-cta-pos="fv" data-magnet>説明会に申し込む</a>
         <a class="btn-line" href="#flow">応募から帰国までの流れ<svg class="ico" width="16" height="16"><use href="#ico-down"/></svg></a>
       </div>
     </div>
 
-    <!-- SP 用の CTA。吹き出しより下に来るよう、目の行の下に独立した段を作って置く。
+    <!-- SP 用の CTA。画面下の帯に置く。2人と水晶玉は 26vw 上げてこの帯を空けてある。
          PC は .fv__ctas が同じ役目を持つので出さない -->
     <div class="fv__cta">
-      <a class="btn btn--lg" href="#briefing" data-cta="form" data-cta-pos="fv-sp" data-magnet>説明会はこちら</a>
+      <a class="btn btn--lg" href="https://forms.gle/aiwPwzEzKZAgK7mAA" target="_blank" rel="noopener" data-cta="form" data-cta-pos="fv-sp" data-magnet>説明会に申し込む</a>
     </div>
 
     <div class="fv__meta mono">
@@ -146,12 +171,13 @@
       <span>SAN FRANCISCO / BOSTON / NEW YORK</span>
     </div>
 
+    <!-- ★一時的に外している。戻すときはこのコメントを解くだけ。
+         CSS（.fv__mascot / .fv__eye）と js/eye.js はそのまま残してある
     <div class="fv__mascot" id="fvMascot">
       <p class="say">今すぐ申し込む</p>
-      <!-- ポートフォリオから移植した目（js/eye.js）。WebGL が無い環境では
-           canvas が空のまま残るだけで、他は何も出ない -->
       <canvas class="fv__eye" id="fvEye" aria-hidden="true"></canvas>
     </div>
+    -->
 
   </div>
 </section>
@@ -166,31 +192,31 @@
   <div class="spiral" id="spiral">
     <div class="spiral__track">
       <div class="spiral__stage">
+        <!-- 7段のカラーオーバーレイ。色相だけ JS が動かす（spiral.js の paint）。
+             映像を透かす濃さに留め、1段目が現れる前と7段目が消えたあとは消す -->
+        <div class="spiral__tint" aria-hidden="true"></div>
+
+        <!-- 章の名札。グリッドの1行目に置くので、カードの区画とは重ならない。
+             濃さは本文と同じ --in に乗せるので、1枚目が出る前と7枚目が消えたあとは消える -->
+        <p class="spiral__head" aria-hidden="true">INTRODUCTION</p>
 
         <div class="spiral__view">
           <ol class="spiral__cards">
 
             <li class="scard" data-phase="jp">
               <div class="scard__detail">
-                <h3 class="scard__title"><span class="scard__no">①</span><span class="nb">まだ言葉にならない</span><span class="nb">違和感から始める</span></h3>
-                <p class="scard__body">整った探究テーマは要りません。「地元がどんどん寂しくなっているのに、みんな仕方ないと言う」くらいの荒さで出発します。応募時の志望理由は800〜1000字ですが、問われるのは完成度ではなく、何が引っかかっているかです。</p>
+                <h3 class="scard__title"><span class="scard__no">01</span><span class="scard__t">小さな違和感から始めよう</span></h3>
+                <p class="scard__body">応募の段階では、必ずしも明確な「探究テーマ」は必要ないよ！自分の身の回りや経験を振り返って、「これはおかしいんじゃないか？」「こういうのやってみたい！」を探してみてね！</p>
               </div>
               <figure class="scard__media">
-                <img src="img/step-01.webp" width="1200" height="900" loading="lazy" decoding="async" alt="資料とタブレットを持って屋外に立つ参加者">
+                <video class="clip" playsinline muted loop preload="none" poster="img/poster-clip-welcome.webp" data-src="video/clip-welcome.mp4" width="960" height="540" aria-label="現地校のウェルカムセッションで説明を聞く参加者たち"></video>
               </figure>
             </li>
 
             <li class="scard" data-phase="jp">
               <div class="scard__detail">
-                <h3 class="scard__title"><span class="scard__no">②</span>違和感を、自分の問いにする</h3>
-                <p class="scard__body">出発前に5回の事前研修があります。第1回は2026年12月13日、以降は1月・2月と続き、2月中旬には現地バディとの交流も入ります。この期間に、違和感を「誰に何を聞けば確かめられるか」まで削っていきます。</p>
-                <dl class="plate mono">
-                  <div><dt>1</dt><dd>2026.12.13</dd></div>
-                  <div><dt>2</dt><dd>01.13</dd></div>
-                  <div><dt>3</dt><dd>02.04</dd></div>
-                  <div><dt>4</dt><dd>02 中旬</dd></div>
-                  <div><dt>5</dt><dd>02.27<small>②は 03.05</small></dd></div>
-                </dl>
+                <h3 class="scard__title"><span class="scard__no">02</span><span class="scard__t">違和感を形にして計画を立てる</span></h3>
+                <p class="scard__body">出発前に5回の事前研修があるよ！スタッフと仲間と一緒に違和感を明確にして、アメリカで何をするか、目標と計画を立てていこう！</p>
               </div>
               <figure class="scard__media">
                 <img src="img/step-02.webp" width="1200" height="900" loading="lazy" decoding="async" alt="夜の机に開いたノートと、オンライン研修が映るノートパソコン">
@@ -199,8 +225,8 @@
 
             <li class="scard" data-phase="us">
               <div class="scard__detail">
-                <h3 class="scard__title"><span class="scard__no">③</span>現地校で学ぶ</h3>
-                <p class="scard__body">現地の学校で授業に入り、登校日には同世代と同じ時間を過ごします。サンフランシスコ派遣にはUnity Assembly Day（登校日）が組まれています。</p>
+                <h3 class="scard__title"><span class="scard__no">03</span><span class="scard__t">現地校で学ぶ</span></h3>
+                <p class="scard__body">現地の学校で実際に授業を受けるよ！サンフランシスコ派遣にはUnity Assembly Day（登校日）があって、同世代の生徒と同じ時間を過ごせるんだ。</p>
               </div>
               <figure class="scard__media">
                 <video class="clip" playsinline muted loop preload="none" poster="img/poster-clip-cafeteria.webp" data-src="video/clip-cafeteria.mp4" width="960" height="540" aria-label="現地校のカフェテリアで昼食をとる参加者たち"></video>
@@ -209,8 +235,8 @@
 
             <li class="scard" data-phase="us">
               <div class="scard__detail">
-                <h3 class="scard__title"><span class="scard__no">④</span>現地バディと動く</h3>
-                <p class="scard__body">到着後に現地バディと合流し、フィールドワークや活動を一緒に進めます。通訳がつくプログラムではありません。</p>
+                <h3 class="scard__title"><span class="scard__no">04</span><span class="scard__t">現地バディと動く</span></h3>
+                <p class="scard__body">到着したら現地バディと合流！フィールドワークも活動も一緒に進めていくよ。通訳はつかないから、自分の言葉で話すことになるよ。</p>
               </div>
               <figure class="scard__media">
                 <video class="clip" playsinline muted loop preload="none" poster="img/poster-clip-talk.webp" data-src="video/clip-talk.mp4" width="960" height="540" aria-label="屋外で現地の生徒と話す参加者"></video>
@@ -219,8 +245,8 @@
 
             <li class="scard" data-phase="us">
               <div class="scard__detail">
-                <h3 class="scard__title"><span class="scard__no">⑤</span><span class="nb">自分でアポを取って、</span><span class="nb">話を聞きに行く</span></h3>
-                <p class="scard__body">ここがこのプログラムの中心です。用意された見学先を回るのではなく、自分の問いに答えを持っていそうな相手を決め、自分でアポを取ります。過去には、米国教職員連盟の州支部に取材した参加者、ハーバード教育大学院の博士課程に話を聞きに行った参加者がいます。</p>
+                <h3 class="scard__title"><span class="scard__no">05</span><span class="scard__t"><span class="nb">自分でアポを取って、</span><span class="nb">話を聞きに行く</span></span></h3>
+                <p class="scard__body">ここがこのプログラムの中心！用意された見学先を回るんじゃなくて、自分の問いに答えを持っていそうな人を決めて、自分でアポを取るんだ。これまでには米国教職員連盟の州支部に取材した人や、ハーバード教育大学院の博士課程に話を聞きに行った人もいるよ！</p>
               </div>
               <figure class="scard__media">
                 <img src="img/step-03.webp" width="1600" height="900" loading="lazy" decoding="async" alt="現地の担当者が図を示しながら説明し、参加者が話を聞いている">
@@ -229,8 +255,8 @@
 
             <li class="scard" data-phase="us">
               <div class="scard__detail">
-                <h3 class="scard__title"><span class="scard__no">⑥</span><span class="nb">毎晩の振り返りで</span><span class="nb">気づきを言葉にする</span></h3>
-                <p class="scard__body">その日に見たこと・感じたこと・分からなかったことを毎晩言語化し、参加者全員で共有します。否定しない場を参加者自身が育てることを前提にしていて、スタッフは事前研修の段階から伴走します。</p>
+                <h3 class="scard__title"><span class="scard__no">06</span><span class="scard__t"><span class="nb">毎晩の振り返りで</span><span class="nb">気づきを言葉にする</span></span></h3>
+                <p class="scard__body">その日に見たこと・感じたこと・分からなかったことを、毎晩みんなで言葉にして共有するよ。否定されない場はみんなで育てるもの。スタッフは事前研修のときから一緒にいるから安心してね！</p>
               </div>
               <figure class="scard__media">
                 <video class="clip" playsinline muted loop preload="none" poster="img/poster-clip-circle.webp" data-src="video/clip-circle.mp4" width="960" height="540" aria-label="滞在先で参加者が輪になって振り返りをしている"></video>
@@ -239,8 +265,8 @@
 
             <li class="scard" data-phase="us">
               <div class="scard__detail">
-                <h3 class="scard__title"><span class="scard__no">⑦</span>発表として残す</h3>
-                <p class="scard__body">現地で探究発表を行い、最終日にフェアウェルパーティーがあります。帰国後にも報告会があり、2027年4月11日にオンライン、4月17日に対面。持ち帰るのは思い出ではなく、誰に何を聞き、そこから何が分かったかの記録です。</p>
+                <h3 class="scard__title"><span class="scard__no">07</span><span class="scard__t">発表として残す</span></h3>
+                <p class="scard__body">現地で探究発表をして、最終日はフェアウェルパーティー！帰国後も報告会があるよ（2027年4月11日オンライン／4月17日対面）。持ち帰るのは思い出じゃなくて、誰に何を聞いて何が分かったかの記録なんだ。</p>
               </div>
               <figure class="scard__media">
                 <img src="img/step-05.webp" width="1200" height="900" loading="lazy" decoding="async" alt="マイクを持って前に立ち、発表している参加者">
@@ -252,6 +278,10 @@
 
         <div class="spiral__read">
           <p class="spiral__big" aria-hidden="true">01</p>
+          <!-- PC だけに出る語り手。SP は下の足あとを歩くマスコットがそのまま話し手になるので置かない -->
+          <div class="spiral__speaker" aria-hidden="true">
+            <img src="assets/mascot/pose-present.svg" width="104" height="104" alt="" decoding="async">
+          </div>
         </div>
 
         <div class="spiral__ground" aria-hidden="true">
@@ -284,7 +314,7 @@
         <span class="purpose__line">日程や特徴から選べる</span>
         <span class="purpose__line">3つのプログラム</span>
       </p>
-      <p class="purpose__note" data-reveal>応募から帰国までの流れは、3つとも同じです。変わるのは、行き先と日数、そして誰とどこに泊まるか。いずれも2027年3月、10日間か14日間です。</p>
+      <p class="purpose__note" data-reveal>応募から帰国までの流れは3プログラムとも同じです。変わるのは、日付と行き先、日数、そして宿泊形態です。現地渡航はいずれも2027年3月です。志望順に複数のプログラムにお申し込みいただけます。</p>
       <div class="purpose__guide" data-reveal>
         <p class="say say--wine">3つのコースから選べるよ！</p>
         <!-- 左向きの完成ポーズをリグとして読み込む（rig.svg では体の向きを変えられない）。
@@ -301,7 +331,7 @@
         </p>
         <ul class="plist__rows">
           <li class="plist__item">
-            <details class="plist__fold" id="prog-sf" open>
+            <details class="plist__fold" id="prog-sf">
               <summary class="plist__row">
                 <span class="plist__where">San Francisco</span>
                 <span class="plist__when"><b>3/6</b><small>(SAT)</small><i aria-hidden="true"></i><b>3/15</b><small>(MON)</small></span>
@@ -310,16 +340,16 @@
               </summary>
               <div class="plist__body">
                 <figure class="plist__scene">
-                  <img src="img/prog-sf.webp" width="1200" height="675" loading="lazy" decoding="async" alt="サンフランシスコの街並み">
+                  <img src="img/prog-sf.webp?v=2026091192" width="1200" height="799" loading="lazy" decoding="async" alt="ゴールデンゲートブリッジの全景。2本の主塔と海、対岸の丘">
                 </figure>
                 <p class="plist__lead">西海岸の大学と企業を、自分の問いを持って回る10日間。</p>
                 <dl class="plist__facts">
                   <div><dt>募集</dt><dd>10名</dd></div>
-            <div><dt>宿泊</dt><dd>団体宿泊（Airbnb）。ホームステイではありません</dd></div>
+            <div><dt>宿泊</dt><dd>団体宿泊（Airbnb ※予定）。ホームステイではありません</dd></div>
             <div><dt>行程の軸</dt><dd>Stanford大学の訪問とセッション、Google訪問、Apple Park訪問、Unity Assembly Day（登校日）</dd></div>
                 </dl>
                 <div class="plist__pm">
-                  <img class="plist__pm-photo" src="img/pm-kazuki.webp" width="800" height="1000" loading="lazy" decoding="async" alt="サンフランシスコ派遣のプログラムマネージャー、Kazuki">
+                  <span class="plist__pm-figure"><img class="plist__pm-photo" src="img/pm-kazuki.webp" width="800" height="1000" loading="lazy" decoding="async" alt="サンフランシスコ派遣のプログラムマネージャー、Kazuki"></span>
                   <div class="plist__pm-body">
                     <p class="plist__pm-role mono">PROGRAM MANAGER</p>
                     <p class="plist__pm-name">Kazuki</p>
@@ -331,14 +361,14 @@
                   <caption class="sr-only">サンフランシスコ派遣の日程</caption>
                   <thead><tr><th scope="col">日付</th><th scope="col">午前</th><th scope="col">午後</th><th scope="col">宿泊</th></tr></thead>
                   <tbody>
-                    <tr><th scope="row"><b>3/6</b><span>土</span></th><td data-l="午前">SF着 ※現地時間</td><td data-l="午後">成田発／バディと合流</td><td data-l="宿泊">団体宿泊（Airbnb）</td></tr>
-                    <tr><th scope="row"><b>3/7</b><span>日</span></th><td class="sched__all" colspan="2" data-l="終日">サンフランシスコ フィールドワーク</td><td data-l="宿泊">団体宿泊（Airbnb）</td></tr>
-                    <tr><th scope="row"><b>3/8</b><span>月</span></th><td data-l="午前">授業</td><td data-l="午後">バディと活動</td><td data-l="宿泊">団体宿泊（Airbnb）</td></tr>
-                    <tr><th scope="row"><b>3/9</b><span>火</span></th><td data-l="午前">授業</td><td data-l="午後">バディと活動</td><td data-l="宿泊">団体宿泊（Airbnb）</td></tr>
-                    <tr><th scope="row"><b>3/10</b><span>水</span></th><td data-l="午前">Stanford大学訪問</td><td data-l="午後">Stanfordセッション</td><td data-l="宿泊">団体宿泊（Airbnb）</td></tr>
-                    <tr><th scope="row"><b>3/11</b><span>木</span></th><td data-l="午前">Google訪問</td><td data-l="午後">Apple Park訪問</td><td data-l="宿泊">団体宿泊（Airbnb）</td></tr>
-                    <tr><th scope="row"><b>3/12</b><span>金</span></th><td class="sched__all" colspan="2" data-l="終日">Unity Assembly Day（登校日）／授業＆バディと活動</td><td data-l="宿泊">団体宿泊（Airbnb）</td></tr>
-                    <tr><th scope="row"><b>3/13</b><span>土</span></th><td data-l="午前">振り返り</td><td data-l="午後">フェアウェルパーティー</td><td data-l="宿泊">団体宿泊（Airbnb）</td></tr>
+                    <tr><th scope="row"><b>3/6</b><span>土</span></th><td data-l="午前">SF着 ※現地時間</td><td data-l="午後">成田発／バディと合流</td><td data-l="宿泊">団体宿泊（Airbnb ※予定）</td></tr>
+                    <tr><th scope="row"><b>3/7</b><span>日</span></th><td class="sched__all" colspan="2" data-l="終日">サンフランシスコ フィールドワーク</td><td data-l="宿泊">団体宿泊（Airbnb ※予定）</td></tr>
+                    <tr><th scope="row"><b>3/8</b><span>月</span></th><td data-l="午前">授業</td><td data-l="午後">バディと活動</td><td data-l="宿泊">団体宿泊（Airbnb ※予定）</td></tr>
+                    <tr><th scope="row"><b>3/9</b><span>火</span></th><td data-l="午前">授業</td><td data-l="午後">バディと活動</td><td data-l="宿泊">団体宿泊（Airbnb ※予定）</td></tr>
+                    <tr><th scope="row"><b>3/10</b><span>水</span></th><td data-l="午前">Stanford大学訪問</td><td data-l="午後">Stanfordセッション</td><td data-l="宿泊">団体宿泊（Airbnb ※予定）</td></tr>
+                    <tr><th scope="row"><b>3/11</b><span>木</span></th><td data-l="午前">Google訪問</td><td data-l="午後">Apple Park訪問</td><td data-l="宿泊">団体宿泊（Airbnb ※予定）</td></tr>
+                    <tr><th scope="row"><b>3/12</b><span>金</span></th><td class="sched__all" colspan="2" data-l="終日">Unity Assembly Day（登校日）／授業＆バディと活動</td><td data-l="宿泊">団体宿泊（Airbnb ※予定）</td></tr>
+                    <tr><th scope="row"><b>3/13</b><span>土</span></th><td data-l="午前">振り返り</td><td data-l="午後">フェアウェルパーティー</td><td data-l="宿泊">団体宿泊（Airbnb ※予定）</td></tr>
                     <tr><th scope="row"><b>3/14</b><span>日</span></th><td data-l="午前">現地出発</td><td data-l="午後">飛行機</td><td data-l="宿泊">飛行機</td></tr>
                     <tr><th scope="row"><b>3/15</b><span>月</span></th><td data-l="午前">成田着</td><td data-l="午後">&mdash;</td><td data-l="宿泊">&mdash;</td></tr>
                   </tbody>
@@ -363,7 +393,7 @@
               </summary>
               <div class="plist__body">
                 <figure class="plist__scene">
-                  <img src="img/prog-bn1.webp" width="1200" height="675" loading="lazy" decoding="async" alt="霧の中の自由の女神">
+                  <img class="plist__scene--liberty" src="img/prog-bn1.webp?v=2026091192" width="1200" height="900" loading="lazy" decoding="async" alt="青空の下に立つ自由の女神像">
                 </figure>
                 <p class="plist__lead">ニューヨークで3日、ボストンで6日。都市を移りながら現地校に入る。</p>
                 <dl class="plist__facts">
@@ -372,7 +402,7 @@
             <div><dt>行程の軸</dt><dd>ニューヨーク（3月6日〜8日）からボストン（3月9日〜14日）へ移動します</dd></div>
                 </dl>
                 <div class="plist__pm">
-                  <img class="plist__pm-photo" src="img/pm-misako.webp" width="800" height="1000" loading="lazy" decoding="async" alt="ボストン・ニューヨーク①派遣のプログラムマネージャー、Misako">
+                  <span class="plist__pm-figure"><img class="plist__pm-photo" src="img/pm-misako.webp" width="800" height="1000" loading="lazy" decoding="async" alt="ボストン・ニューヨーク①派遣のプログラムマネージャー、Misako"></span>
                   <div class="plist__pm-body">
                     <p class="plist__pm-role mono">PROGRAM MANAGER</p>
                     <p class="plist__pm-name">Misako</p>
@@ -417,7 +447,7 @@
               </summary>
               <div class="plist__body">
                 <figure class="plist__scene">
-                  <img src="img/prog-bn2.webp" width="1200" height="675" loading="lazy" decoding="async" alt="対岸から見たマンハッタンの街並み">
+                  <img src="img/prog-bn2.webp?v=2026091192" width="1200" height="800" loading="lazy" decoding="async" alt="マサチューセッツ工科大学のグレートドームと、手前の芝生の広場">
                 </figure>
                 <p class="plist__lead">3派遣でいちばん長い14日間。都市のあとに、バーモントの生活が入る。</p>
                 <dl class="plist__facts">
@@ -426,7 +456,7 @@
             <div><dt>行程の軸</dt><dd>ニューヨーク（3月16日〜19日）、ボストン（3月19日〜23日）、バーモント（3月23日〜28日）</dd></div>
                 </dl>
                 <div class="plist__pm">
-                  <img class="plist__pm-photo" src="img/pm-nanako.webp" width="800" height="1000" loading="lazy" decoding="async" alt="ボストン・ニューヨーク②派遣のプログラムマネージャー、Nanako">
+                  <span class="plist__pm-figure"><img class="plist__pm-photo" src="img/pm-nanako.webp" width="800" height="1000" loading="lazy" decoding="async" alt="ボストン・ニューヨーク②派遣のプログラムマネージャー、Nanako"></span>
                   <div class="plist__pm-body">
                     <p class="plist__pm-role mono">PROGRAM MANAGER</p>
                     <p class="plist__pm-name">Nanako</p>
@@ -476,6 +506,14 @@
 
   <div class="wrap">
     <div class="tabs" id="tabs">
+      <!-- 吹き出しの尻尾は右向きなので、札は吹き出しの右に置く。
+           pose-present（両手で差し出す）はこのLPで未使用のポーズ -->
+      <div class="tabs__guide" data-reveal>
+        <p class="say say--wine">自分に当てはまる方を選んでね！</p>
+        <div class="tabs__mascot rig" data-rig="assets/mascot/pose-present.svg">
+          <img src="assets/mascot/pose-present.svg" width="104" height="104" alt="" aria-hidden="true" decoding="async">
+        </div>
+      </div>
       <div class="tabs__list" role="tablist" aria-label="読み手別の情報">
         <button class="tab" role="tab" id="tab-student" aria-selected="true" aria-controls="panel-student" tabindex="0" data-tab="student">高校生</button>
         <button class="tab" role="tab" id="tab-university" aria-selected="false" aria-controls="panel-university" tabindex="-1" data-tab="university">大学生</button>
@@ -485,8 +523,8 @@
       <section class="panel" role="tabpanel" id="panel-student" aria-labelledby="tab-student" tabindex="0">
         <div class="panel__head">
           <h3 class="h3"><span class="nb">選ぶ基準は</span><span class="nb">英語でも成績でも</span><span class="nb">ありません</span></h3>
-          <figure class="ph ph--45 panel__portrait" data-ph>
-            <img src="img/student-01.webp" width="900" height="1125" loading="lazy" decoding="async" alt="現地の掲示板の前に立つ参加者">
+          <figure class="ph ph--43 panel__portrait" data-ph>
+            <img src="img/student-02.webp" width="1200" height="900" loading="lazy" decoding="async" alt="校内のホールで現地の生徒と話す参加者">
           </figure>
         </div>
         <ul class="conds">
@@ -505,7 +543,7 @@
         <h4 class="h4">なぜ今か</h4>
         <p>派遣は2027年3月です。高校2年生なら、高校3年生になる前に自分の問いを一度外へ持ち出せる最後の時期にあたります。高校1年生なら、ここで持った問いを2年生からの探究と進路選択にそのまま接続できます。高校3年生なら、進路が決まったあとに視野を広げる時間として使えます。</p>
         <p class="cta-lead">自分の違和感がテーマになるのかどうかは、説明会で過去の参加者のテーマを見ると判断できます。</p>
-        <a class="btn" href="#briefing" data-cta="form" data-cta-pos="panel-student" data-magnet>説明会に申し込む</a>
+        <a target="_blank" rel="noopener" class="btn btn--lg btn--fv" href="https://forms.gle/aiwPwzEzKZAgK7mAA" data-cta="form" data-cta-pos="panel-student" data-magnet>説明会に申し込む</a>
 
         <div class="schol">
           <div class="schol__guide">
@@ -515,9 +553,12 @@
               <img src="assets/mascot/pose-l-point.svg" width="104" height="104" alt="" aria-hidden="true" decoding="async">
             </div>
           </div>
-          <h4 class="h4 schol__h">奨学金について</h4>
-          <p>サンフランシスコ派遣には、参加費・渡航費・宿泊費が全額免除になる枠が1名分あります。給付型なので、返す必要はありません。</p>
-          <p>対象になる条件と、申請のときに出していただく書類は、いま確定作業を進めています。決まりしだい説明会でご案内しますので、費用の面で迷っている場合も、まず説明会で聞いてください。</p>
+          <!-- ★マスコットは札の外に置く。ワインの札の上に載せると、赤い体が地に溶ける -->
+          <div class="schol__card">
+            <h4 class="h4 schol__h">奨学金について</h4>
+            <p>サンフランシスコ派遣には、<strong>参加費・渡航費・宿泊費が全額免除</strong>になる枠が<strong>1名分</strong>あります。<strong>給付型なので、返す必要はありません</strong>。</p>
+            <p>EdFutureは、すべての人が安心して挑戦できる環境を目指しています。条件等につきましては<strong>説明会で詳しくお話をさせていただきます</strong>。</p>
+          </div>
         </div>
       </section>
 
@@ -544,15 +585,29 @@
             <caption class="sr-only">大学生の参加条件と選考枠</caption>
             <tbody>
               <tr><th scope="row">募集人数</th><td>各派遣3名程度</td></tr>
-              <tr><th scope="row">含まれないもの</th><td>航空費／保険／1日3食の食費／ニューヨークのホテル／ニューヨーク〜ボストンの移動費（自己手配・自己負担）</td></tr>
-              <tr><th scope="row">宿泊</th><td>スタッフの宿舎に帯同、またはホテル。ボストン・ニューヨーク②はボストン／バーモントでのホームステイ</td></tr>
+              <tr><th scope="row">宿泊</th><td>スタッフの宿舎に帯同、またはホテル</td></tr>
               <tr><th scope="row">選考</th><td>書類（志望理由500字以内）＋動画選考</td></tr>
-              <tr><th scope="row">奨学金</th><td>参加費が全額免除される給付型の枠が約1名分</td></tr>
+              <tr><th scope="row">奨学金</th><td>プログラム費が全額免除される給付型の枠が1名分</td></tr>
             </tbody>
           </table>
         </div>
         <p class="cta-lead">参加条件・選考枠・高校生との関わり方は、説明会で確認できます。</p>
-        <a class="btn" href="#briefing" data-cta="form" data-cta-pos="panel-university" data-magnet>参加枠と選考の流れを確認する</a>
+        <a target="_blank" rel="noopener" class="btn btn--lg btn--fv" href="https://forms.gle/aiwPwzEzKZAgK7mAA" data-cta="form" data-cta-pos="panel-university" data-magnet>説明会に申し込む</a>
+
+        <div class="schol">
+          <div class="schol__guide">
+            <p class="say say--wine">奨学金制度があるよ！</p>
+            <!-- ★マスコットは札の外。赤い体をワインの地に載せると溶ける -->
+            <div class="schol__mascot rig rig--face rig--point" data-rig="assets/mascot/pose-l-point.svg">
+              <img src="assets/mascot/pose-l-point.svg" width="104" height="104" alt="" aria-hidden="true" decoding="async">
+            </div>
+          </div>
+          <div class="schol__card">
+            <h4 class="h4 schol__h">奨学金について</h4>
+            <p>大学生の参加枠にも、<strong>プログラム費が全額免除</strong>になる枠が<strong>1名分</strong>あります。<strong>給付型なので、返す必要はありません</strong>。</p>
+            <p>EdFutureは、すべての人が安心して挑戦できる環境を目指しています。条件等につきましては<strong>説明会で詳しくお話をさせていただきます</strong>。</p>
+          </div>
+        </div>
       </section>
     </div>
   </div>
@@ -566,7 +621,7 @@
 <!-- ===================== 参加者の声 ===================== -->
 <section class="ch ch--voices" id="voices" aria-labelledby="voices-h">
   <div class="ch__head wrap">
-    <h2 class="h2 h2--cream" id="voices-h" data-reveal>参加者の声</h2>
+    <h2 class="h2 h2--cream" id="voices-h" data-reveal>数字と参加者の声</h2>
   </div>
 
   <div class="wrap">
@@ -592,52 +647,48 @@
         <span class="dial__label">全体満足度</span>
       </li>
     </ul>
-    <p class="note">※出典: EdFuture Impact Report 2025（2022〜2025年度の累計・参加者アンケート）。個人差があり、結果を保証するものではありません。</p>
 
     <div class="vcards" data-reveal>
-      <h4 class="h4 mono">VOICES <span>先に行った人が、何をしたか</span></h4>
-      <ul class="vcards__track">
-        <li class="vcard">
-          <img class="vcard__photo" src="img/vc-1.webp" width="1024" height="700" loading="lazy" decoding="async" alt="" style="object-position:center top">
-          <div class="vcard__body">
-            <p class="vcard__prog mono">ワールド寺子屋 2023 / サンフランシスコ</p>
-            <blockquote class="vcard__quote"><p>高校最後の春、経済的な理由で一度は諦めた留学に挑戦することができました。海外経験だけなく、「自分にも挑戦できる」という自信と、切磋琢磨しながら応援し合える仲間を得ました。参加後はEdFutureスタッフとして挑戦を支える側になりました。その後、トビタテ留学JAPANの制度を活用し、デンマークに長期留学、今はインドネシアで国連インターンに参加しています。海外経験も英語力もなかった私の最初の一歩を後押ししてくださった皆さんに心から感謝しています。</p></blockquote>
-            <p class="vcard__name">H.N さん（参加時高校3年生・東京都）</p>
-          </div>
-        </li>
-        <li class="vcard">
-          <img class="vcard__photo" src="img/vc-2.webp" width="1024" height="700" loading="lazy" decoding="async" alt="" style="object-position:center 15%">
-          <div class="vcard__body">
-            <p class="vcard__prog mono">ワールド寺子屋 2025 / サンフランシスコ</p>
-            <blockquote class="vcard__quote"><p>「お金がないから海外なんて無理。」そう思っていた私の背中を押してくれたのがEd Futureでした。経済的な理由で夢を諦めかけていた自分が、勇気を出して一歩踏み出せたのは、その支えのおかげです。サンフランシスコで出会った人々や文化、景色、そして触れた新しい価値観は、今も私の大切な財産で、挑戦を続ける原動力になっています。プログラム終了後は、地元北海道で会社を起業し、挑戦し続けています。次は自分が、誰かの背中を押せる存在になりたいです。</p></blockquote>
-            <p class="vcard__name">S.O さん（参加時高校2年生・北海道）</p>
-          </div>
-        </li>
-        <li class="vcard">
-          <img class="vcard__photo" src="img/vc-3.webp" width="1024" height="700" loading="lazy" decoding="async" alt="" style="object-position:center 30%">
-          <div class="vcard__body">
-            <p class="vcard__prog mono">ワールド寺子屋 2023 / サンフランシスコ</p>
-            <blockquote class="vcard__quote"><p>島で育った私は、自分の価値観はまだ狭いと思っていました。だからこそ留学に憧れていましたが、費用や距離の問題から、海外へ行くことを諦めかけていました。そんな中、先生の紹介でワールド寺子屋に出会いました。親を説得し、審査を通過し、海外で自ら行動した経験、そして負けたくないと思える仲間との出会いは、挑戦することへの自信を与えてくれました。今でも仲間の存在が刺激となり、新しい挑戦を続ける原動力になっています。</p></blockquote>
-            <p class="vcard__name">Y.T さん（参加時高校2年生・広島県）</p>
-          </div>
-        </li>
-        <li class="vcard">
-          <img class="vcard__photo" src="img/vc-4.webp" width="1024" height="700" loading="lazy" decoding="async" alt="" style="object-position:center 25%">
-          <div class="vcard__body">
-            <p class="vcard__prog mono">ワールド寺子屋 2022 / サンフランシスコ</p>
-            <blockquote class="vcard__quote"><p>高校3年生の私は、「世界は広い」と初めて知りました。写真や誰かの話では決して得られない、「自分で見て、感じること」がどれだけ貴重なのか。離島で育ち、夢を語ることにどこか遠慮していた私も、同じ熱量で応援し、一緒に悩み、夢を実現している大人や仲間に出会えました。4年後の今、私は児童養護施設で働いています。今の私の夢は、どんな状況にいる子どもたちにも希望を持ってもらうことです。いつか私も、あの時背中を押してくれたたくさんの大人の1人になりたいです。</p></blockquote>
-            <p class="vcard__name">K.N さん（参加時高校3年生・鹿児島県）</p>
-          </div>
-        </li>
-        <li class="vcard">
-          <img class="vcard__photo" src="img/vc-5.webp" width="1024" height="700" loading="lazy" decoding="async" alt="" style="object-position:center 48%">
-          <div class="vcard__body">
-            <p class="vcard__prog mono">ワールド寺子屋 2026 / ボストン・ニューヨーク</p>
-            <blockquote class="vcard__quote"><p>英語に自信がなく、知らない環境へ飛び込むことに大きな不安がありましたが、「挑戦してみたい」という気持ちを大切にしているEdFutureに出会い、自分の可能性を信じて参加を決意しました。現地では積極的に質問や交流を重ねることで、自分から一歩踏み出す勇気の大切さを実感しました。参加後はまず挑戦してみることが自分の成長につながると考えるようになり、新しいことに前向きに取り組めるようになりました。この経験は今後さまざまなことに挑戦していく原動力になると感じています。</p></blockquote>
-            <p class="vcard__name">S.A さん（参加時大学3年生・東京都）</p>
-          </div>
-        </li>
-      </ul>
+      <!-- 紐で吊るした札。縦スクロールで横へ流れ、速さに応じて振り子のように揺れる。
+           js/ui.js の initVoiceGallery が pin の高さと帯の位置を実測して入れる -->
+      <div class="vcards__pin">
+        <div class="vcards__stage">
+        <ul class="vcards__track">
+          <li class="vcard">
+            <img class="vcard__photo" src="img/vc-1.webp" width="1024" height="700" loading="lazy" decoding="async" alt="" style="object-position:center top">
+            <div class="vcard__body">
+              <p class="vcard__prog mono">ワールド寺子屋 2023 / サンフランシスコ</p>
+              <blockquote class="vcard__quote"><p>高校最後の春、経済的な理由で一度は諦めた留学に挑戦することができました。海外経験だけなく、「自分にも挑戦できる」という自信と、切磋琢磨しながら応援し合える仲間を得ました。参加後はEdFutureスタッフとして挑戦を支える側になりました。その後、トビタテ留学JAPANの制度を活用し、デンマークに長期留学、今はインドネシアで国連インターンに参加しています。海外経験も英語力もなかった私の最初の一歩を後押ししてくださった皆さんに心から感謝しています。</p></blockquote>
+              <p class="vcard__name">H.N さん（参加時高校3年生・東京都）</p>
+            </div>
+          </li>
+          <li class="vcard">
+            <img class="vcard__photo" src="img/vc-2.webp" width="1024" height="700" loading="lazy" decoding="async" alt="" style="object-position:center 15%">
+            <div class="vcard__body">
+              <p class="vcard__prog mono">ワールド寺子屋 2025 / サンフランシスコ</p>
+              <blockquote class="vcard__quote"><p>「お金がないから海外なんて無理。」そう思っていた私の背中を押してくれたのがEd Futureでした。経済的な理由で夢を諦めかけていた自分が、勇気を出して一歩踏み出せたのは、その支えのおかげです。サンフランシスコで出会った人々や文化、景色、そして触れた新しい価値観は、今も私の大切な財産で、挑戦を続ける原動力になっています。プログラム終了後は、地元北海道で会社を起業し、挑戦し続けています。次は自分が、誰かの背中を押せる存在になりたいです。</p></blockquote>
+              <p class="vcard__name">S.O さん（参加時高校2年生・北海道）</p>
+            </div>
+          </li>
+          <li class="vcard">
+            <img class="vcard__photo" src="img/vc-3.webp" width="1024" height="700" loading="lazy" decoding="async" alt="" style="object-position:center 30%">
+            <div class="vcard__body">
+              <p class="vcard__prog mono">ワールド寺子屋 2023 / サンフランシスコ</p>
+              <blockquote class="vcard__quote"><p>島で育った私は、自分の価値観はまだ狭いと思っていました。だからこそ留学に憧れていましたが、費用や距離の問題から、海外へ行くことを諦めかけていました。そんな中、先生の紹介でワールド寺子屋に出会いました。親を説得し、審査を通過し、海外で自ら行動した経験、そして負けたくないと思える仲間との出会いは、挑戦することへの自信を与えてくれました。今でも仲間の存在が刺激となり、新しい挑戦を続ける原動力になっています。</p></blockquote>
+              <p class="vcard__name">Y.T さん（参加時高校2年生・広島県）</p>
+            </div>
+          </li>
+          <li class="vcard">
+            <img class="vcard__photo" src="img/vc-4.webp" width="1024" height="700" loading="lazy" decoding="async" alt="" style="object-position:center 25%">
+            <div class="vcard__body">
+              <p class="vcard__prog mono">ワールド寺子屋 2022 / サンフランシスコ</p>
+              <blockquote class="vcard__quote"><p>高校3年生の私は、「世界は広い」と初めて知りました。写真や誰かの話では決して得られない、「自分で見て、感じること」がどれだけ貴重なのか。離島で育ち、夢を語ることにどこか遠慮していた私も、同じ熱量で応援し、一緒に悩み、夢を実現している大人や仲間に出会えました。4年後の今、私は児童養護施設で働いています。今の私の夢は、どんな状況にいる子どもたちにも希望を持ってもらうことです。いつか私も、あの時背中を押してくれたたくさんの大人の1人になりたいです。</p></blockquote>
+              <p class="vcard__name">K.N さん（参加時高校3年生・鹿児島県）</p>
+            </div>
+          </li>
+        </ul>
+        </div>
+      </div>
     </div>
 
 
@@ -672,6 +723,30 @@
       </div>
     </div>
   </div>
+
+  <!-- 寄付LP の #coo（COO 徳永）を移植。組み・寸法・色は上の代表カードと同一。
+       寄付LPの最後の段落「未来へのバトンを、ぜひ一緒につないでいきませんか？」は
+       寄付のお願いなので、読み手が学生のこのLPには入れていない -->
+  <div class="founder-card founder-card--coo" data-reveal>
+    <div class="founder-card__photo-wrap">
+      <img src="img/coo.webp" alt="COO 徳永悠馬" class="founder-card__photo" width="2048" height="1365" loading="lazy" decoding="async">
+    </div>
+    <div class="founder-card__overlay"></div>
+    <div class="founder-card__content">
+      <div class="founder-card__meta">
+        <p class="founder-card__role">COO</p>
+        <h3 class="founder-card__name">徳永 悠馬</h3>
+        <ul class="founder-card__career">
+          <li>世界経済フォーラム</li>
+          <li>Global Shapers Community Yokohama Hub Shaper</li>
+        </ul>
+      </div>
+      <div class="founder-card__message">
+        <p>活動を通して、経済的な理由や家庭の事情など、さまざまな背景を持つ学生たちが世界へ挑戦する姿を数多く見てきました。</p>
+        <p>どのような状況にあっても、一歩踏み出す勇気があれば未来は変えられる。そして、「すべての学生には自らの可能性を切り拓く力がある。」と私は本気で信じています。</p>
+      </div>
+    </div>
+  </div>
 </section>
 
 <!-- ===================== 05 説明会 ===================== -->
@@ -682,9 +757,9 @@
 
   <div class="wrap">
     <ul class="tickets" data-reveal>
-      <li class="ticket" data-tilt><img src="img/ticket-1.webp?v=2026090924" width="1200" height="602" loading="lazy" decoding="async" alt="第1回 オンライン説明会 2026年9月26日（土）19:00〜20:00"></li>
-      <li class="ticket" data-tilt><img src="img/ticket-2.webp?v=2026090924" width="1200" height="604" loading="lazy" decoding="async" alt="第2回 オンライン説明会 2026年10月5日（月）19:00〜20:00"></li>
-      <li class="ticket" data-tilt><img src="img/ticket-3.webp?v=2026090924" width="1200" height="601" loading="lazy" decoding="async" alt="第3回 オンライン説明会 2026年10月16日（金）19:00〜20:00"></li>
+      <li class="ticket" data-tilt><img src="img/ticket-1.webp?v=2026091192" width="1200" height="602" loading="lazy" decoding="async" alt="第1回 オンライン説明会 2026年9月26日（土）19:00〜20:00"></li>
+      <li class="ticket" data-tilt><img src="img/ticket-2.webp?v=2026091192" width="1200" height="604" loading="lazy" decoding="async" alt="第2回 オンライン説明会 2026年10月5日（月）19:00〜20:00"></li>
+      <li class="ticket" data-tilt><img src="img/ticket-3.webp?v=2026091192" width="1200" height="601" loading="lazy" decoding="async" alt="第3回 オンライン説明会 2026年10月16日（金）19:00〜20:00"></li>
     </ul>
 
     <!-- GP の LP（edfuture_gp_upload_server）の .sched-note を、この章の地に合わせて置き直した -->
@@ -693,6 +768,11 @@
       <li>完全無料・オンライン開催</li>
       <li>少しでも気になったら、まずは説明会へ</li>
     </ul>
+
+    <!-- 章の締めの CTA。日程を見た直後に申し込めるよう、チケットと注記の下に置く -->
+    <p class="brief__cta" data-reveal>
+      <a target="_blank" rel="noopener" class="btn btn--lg" href="https://forms.gle/aiwPwzEzKZAgK7mAA" data-cta="form" data-cta-pos="briefing" data-magnet>説明会に申し込む</a>
+    </p>
 
   </div>
 </section>
@@ -752,13 +832,13 @@
     <h2 class="h2" id="faq-h" data-reveal>よくあるご質問</h2>
   </div>
   <ul class="faq" data-reveal>
-      <li class="faq__item is-open"><h3><button type="button" class="faq__q" aria-expanded="true" aria-controls="fa-1"><span>英語が苦手でも参加できますか。</span><span class="faq__ico" aria-hidden="true">＋</span></button></h3><div class="faq__a" id="fa-1"><p>選考で語学力は問いません。判断されるのは志望理由と人間性などです。現地での通訳はつきません。バディの役割の範囲は説明会で案内します。</p></div></li>
+      <li class="faq__item is-open"><h3><button type="button" class="faq__q" aria-expanded="true" aria-controls="fa-1"><span>英語が苦手でも参加できますか。</span><span class="faq__ico" aria-hidden="true">＋</span></button></h3><div class="faq__a" id="fa-1"><p>選考で英語力は一切問いません。判断されるのは志望理由と人間性などです。過去にも英語力に不安を持っている学生が多く参加しています。</p></div></li>
       <li class="faq__item"><h3><button type="button" class="faq__q" aria-expanded="false" aria-controls="fa-2"><span>探究テーマが決まっていません。</span><span class="faq__ico" aria-hidden="true">＋</span></button></h3><div class="faq__a" id="fa-2" hidden><p>決まっていなくて構いません。出発前に5回の事前研修があり、その期間に自分の問いの形にしていきます。</p></div></li>
-      <li class="faq__item"><h3><button type="button" class="faq__q" aria-expanded="false" aria-controls="fa-3"><span>高校1年生・3年生でも応募できますか。</span><span class="faq__ico" aria-hidden="true">＋</span></button></h3><div class="faq__a" id="fa-3" hidden><p>できます。2026年10月の応募時点で高校1〜3年生、日本の高校または高等専門学校に在籍していることが条件です。</p></div></li>
-      <li class="faq__item"><h3><button type="button" class="faq__q" aria-expanded="false" aria-controls="fa-4"><span>選考はありますか。</span><span class="faq__ico" aria-hidden="true">＋</span></button></h3><div class="faq__a" id="fa-4" hidden><p>あります。書類（志望理由800〜1000字）と、11月15日のWEB個人面接30分の二次選考です。派遣候補者の発表は11月24日です。</p></div></li>
-      <li class="faq__item"><h3><button type="button" class="faq__q" aria-expanded="false" aria-controls="fa-5"><span>ホームステイですか。</span><span class="faq__ico" aria-hidden="true">＋</span></button></h3><div class="faq__a" id="fa-5" hidden><p>派遣先で違います。サンフランシスコは団体宿泊（Airbnb）でホームステイはありません。ボストン・NY①②はホテルとホームステイの併用です。</p></div></li>
-      <li class="faq__item"><h3><button type="button" class="faq__q" aria-expanded="false" aria-controls="fa-6"><span>部活や模試と重なりませんか。</span><span class="faq__ico" aria-hidden="true">＋</span></button></h3><div class="faq__a" id="fa-6" hidden><p>派遣は2027年3月の春休みです。事前研修は12月13日、1月13日、2月4日、2月中旬、2月27日（②は3月5日）に行います。</p></div></li>
-      <li class="faq__item"><h3><button type="button" class="faq__q" aria-expanded="false" aria-controls="fa-7"><span>奨学金はありますか。</span><span class="faq__ico" aria-hidden="true">＋</span></button></h3><div class="faq__a" id="fa-7" hidden><p>サンフランシスコ派遣に全額免除の給付型が1名分あります。応募条件と提出書類は説明会で案内します。</p></div></li>
+      <li class="faq__item"><h3><button type="button" class="faq__q" aria-expanded="false" aria-controls="fa-3"><span>奨学金はありますか。</span><span class="faq__ico" aria-hidden="true">＋</span></button></h3><div class="faq__a" id="fa-3" hidden><p>サンフランシスコ派遣に全額免除の給付型が1名分あります。応募条件と提出書類は説明会で案内します。</p></div></li>
+      <li class="faq__item"><h3><button type="button" class="faq__q" aria-expanded="false" aria-controls="fa-4"><span>説明会は画面オフやミュートでも参加できますか。</span><span class="faq__ico" aria-hidden="true">＋</span></button></h3><div class="faq__a" id="fa-4" hidden><p>画面オフでもミュートでも大丈夫です。顔出しをお願いすることはありません。ただ、チャットでのひとことやリアクションがあると場が和みます。できる範囲で参加していただけると嬉しいです。</p></div></li>
+      <li class="faq__item"><h3><button type="button" class="faq__q" aria-expanded="false" aria-controls="fa-5"><span>選考はありますか。</span><span class="faq__ico" aria-hidden="true">＋</span></button></h3><div class="faq__a" id="fa-5" hidden><p>あります。書類（志望理由800〜1000字）と、11月15日のWEB個人面接30分の二次選考です。派遣候補者の発表は11月24日です。</p></div></li>
+      <li class="faq__item"><h3><button type="button" class="faq__q" aria-expanded="false" aria-controls="fa-6"><span>ホームステイですか。</span><span class="faq__ico" aria-hidden="true">＋</span></button></h3><div class="faq__a" id="fa-6" hidden><p>派遣先で違います。サンフランシスコは団体宿泊（Airbnb ※予定）でホームステイはありません。ボストン・NY①②はホテルとホームステイの併用です。</p></div></li>
+      <li class="faq__item"><h3><button type="button" class="faq__q" aria-expanded="false" aria-controls="fa-7"><span>説明会に参加できる日程がありません。</span><span class="faq__ico" aria-hidden="true">＋</span></button></h3><div class="faq__a" id="fa-7" hidden><p>どの日程も都合がつかない場合は、後日録画をお送りします。その場合も申し込みフォームからお申し込みください。日程が合わないことで諦める必要はありません。</p></div></li>
   </ul>
 </section>
 
@@ -768,9 +848,9 @@
 <section class="final" id="cta-final" aria-labelledby="final-h">
   <div class="final__inner wrap">
     <p class="ch__num ch__num--cream mono" data-reveal><span>07</span><em>THE DOOR, AGAIN</em></p>
-    <h2 class="h2 h2--cream final__h" id="final-h" data-reveal><span class="nb">迷っているうちは、</span><br><span class="nb">説明会で聞くのが</span><span class="nb">いちばん早いです</span></h2>
+    <h2 class="h2 h2--cream final__h" id="final-h" data-reveal>さぁ、一歩踏み出そう</h2>
     <div class="final__ctas" data-reveal>
-      <a class="btn btn--lg" href="#" data-todo="form-url" data-cta="form" data-cta-pos="final" data-magnet>説明会に申し込む<small>9.26 / 10.5 / 10.16 — オンライン・無料・60分</small></a>
+      <a target="_blank" rel="noopener" class="btn btn--lg" href="https://forms.gle/aiwPwzEzKZAgK7mAA" data-cta="form" data-cta-pos="final" data-magnet>説明会に申し込む</a>
     </div>
     <div class="final__mascot" data-reveal>
       <div class="rig rig--bow" data-rig="assets/mascot/rig-rev.svg" data-pose="bow">
@@ -785,14 +865,14 @@
 <section class="ch ch--handoff" aria-label="教職員・教育関係者の方へ">
   <div class="wrap foot__blocks">
       <div class="foot__block">
+        <h2 class="h4">視察参加を検討される教育関係者の方へ</h2>
+        <p>視察の受け入れ枠・参加形態・費用・活動範囲は、オンライン説明会でご案内します。教育関係者の方もそのままお申し込みください。</p>
+        <a class="btn-line btn-line--cream" href="https://forms.gle/aiwPwzEzKZAgK7mAA" target="_blank" rel="noopener" data-cta="form" data-cta-pos="footer-edu">説明会に申し込む<svg class="ico" width="16" height="16"><use href="#ico-arrow"/></svg></a>
+      </div>
+      <div class="foot__block">
         <h2 class="h4">生徒に紹介したい教職員の方へ</h2>
         <p>プログラムの概要・実績・安全体制をまとめた資料を準備しています。ご希望の方はお問い合わせください。</p>
         <a class="btn-line btn-line--cream" href="mailto:info@edfuture2022.org?subject=%E6%95%99%E8%81%B7%E5%93%A1%E5%90%91%E3%81%91%E8%B3%87%E6%96%99%E3%81%AE%E3%81%94%E4%BE%9D%E9%A0%BC" data-cta="teacher-doc" data-cta-pos="footer">教職員の方へ（資料）<svg class="ico" width="16" height="16"><use href="#ico-arrow"/></svg></a>
-      </div>
-      <div class="foot__block">
-        <h2 class="h4">視察参加を検討される教育関係者の方へ</h2>
-        <p>2026年度の受け入れ枠・参加形態・費用・活動範囲は現在確認中です。確定後にこのページで案内します。</p>
-        <a class="btn-line btn-line--cream" href="mailto:info@edfuture2022.org?subject=%E8%A6%96%E5%AF%9F%E5%8F%82%E5%8A%A0%E3%81%AB%E3%81%A4%E3%81%84%E3%81%A6" data-cta="edu-visit" data-cta-pos="footer">視察参加について問い合わせる<svg class="ico" width="16" height="16"><use href="#ico-arrow"/></svg></a>
       </div>
   </div>
 </section>
@@ -843,7 +923,7 @@
 </footer>
 
 <!-- 追従CTA（右端・現行版と同一意匠） -->
-<a class="side-cta" id="sideCta" href="#briefing" data-cta="form" data-cta-pos="side">
+<a target="_blank" rel="noopener" class="side-cta" id="sideCta" href="https://forms.gle/aiwPwzEzKZAgK7mAA" data-cta="form" data-cta-pos="side">
   <span class="side-cta__sub">無料・60分</span>
   <span class="side-cta__main">説明会に申し込む</span>
 </a>
@@ -851,6 +931,17 @@
 <!-- カーソル（PC・fine pointer のときだけ JS が有効化） -->
 <div class="cursor" id="cursor" aria-hidden="true"><i></i><span></span></div>
 
-<script type="module" src="js/main.js?v=2026090924"></script>
+<script type="module" src="js/main.js?v=2026091192"></script>
+<!-- ==== BALL:BEGIN  ball_css.py が生成。手で直さない ==== -->
+<svg width="0" height="0" aria-hidden="true" focusable="false"
+     style="position:absolute;width:0;height:0;overflow:hidden">
+  <filter id="ballLens" color-interpolation-filters="sRGB">
+    <feImage preserveAspectRatio="none" x="0" y="0" width="100%" height="100%"
+             href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAIAAADTED8xAABDOklEQVR42uxZ7W7cMAyTlL33bi8eDtnFpW3a+Vi3tldIIFyS8Y8iIO2gtcfDEh+EXwP8HOJRkC/tP+OH5fzDca4k5HcG1U/UJqXnC3/3+OORL+HdWff76XdGWpg62gFdsw9ZgA8IvQsx87YAsEkTVGrsoZIEbei9qwFJ3g8XJz+BTscJZ/Rlde53ST+M8sbHj3Sgk4D42OD70yxDFuBvRhOvZ3/fB7APHaHC5RgCtRgT9ImnxE74FBvJz6T8BLqQe2fipQOmRFf9EBKTM3FQazGhq5KmG5TZhHYiX4G5WZgvO2wh9zCjcwQTDHxxFFCHpvhHKNuidsg33w1ZgMz9FdgQQT7bTOc+NPog5Ne41ZBsQpnI3AtKcLlNpIBZnNRAuQLKtQxBZ4oYSLvUhCzAt46+R8GyIaaBPixJSOjVXESWneeIvgkqEVoG5l5h80frG48N6/NCyAJ8t+gvRCysgYCP6hzTkYiPcx9FFmJnlwCGZhQekybQJFiGxqFJ1NHvTDdkAV5+4jDxIZA9PGjZBJLxeS+cJOb3QHkKqYRyaNxJ6qtJs66Y9aHwLMALzh7QCDn4l5uIEecBX8mak0jiWQN1atBBRbD5hcsjkJDfQX8VrFHW/D/A60S//Dk/zJ9k58V/ktiJ0Se2mTh449bJwo8JVyG1xBlB4Z2kQ6jjaOVKf1//OF64l22eBfjy0Sdpc09JR6SCWe+awBqQgw7JcyBy3Af0koTpf3PIKcmncJUSfZP0k2QBvtIw64z+xk+Pf8KnudfoS+J7Lln3Nus+KQBaE9IK0B/1QWpAOSrA9UugrsTKVngW4LOHRz47UCc+zo9/+kw5AfFhdOCHB79r6HW9UAYcXAUk3EaHNWh9Rvz8ElhpOkh4IWQBPj/6NdH0x63jnwBzfy39ZS0mCYRPV7S8M3G5A+A2yjuXgK1tBybEN5IF+NDp4+6h0RfeN4Hw3+2dAY7cuo5FKXcWNrOz2ff8Z82UYeGAOKBkx+l0Oq8MQrik5A7e//eSlOyq2tzuE0mMd/e/0IAw4z0ZmP2Qm6msB4yVie6WRJX+zf5dSngL4Pcmfnc+2gGL4iihTv99ug0wsAYIEgHjaoTlkbH6H1UAATG+10UA3kse3ge7F2LsbwF8fuJ31ofuuMes2T8wEVl3RGeg/VIFGIAgY+lKBssKYMBKjKlKA7Q9Sv+J9LipGjC+BfCrLzH+GMvmZ8l+R8z+UETpv0sDSvxEcCcC6HJdChghuosAjFdEjF9pAFw0QicguPW3AD4r8UsM1fG/gPt+W7er9A/7NboImPcAuaK+NFCOKgJgDBeD1j4gArgREumbx/erEM87/m1L1k5L7gt8AI54ANKNvBZx1Y7FMfABGHkviHHMZoAdkZbf8/GCnkH/SGMf+JhlzQkGvmC8/oALOOO8EwE44yfGxXp7V4AHV8r6KgKhLij8EAAgXFg3Jt9PW6Ai9wNcB4rcT6SoA9MWiCBZ37gsBcJ6FEDEu2HG7L4F8HNtzybqR3kE9LPsJ1h0/Oa9NRAEJ+wHAxysNcCYmp8RlBKIFALYf1YDon7VC20DtHcL9BNtT5OlKYHNQWG1N4Xplek43EiYEZc1RMBT6ywG9zzbD8NlDRhLvY3MU2ppAIyaHdYxTbW3AK61PdDXZkIbPGe/aK1bpAq6f7QxY/+HrNAAQfYAvCNdENpSeaYBuQJgG1Mt+lsAk8s53sYsQFx35KaZ8VGMAmK/MAoRv3GFYbOBR8h930zrKgIAyzT7FkDF/k3p/1IF8MgUmAjxtUUdrxnPuZDpDtFtH5IEZzuVHhhtcZHrmOJgjYVUVkXgwG8B5Cvl8oF9+MMCtsgt877VHZEj7bIMNOIWMnCcIBjrjtSlAGwx3KV+U0RrAC2x/3SbbmyMKgIDvAUQNP1mdmGNBdzl3D9WshgtYURuWlTAkpARXGrAdMctwF1risBmZvc2QBoByKDVRaDprvavF0BrkBjeO/Fj9REQK4l7CiypmOJeH1MQdpdx030Zvy6DVsShtdeD3fR7CgDGKAVZCcig/VsFAPvbhfTfGF93gYlQBNqqw2mOnKaIOp92AEVcAaKNeCN+yWAPf8oVIAaxgiAR4u0wmK0I8WmPdAAYT/8z1oAZF0WgneO/SwB0PrAf94Vh+fINCG5nTAAxICdpYCuUEBPloA3xW0UjWQMvpzrGrHoh8VsLxHtla/gKoUneCTCWFUB/Cuqn21HLv0sA8NU7V/J9oloKgsfoPbHrQMs7adyVOfe3cL5HIQQzID7Mbn0vjHTwiOQ6cNnawULcRFbWAMZICtceANKnoPbTuYb87QIw+yEogI5IYmh5mTXgFqjI3NgVGTQYH+R+MBHRVxEFi/g8Ar3OOBg9LGXgNbiSAQD2ExTv3QjlZQlwmvS3C8DsP0aonFsU8R5yWwNVCzSAsDqfylwHwIcVu3Zc1q/NLMQao9aDsTY12ExE2C2Q2E9qdwVgpCOiGny9BrYv63wy3Tdlbo1j1rLJlWEAaMcGQNvcpKipRdobgA+QM3RjTGD8ozPq6+8A0lSWxzEFXuV++KoNMTmbOJkbkKkMYOuskUoC45lFA3+pANz3w1c0QC7XqOanrABMoRzUpe5/nu8Vh8TK+vl2a4C7QtbLPYCLgFsgH/UMJfh2TDsBJX6CswoASMrRuLfD8kpc4n/d69DQ3dtW6AtefwSsHBOIGvRGpBPJYwY9EhbweII9wHoNWZE+IuADeAQAIuEBqnHXa9J7CRqgHFvCGvfYThe8He52zuJu/ftXANjfCva3lLwHFvu1YCtGQLUHaCwbU7I6HpvWABiz3s44QTVCqLGNZka6VUIV4F7ZNL4zpT0AgGUH0KgToTxqgSrAmKUcffMKAPt92lPvXGHS7QoA83CV+BMeYJtUgIEjUyfO+D6rAOcs6bUp5Rt3cO9jqns8Z6MTwUZ8VgH2cPrvYEAjgnunAiR3GxhwugL9Zd9aAOw+tQGQBg5sJcTAuJnxjLRAanvU8Ij6B6gEIOrXANJLBrAoBXsKmvpEYP8K9EIAAyQZELEuAS1LgtFfGbTjivfJdSME6MP9tgIojnpwvW1d9BVgj7jXNgBQH9A36A4IawAMy4cL17UNIFgxTRsAgrD/iODW7A8wYIf9AOX+Cvh7IhgtA0bApg9MltuA4bZvKABRf/7stkj/0H2bfgtQUQTURoNF/XXiz+4Jdrc9xqY+ANcyAPeEiRTsX5cCy2AXBij9q/9x82MZbNoNi/1oIMsg2vcSQH6wFd4GMDr9r4tA3f1TDea539SfCQALYQBdzYEF1PwgADdC3YBlRecjbAFYBus9AGOb7ATW6d9FAN4zSgbMfhMBcGav7t/PvHQMeu0A1F2QN8EG9P2IYbX3XWrA1Ff6B1gJkdwkg55Bn8oAfEcAkB49lP0P1AcwLrbCMB4ZMJ6g2AkM0L/DMWiL4PEtZ44nPoPMhtfYtmENEIwAsIzjS27ReMk2ME8eDgvrE5CPp2R9skvhHbiBEbNPMNe255HgBpal2wGMA4BlPAjTjdsAWsPj5PgGAsj8SEqgGuCyZs1d0x0XUKtI+IFBYpSgeOAmSVQG3XF9SAXviT8089uWaQ2wC7ZlGRAc4zYAa7LC/2wBQFkVgQQYM7hfARyv7daCyWMyErmVcJ/098Vg3lMZbNswEVR2dcEucK8C6BapyOkf63+qAIomwW2PRrTxpAI8qCEWBjw0++XOEz9KuM/7dSlY71iGiYg/k78fV4DdQpq2Q9gG/tME4Nbf5AMzevZaBWgGkf6IiJumtsc9DxGDNNqI+wMxvZYEYwGedkSc50I+zFMh0rsCFMbsRANgjGrwJwpgU/Y1fYtxi1sVIEdC+pEw2gDIQwuYtTnxxwX213qw2+VORwNyPJF1kwOPoThYC5y8IwXvVYDgFo+1DLwZ+HoBFB28lVCMSQbh8ZgF5zHTensFWX8AFtQSmlk8Zf9hkVyCYeoTfKCBqQxq+qIEOHqAEWEBdYPxnAqwx13VQ6NlYF39MQIw3a0HGBnLffCdJipm/Q/mqYD3dPxL6pv9kYDYL94vzEooNBDRAdYAwdnGACXgQu6LXVAsGxhbvQdAIXUlIf5HCMB0X1eATYkcOtpYf2JGVY/hElT/MwAYOVkJFkkQUe6PPDKliAy+hiMaYTbcDZEbY0rte4DVBUFHSBkERVyEceDSdsTD+nUF8NSXC4A2+kbyriPhsbgFJajOuCM6XOi+zP3eoHoNqR2cRheBgWcWSv9VFxQJl1w/rEe1JrnIINzzKDfD+7oChEf3P9OILW1gvlIAZNa6g3fyriN39wAERX1Aoj43EsTNSq63wgHj/c/FGIcwAGDcRP0euD0AiAE6KveP21cHLwhjTOHukgH/imUA+y/vAVQi9kWk3kVQfL5MAJcP4MEGeY0NbYAZcU9M3VBBIP0TJM6yRY5OiyNQRaCBMTuwN8G+yPT+JVbYr0bIWby2ncViORjuQjXyN0SE7riJtdwlU74XuPU44isEsHyIWybvpkhdQFanQJYHtxNHHqdowaxEDGsLqUgtftLDPPe7DoCrLYG4G3HjsB9jExw7WJ/jIfua4vNToCKF+xbrCrx8nPzbBdBCpytV7+58byoT8R+ZyaZZPwLsDZhSvtc+uO7PWR/0QgKRE38gj8VFP5NKAaRvCSTqx3BnlntoVYARH8ukAbOzpnKxAUhcV0Rp3n/Ep1X77xYARFTTbELD4PoQE6wxLdOU+x/AmFXi30JKILIy3RshQM8j6reJSQYjiBuAzF3c2tQLEUmlgDi0q7ogXCfyegNQHKQyZcFoSyP9/CYBtNT/uAhg2sXmkam6AuQp9q8SRi4CjCmeMadDidALC9J/mPoHYjHr7lQAcEBuXIGgICws534IxCwYriv9i8ExRm2RiwoA9kGqCwU2gtoz/DYBkCMzO1ECI3GzP2YVAHMN8TYguBGpYLhbk3hE/YWt0z+8Z5QIh5UvrqEBqL8uAmvTLZAYjMsappAQt/BHnOaxqgLAfndQ2kUQZ/2wzxdA7l7U1sMkRtbMKwB0V+9UkZgbD8wtLiAA1wHw+iXQwIr0j8v6RRHwrHefWQkC2PK10DL3k/IBifr0QqlKWDyiOzcuKwBB1Z8cZAOA+/kC2MKE1g44u/CsrADO5Q6CUx+feW/bBNK9vlFE92wQUfo3w5uAr/X6THF1LDEvBZ41ZcEJyKC19g+wHAx9FXQFICjxNO2DB0gq+kQBpMdPOpqs6wDn91c6eGhUyqDJTVl/AG4HWBLZLh4ENVyT3jUwzP4mkwac/ywGcMOdmTUQABcBWKtqoE/3l9TH2nIXMVztQNQI6aWMEf88AYjr5HjVgRSH7qmDF5Wx7PqgxtmdWQeL2exibW7WQEtBXSJ5sSiTW5fOIjP717Zj0kARyYsdzO9ZSEJYcrURV+KH9DqDIo6bVfEpAsjUh8TlOUzdiLPMMjDJnO8Z3cbYWMa4EoOwTLQm4jhOi8UeoFsk4p/iYDFVWK6CIrfN7ZOLQCVOU594vf3wGZSfQhD5DAGQ/rUNmL6HA3HN4KYOXul/wWOtwQoSL0pHBy+sYrz1oGBxQW7xW3FMkbn1IpGvxIMt2qf63hbEcX2QCli9j6QNwP0isN1M/yWzcxcOYApgHnPvuo0x6HUL1AfurCdoxo/ItuR9BxfGJbdiP9guZvZ3MGamdk3pa4h28AnKFoj1FSjubbg+RAL4SQJTlU4oAr9WAHqRpgXsdyIH1GeRXiPTAuf1fG8XYLa27sjlWyCvLi1o4atWQrcSvM6pvbZeR2wuCx0AlbVMZ0G2vACiG5jf3h/rdVTqzAMBeFFz83NgEVpg2rE4YmvK4oyLjSz1gdsJzjWQLUdiKQwdZoL7jPvdSrjG2jimsORO2a90vneC6w20x57Ki0z3KgJQapdgCML+AX6VAKA+nPanTGhjsMVZ5KJTd1xURhuH6whBAPfiHuv7MuU77j9OazKweD9UREBNTwfwB5WMwdez+94Pi2AlbpHpCToi2ZjEmNasT2CzoQEwO2A9H3gsAL89XzxIAkN6LdBsfYi5WlBTHzCmsmYgOrfjwultfvLTsypI11qPBk6gxE4A0ruzZ0Xmd0cbrM8kg+g9xZOLEohTBwQkDHU4stmCJnkkuitYfOkq63+NAGDwtAgEuOC30/+6BYKd0Ff3SgwvQwPgFyB+TIGZIjg3teMqAqiirfof534E5fQfecWILwxuKUglGSJBEuC9qAaMFIQkknUL5CJQK4RtQJ3+mXokAKjpIuApXGOIZdeRrrjzOpG6BToxAKwuSEqYm9efgCKABkjOYF1aA/s7jZBbINy1eX3XQRAYULRAUoKWqStTnEjhthpndy+mHghgkFtFYPEyArbs6QHiIgByuyDk4ADK+nklcfGYu2qzcmD/AagAjKcwwNlI/OCuCoAGxOOFibLK+i4I3EVQjFfKB0gSA2uzK0wQq1/EqNL/yx4IILHWmd7s12xJd9MaErv/8WIYvIn6YPf9HSzqm99zUzs0MBVAGpgmpayE7gpAxx83K4DbId++DzfvBwgKs2AX+9UFESyPniwJJ/5CAxgyYM0zAbT6s7MiN6YpY+d+2nelfHCR4NkAQHEtFte5xbwnmMyyicMFm/1QHxk0fp5oAGRQaYDcDI5V4kchBCElvJ9k/XTLPi0Ru3A6gHIdwMx+m6eqzzqjjZ8UAM2PqW82sxITyzG7m6ZgNtiHOWCoCaehPhj2g5PAauqHI8FdMYDYD8DG5XgvNACgUCSLUgYi5Wm4sDlj9gAqETo+Ip50UuR+T9XaqDfEExmwRb4vgIaZ+p4C33gprU/2AHI1VVeGguJgs79K+UVxsx4iIgHGExAX6Ylk6vsXjQIgxtenn1ZCpQFmNVVkesdxwfUeADcHV2au1zJ4IoA2eF9SXFM08QVvHFm7UHOTK4pXSvBdvnEdD5p+KQHe560wcW4MDN6De9r+ogEAmN2zLRSZamCveI9b3BW46ouWbh1hC1HXARufsv9JAUD6hbXVu8R2uwTjh7L09G5Rhml23Jjj09xv26bsh+U2Wh1JIgr21xqA0Ihh4Pkv4dkSuWV1Hdjz7M7mIYhLHnlWN2qnoePUO290X/8egBsCuNrMoBBN+TmUGV8sZn1mcKEEIuIxWBHd+8iiiEQCcmVdLqBg/BPbo4gzElmrZXas5PNWbK/0EMXi9SNk2y8UgB4OyOYJ3vxmtj6YZ7FuFIO1YCIMfpLWwtjvymCMAiG3MMiNKxB3ib4rcljfByiIDmWLrkkLwPVjB4JWiEvE2jjy/4UCaFOL+2aOOv17tidTUG5Bd+zu1H4YU47DbEcCjLsw9/dO+bsjBDHisE12fcoacAT6KqhOLGS65ba1qV0UQPt0M2vXs5viyGZu7oJ23bUrmGZlWhN7QP39Au/vK6HvkD4mdMcqTjObg+p/5gaVFY+pEsrZT7UvFcAGXqX/VR1g/2CWD1t3MkVQ8bnAYDyRHRBjbCk4M5jN7QSZzXpY5+91rVj3TvuwYjvhKXFdyqls/0oBtOUnX3O83zUTa10H6i5/gU33bU53Z/pFZaD7f7kADCWwJhssHItF0ABQE0ToRWWoJaEpsX+KzXIrYaGH+zZozYgp4i7IArj7VYEQ93lluKiZ1cq90kBRCsR1zZYWrMyR5WfFz8VY37VMt5PyIT2R2iaqqBJ/xf6V2OIym59neoR0/ST0qgCQARHN3nptOB6UiJuLIfTmWdNdU9P9wFo/MXDbNepYG+tugTQyKwavbLdIaklwC4ApgrU9T/Bx7zVvJX4w1L8pANqhhYWwOpbCbvdRd1bumKUC0SeVYW1oO4icnKYUMDJbvfjblftftGP2cFlJpLBFpt9ZYKbq9isW97uX0nSLyb20pmWFAFBAA2KiuKfMeM9icfvd4we2J3Pd2JgFL8uFlcD6wXJchHHic81JaI534D1bYVw2AyuKe82esNOz/+ADi7k5369vr2ctDzP+AG1WAdKv/WBN/U8v9sGRxJO5fpvQUVB5ZVf1sM3vXdPdU0kDrCTuzscRWE7KB7AA65clUSzbrzL+J0tN3BaM7orjYtY74BEhqOZnuFMB2Iop6wHj35EYlPKJ11bT+lH3UrdGEkll9D+i+ABHHBmwA2Yl++CU8lEFoDNlUtbknrQ6D/qo2haLw7wnzhRXXmzG2wKMXRZAK1p8NT/R0zKR2xEZ8V9v21Qnzy3I96XR8JjQRbBD99rQzHN7sH991CPV8agiidzRVTesAVeDSxWAIC7AYuiIoVICalGrQ9C2L6vEiqCfb1EEw+lf7If3PRcB9JCN4Kdb3NdMrIoAH2xwMKrigBuapQsCgK9ugpu2CHCXBE+cpl9YeT1PSQYErzc/955YfbL9gwagPhhwmtwutycAJv7P5wugT229spgK6yEFI7lpFjaDWRMDh+JcragArbZwBE6jCuHiU7Ml45myhdns2b2wXy2JEPszxfPKf47gMbYTFPbiNIv7P4n3SR7SQHwG3euVUayE07JyKvJUgN35GId6IcRQ2dVNsEpBwP4USUHXHogODlx1RNDU/NbiguiXdsDPE/+gtfTAVB4HkHWAxkF0AFMEn1J/vcYr1cZYIXteUH3KBxesz4uOQGcmB4lw3/UWyJeVQCS3PQAqAIBbCGLWQIj9md/QThEfzNtoxxdNfEH6kvpm/ysCBszSP+wHo4FKBppCRdNgT64tTHo4nSKYNBBmvy3cEQHofADeCpv3vogjgFYbzPa3O4noRDylZdEZAbiHqRQUvFehKI4pla1lXoMVWmIKfqsaAA6WyyC6GI8wCOJiKATb56Y1YjmCgda1EqSBEN0DwJjamw4GsEyRGKN0Utr8SXDzt16eLrxnZNkZCW/LnewdAcBdsx/luJnhPFEND72HWnYFC8Z7AWvgt4vAAaD+ALIkg3D6PyIoRFyPmR7KHUUOMjrrR64VyANhSANgs59ZR8yfSHvc4hvE9LsK3Dh9Elz3/dB69SigA0j8rgMAbpEYzH7THRzgYeBb6V+EhtnZfMvI4rjo4XQDd5iy9agGuP10IXE4wVsP6ESCuVMEcL3TBUsSYFEcI9lHkeABqg/1QwCE4Xy/rgAtGRcyUBFAAwcIa0B1IBh5PcavTAJE9wDrgZSwU7jZXzObuNM/+T6vjKyBYBaKYzRF0PRwYT8NT6Z+TIrATCfWwOrIP+PI+4eQJPx/IqpgPaoI5X6zPyD9AKT/5NY/MDWpAG39M2+ALg1Ad2tNG1yf/DAF1w1iABobANiH8cFYEB1+i/QjEqI4toMjx+H9MQIwz5KYIXcmNDjLIxxMBaSWAUWDZaE6QKQDmCXrC5Tfc0GEoFg0mG26M4aT/fSnZn0MComhMiyfffGlFzPWD33DYLcM9EoZ1AfM2vrqoZWJzmxO2zXjgwguReCMYBDdJlrHAIncuyThG3eCAbMLYTDL1GLD0FUE/Bqfqb+Du0EQwRLvUcLk61O9uKex3gPE9QrgLigTHQvGFiJ99UHyXS0QO+CZBmyRSR/QHVw0M9Mcbw0AHMccCaisCABX7J/Xh7JxgtxgxrIpqtkfkN6fa6s/4E8cEgejj5Lc/0Dr+8eg7vWlh5z4fRg63A4uHvSa/U7/fqSFQoIKULRAKKHYyyIJOnJmtZGVBrDIOP4zXLAksbCa7v+JDo7QGswnP8bsOrQH0O7Z3b9bIDRwApSA7S4C1gAYiywMcD4AVSmAv1gK+hQoXfCY1h+KM+Ie2NoV9cV+L8hFANInTqMBgpjYb6DDH4A0YN7/J8Bif7DmpGyM2ZAY+pDQAbilH5GQBvrAkbEPRpnaE/BzBgP3P+ghy4AIRM+jWa6RBTYonumOG6HNgHse4q4AxORCfaX87A7ci4Ogw6wBqAzWyCx6gOJ1FxRscLMLuYcqEijbFVhes98YwaAHDPZDaOV+aUDxsq2i7QEgElogqI+LeR98AlI7FcAjszoCSkBHQAhDFcBuIAMuu8Um2MbNZHo96soHoJFnWeNM3/bbFQC1SDNhQwaMtEDp7EUpH7rD4BSHzWDAf8YsRSBrAAvYz2Li/QDietaGhEHcBUEPHI4gpEcSGJbYLE7fqwC74iehtY3UYWgw60aIZbLVJpglfr7r70COxP6kCorAogvCheh1BYDZAjKmGOF9O7BaIFWDZCePARD6FAkFIUXQwAnc/7zikP5lEJoIwhiCAWTLWd8tELOBBhgPIGPKoK4ACEMawHURIEj678WT4K5fkhWfq03w+kIDfhtCYNQK8V5cJ7IHgFlVABJ//cL9P4zwWGPTysR+3KApF/uP0UQfLGfqxC+ADDCof1jAfhZIGEdQGnjZAJA+ufk/nAqQR7TBiCoAKgXO/alcADBUEVZC+FkYwO9BEKmvZQvUAeM6gpZUIYMASAbTJ8FR1IHwx2pdE2T0+hqV2uE6/PYaKJ73wRDdLRCu2C8NwHu3QAiDzTELiGO0VVC/y8LsRxurCtDBUL/I/TF9Emzqm0tdICf43AIVP1PJ7OR1aPMe6vMaz4z9DSMYdQsE9bs+Xa6v3Jm+ZE8pIO4KoNzmCgBloXtu9BObKQikfNzTwCRsNADGkpvX510BB0esVAVwUj/iZj9PCa59dCFTP/xZ/j4idQuUn/tiEw10sPqcXuV+7wHyjHHL1GeN4yI9EVw/5xpTBAHIIAGxn/PNIIIL+3ODhJ1Bd0FWgvscIgkT+d8j+L8EXzi5B32PkSAyALs7yrxX/5MzPYYSsgYoArhDD9IAjDf1D1Pnoydl0xYogojpDibO4oLY0z3A+iQUSYBhf/0cQJhxlzBG008Q0idr+gKS5OqoZ4CBMXVB8ElKQA8iOowPRisBg/eJ5eiBYGAwXrzHdf8T2TgX0gGRzoJwSflYaoF4Kmyiq/mB7vPnAMKHB16egTr8o7nhaToDbdwklwgnpI2p5FpsnVDjj79wy3+28XdO3MAD6LE2NzVARMIBYFkGB268NThWAhpjmhqRwwOfboR3b7jgA4wIYwRTQVDvzQuEwIBgACuJt/GvtDjcgQMKytXtYid/RLPcq9n1eT92LmD+R2K/SJlloI/FJCWI/fWmYrAQlytRP1N5uBZYw6k0cIAWHfZLNpVU9AczjyUhVDFiI+j1XKa+XnsUa3HVBBMUrYeZ96ixZD8cqQnXluSWfliwoLj+zRzson64+eFCAFYeIed78x7U9U3rveyyTPpW1Ba8NtaLvngQOud1VrgOQPcTDMFAYkkOirMADbhiNILBBcsByugEU1ypvZ/Bgh/rnGoaMdvCt18nsZfVK63SFZUdctzejykvlV+t+6b1hNX8qAhUAnOQOBGoCQapVKAEsZ8L0vuuzF2J1lhgOOV/PhQUUKOilQkX/8dXOdV3AZ3dB64IdzOOJNBJodKFbIRndyKAOkObgp41vyuyzouM039dcLzAU541s3VJPIADSWZgIiJ9zv2NIKQktYupBFOcCFgRwN0Eacfs7PUUC+6tqRWyvsPT9ZJ1BVhR0yvu/1e1Ql33/lSbT5YZfX1Le/BPNwWaXdFdLlFdqynrwdeqYjykmi/vJR78hfuTrgB3rof/ZruvrnbYAwE8uBDDo3/aSywGk56AL697zs9PY2GrZ1sZ//wLAfT49tceX3b1xzc+l3GLL7tafJfr6yvAWvT9ZhZh0aextj9oN7uWuM9xQdB++nav5fLVPo3QrL9ZvVs51X6v9n7c40x/TDLv/deLnhXifvM/h1s8cSNi3C2MLvY3ne0W+F7EDzS8Kbp1y8M9Umdea55uMq2utQD6LXrVeQ68TpDXS4FP4hzXlFvqewxenZ2DfaPpnr/12/8tPEuGFnrmoBIhXD7TWKvFB8FetqhLzaiLmjervB+DrmtjL2cd/nGb3DOCCpqd6+cga4Kuj5CL4/DFk07TvesucAYKBhpIwcUeQA+Mm4PEU7CloEiPJKZPyl0ZsotXy2n9pMiq67XGxBZ8dZLgubosgP6zXCRM0A/z1u94NDO4UNFYj7tmcHanyfvaE1aWnW7H9deY+Ytr1C7rfSEIrSCuKkaDtTC4NVPcr0WZ96489UMPXtCSGCzaGS/9GoH/JhBUCMwyaBJAyRI/V4c6hBc51QSF67gSQ3WjpnTLJVpDUNHXRF+/hMOYup0RkTacJhOtM06zjNNXknLKzxpgDexfSQU8BsXhpagv0pP1W3LXZ9J+2E+wJRq0prQ7Igigg/WVoqLgyiUwS+HiqPjt9wf5T83KOTBB9RjXaU3OFqgzOkHGiPKNTr/XoFYeKicZUB8YVRz0gmofOIE7UrEG3H21yLmftF2+26uetWp+CvZLYM70WQbD9M/9EFcLfvsFLOEQdrO0JrFpqmCzqKA4s331jk2XAJgdLlORXfE7q6X6Zj8irvhw2lxPpM8KGWOmPm4fI0RX6WDWWxFko5rTXcFgYRP1EU9HPCok89wPRoEdTCVZnb43nwKtj/DcYStOmtRr7lATTueI+e1lABYfAKZeorWTN0FG8Z7epiuYWR6RbpTknLES4xMLkzaq4lAogdHHrC23QAhmqEK3EHH6HwAZQH29Cd8tDKiJ65KSRRVg4k2lIGM8bYJ1wYzwFhDsvgJuFSmc9K8bA0InBVIoOiOSYD0jNM2j6wPEZRTvWbYmeu6LWFBdTdmdHD8VhhVCym+J1jCeEbo3xtwCqWjofJaC0LIMYHASg/5qQfrDVAcAYw9gsVWbihz7+K//ji0OK74VgtlX8MAnOGdbAZpAEFn8zIy7+Za/WTpwidj4JJ7G8HfXEM/feMwI2F+A8WUvcEyNBYA9/jncI3hgWR8LegfvHbe/IvrBlZ2RT5NizJ64supLvw+cRqa4Md+bbgFAm8wfuAcPsZbAVoDz77wAkdNaCT7a/wvgv/iHS0MJYn9N/a3jhpWAi4gBzGZJsBjSAyABYy800LXyWMwCXFEfAPsBfRA6T8F7a6Cjn0x0VIEYOiCzX1NoQO7rMpXTSNzrWaMIYIywP3EDgzyWgZjdBBYaKMDHC5wCOG1QPIFm9lvBXRqoSIxL4sdV7l9/uzqgNkhQVQAkAcgyYGXWAMSF6wWA+gfoR7Cf5HYR6N0AeQTBQOrZaOGI+Le3Mvud3TVKNhKDRgBcn6b/RNmiCODCfjTAAlEfN1eAFjb0gIglBgDaqKnvr1nHBXsMVecgXsoAfoyRxsbfXQPwL6CA6XNGUImcapDZP6i/JyPHs1gtEOwftivBqwsizlYEwP+esJ+xrgBT9hPJo/id6JR47y6IjA77RfoBlP7lJgFE5MRvlyIg9ksbk/S//pkZ8LXKSwVgGabUSGrvAemV7FFLlgT9ibmOBoyJwP4uQwNQHMYL91wHYmAsZX1VAzRAGlI+8v+JOU9Vt5Sj+wWo7/TPOGZhf5H40cmS+hFtVABsw7J2kQHsLytAlcKFGSWDqgJAeiV+sPIfjNdvmagFqtlP56M9gHjfSe3Mnuyn/1EXhB4Qw272g73Hdcpff6MgaUgVO2Wi6bYt4lYFqLsgGxR3yk+jqM/U4D2zjQrgf5sghFYjtKoA/V4FgOiMqgCssQyISwNqgUYEYcB4Ye8BlOyd+wEea+sYrusA+V4dvzQgHOAWboGgMownkqhPXOu5a7UHcBeEwd2iAqj5EelnFWALZYT65zQy8I+TVV9u6uPzDkhZeZi+WzgVfR3UAGxR/f7hP+Dqd0jBuPWP1QEcxxyJ2a+JAXDrH+cjUrj+aft4uWD9oI7tIHoG0cfYiac9yStY/OA58ToD6mdFrbqIDIbpSvFUAZS/x2bA3ZtGgEaAEjkZpSoCjg+gew9c7f9UBBAMqkNjuKiOTN993Flsf10BALYI0n/ujnoEBYFlavFH5IjhHjB3Qcp8pH9w3gorCHDvBJ2wnP4BpHAi6t3TbhjAWDRC5UgFaPx46sUK4KeqflyKxc2fiXWD7t7dO1cwuT/AjJMfjo7hdtYowRMs6oPj934n2D/eMc/xpHCWEUyLI0dYUP2WJjhI7aoDzPYREbj7Q9FmUfNmg/FqBWgIiQpQ7D8QovYAuMVWuCgCbuWbvlpddynHv4JgnwKBrTr2ABiyUURx6gAJPm+FSf+dNWmql9ZD6T8oAuT+01X6yNkLU1ypDvbkdK5cDgXnRSPdCH+qJ8E66iFb6wBUmf4YU+IHaAQggBDpy8qlujZIP2c/IABmsKi8pLizhdzuEQ2Y9NqoIAaYzeEMT3Nxzf5etEDpX48RD9xOawQOblF7cxpxgKnPtAQAy0Vl0V3yADulAhqgfnzrIx0AbLYMmGXxRxB0BWApLtQv34NAA0SK3D9J/wRNYosE1/skU6FH1XphBIvcryLAmJ/m+lwfN7OfGzFIf4BADC/cwRE6SwhdOhEiDPTHbU1x7QFE9yjYD7YGPKoOAEjqBybNM6IKy8BqUQWwOev7ADRxnYhB9U5bkcjHjdYAbo6AoXsE2AIwv2279ABxoXhK6uI67AdIAPAb8LIsA4LkeEY/CpxecNoCCGf0THSwIrgifamBlOPBgKJEwHuzfykAfiKpXT0GJZJSESC1qgC9IYyJl7TpRcfCEY0iOropzDtmcBn0j7B7avevjoIDIDv3oAD9rqs3r8xiu2Zl4TPN2o4so9v7MEc45cQNXKYwdQdKoAQDoEp1/Rh0TGymu9OHv7c1R3LQd8J4Fe4ASwnWwMuutivEbax5YIUMrIE8ArI1AKPYX1B/f2LQdLXGK0Xr3ew378E0tLjgxEJkAOMjUpCIlCCFSAC9NM/SUEJrYZ9UgHGxNCULMduzNd1l+yMLMz7TmshQgtL/ogiEHkUFCpEeiD+wLqtXRrGyTvD1VOSpyDhYFsY8wBbLwbJCAHlGv1CQUz78DmOd2THljogg2EXAZorXKz/L0IB4H2DAaXKb3MlhfMD+T7Y+tfXKYirA6nngNGtwi52JCkIoztWITFsgBSOD0LYssptn0wL3PARrDcR9igf4cy3Wv6ebf07URju++v1jgp9ucV8eMWO/ngVJBgRjGC4LymMobwBWLRCr4CtYGujFVrjgvSIy4r/e9k8uC/7AgC26Un4HOwj1+zw9Q9DPS/abg88NBtfxqCM+qK0PrJhqCdcVwDaZcl/kfXDmd1gSxGvbFXnMbEvF9+7X/kiI7gGI7iLgn0CGzaT/Zm10H8UsmL0pAq2xhzqxLRaHyU2cKS4Wa/tbWMymZgLIpYB3hMx4gnC6JL1ls7D4aXL3hdXkvqgob7v9aTJAEFfu7+FIQwYBNYlXW9KLfJ2KZE3rpRV0X1okq8Tgpiish/zOD8E2FYAfCNTVQIRWwyNb8TtW1h+Y6Ou37eusf10SYFK+PnvJRzTd8ORMzwm6NHCV7iY62E2O/+ADi7mtFBK22SytkQ1q4xQCaOI6kdLC+DK54y6/46dIX7c6+2EP+ii9O60vmAhGZqPLzq6GxSiB2cNl5aPuZUMSRWv0E2KIewqJqyIRxcFTa1rWKgE46zeRG4PZK4Mlt2y/tVjcJQi4kdT3yzLzA2mmGJnNjJce6Ow1MnvYHWpu/Ua54BYAUwRLe76TVtM/NW8PwG6E4ooA2pXcrwR/33bwRZavVu6FflaZ/v5+OquaSNrjMmbAGnbAXsZIKRAXiVTWbdPKQFwMnustrtBdL8Y9sYs6aYddEUCI+gEmkuLPDyjv7pJDf8QYm3ZBXVO3n6/ljxkAMFog1mSDXmOx+BoA8f7qztXsrPofaWCJY8V47HmJKPbBGJEsAwtAV/8E28G2lR5y3K/IMzWsY1Xid7CWRGlwmsgOgPcpWJhaIH2gFoBa7vUelWCqUpDdYc0ri9w/ZfzqBeRPsIivEcAqu69nzXgpZ2o7o1v8Vd+/y6yEvf6A/wMrP0hekDjbYj/g4AEYZRWPFS93sdhi9osEQBdU23PSz4tArQQHcR2xPO5Ome6Ow3VHAox7k/e4xHdF5vvaktO3psx1R+bMXqX/52JocysEcLsItJftl5WwQ1/vepnFpIQdaupGFQcWrCTBh3SJq3e6bMFoGeCuqS8XwHjDtl2RM+UPUNJ91uVv4QXgbfJSg29058NfWNs2+L1K/08FIBI3TzmvV5IoFncrBPeM4BLBNdEV0b2PLGoxAOTamt2C9EQe2BZFnJHI4t7IkUhiEOkzfUu6F4uV9TX1WABxvdtpsZcaKKb6vETkD8hOeK/ZcWOO97laauXElPG28Kd8/DsapQb8vRhRfXYkbr5uEAWPl5zOs1sfFqoDUgJ3ceMqwXfxGLeYatf7oqkAfMHvWgx1HTis2N0qMnfVBdk1ZV00Dqy7fOM6zqfLUxDAGsRAXBoQ+wmOCHHTPX+roS3Ajpv9m8XgNsZ3QX1cVsbSdcTfT25mL0i/6fj/vgCwoYRqKiqrH+/0FJwqwVPg3fFSHppanCmpjtUvt0YC6oKI19/bA6GTDBgDICWIN7Pzx3nuB0sJyvQ112vew+YNNwfXfX9FfU39nABCO13LYFcdsGV+Y3Z3cI6fU/QzOzjF9QU74A62BnAR1cXmxx8HBTAGGsC4FG8ARn2zBnjaCGmfKvaDYT94A6s7CvAGPgD4NNYPjMldaKCBtxn12R/fFwDMHmYZ1O2+p4ytjdw4iZRVX4RO2An0ejHxdIvLDkFb/YnnAfLor2Xu3uxGsNLsj8mnZkszCxsduRN81cBwC8wuFm/CqZmZsnwzxjxl6hPx6w/3BdAyTd0CtUxuzYr9cBFXuR9SjqAW6wy06oIoF/Wxktybb2jnLUFUGoD6xYUMSvZHavpvvnus9fWhzeYNrjAL0h5gAPBQTlEHKB2VBpqSerEPpvtP6+8KgIsjf8tgLzSwR7JVQaj3AAX7CaoylFlfK4lXjx3WJiXo97fN/h5gDN5D9PLnc4quemmk6iLrK3/X29m8cnNQdJ/tAYxzECvYvyXqu/l5IICUzpMMPIVrDIntOtJTXPxWJJcLImBWEpx9gnlpXp9LQdH/gHV5jSsA7DeP1+b1MJgiAAZsoj4RglaIG33FiRRuq3F2t2LqkQBC6R9Op6kDi/fM0hFp1EqsO+Wnu0R6bkQtzNbHR0wRXFhw+YfBqQDME6+vXApCFcA/WxSoYmEQS0FVAzQAZgNgljP2qv/BILpH2OxGH7w505dF4KEAivS/u++3BrxgrhBZsUCkJ+JawTIkpNKBOz39DLA+6Ezy1npaoBMUx6DFL9VBAlbmLI48WC+euRGCzT7M8YmNgMSAQd/CJvze1O6b/cZbUQTiUQXgPHSa/olrDwDdZ0Wgg2VaA5stA0esDfc/Pjuy9SruPw73BwYgElzOPVUHBlARABxYRtzmh7ItuQmY6I6gmXVP7zVO/4DZHqCBNxeBAR4IgAv274n6eUNMEABxBS61QGJ5pR/fTrxLNgQrfi8eCcc1ndCqgPHXX9QMWDM7Yv4AeKYQH8gQZA1mNjNKGzLdq4i3AQCLBBkk6sPs5wIIWB57I+vnBB8IA6ANAEBrZGlBqZ8y07PMtmD/jVui4rQW9Lh00eJX2zgtkDBsUw3YzEJXhoLBTLVVC2RCA7wGosN+f0M6s79QAPQ54vcB1AIBmAI4hXNv3f3XoFtCNDauHgRL9vuvubMHF8Ylt+A9WK7N39a/orIZ7yOgzUdAFX1ZXwHd66NMRuIs8A/GJD1YIXRHXM8FQBFwI3QAdggA6QQwRpcOxHMacYBdMOZ7HdFK9LA0s9852nG50oB472XWwGVzV7M+mpz0MAC5vrcR1y9dDzxhdrv2UzFjzUMB1EUA9ueIdwKqAyxwWQjiGLPWj06iZFPleI1dsM38th5M7T5wpYAGLhnvONgkNrY747HNJzAFg6EvxqySvVsgUr5qAuvRAJGITxBAiPQn7+W+xhTPXB+uyY3hJv1IGIB1+4Rd3UDbLM6Q7GNVCqwBgnBFlwp9iGSlrTeyWN3GOGiiJwZjybUMGAEk+PRHiGeX9P9ZAlALdACpQl3QDunVArl6FC8UpSIgVzuQ9QkswLSuLdIykxs9MJb9DeZZ6M44zf0Nd2at4PryLLJNX0aQu1XpP2dxt0Ab5A73P+b6phYo4tMEEN4AOPe3ACjxox+CYrmCPguC+ghMZrpLNroR9WKajRRRHXDeBqwur7dkkEdSAiyxedZtDDgBGwTlXhhcyCAHzf6WJcG/Uv7EXb4F9/LFr0Tevngra7g6KWNkDU92CPpxTwSgeKjEeIb0HMov5wD4I9xyf8sL6Q18DBAX1MWsZcAfPCIGWHTwzNoWkXE7cQKN2djOCPGTeczitu0Mbm2MI9jOIHdtZzBNcSMj4GMEPxru5wug6ecJOpPmfYj9hQYSZuR9MnDWwFiQqe+/wI1gn2xetiYZOEgEANHFVC7uYow59cEXDLpn9oOHiyU9wHLz+HTBmKbMfjRQKOHjxHKPkeszK4BrNRQP8Z40v64AHlUBGFOQagBQlYh0rzRwRQaDecsiEHIbWIXFazLvp+m/tzHGFeqb/SOyBbynDuCS9c3glvP3wMrilyuA07+VQCkg/X++AFp+U1dNaua9KkDA/nUFENGrKdqYDMLpHw2Q+8HPiwAdC26WARbJTWuCG3GfpX+4Th2A/SoCmf0GGy60LqaKCuDRFQAcLgIfSv+/pQI0PYk0cVXb82ZAGqhGsb+rre9e76ZI1BfvF5uB0MYXrhs0APFrFSDQ0miTAg1kMBYQXLf+VgIyUN8v9kP0tA2wBuoKYPY78bci8VdFgOuzBQC15k/s9WkmbwbWXRCMBzPWXZA3AKR/YTHy6mEokcY4eAmmFKwrQF7P7awMxAD1+63cr+7fuEkPRf9TU9niYYFuUVyY8UO4td8tgPWDG2bBAozF1dcVoO6CzP56E3y5F3KLH2H2qxQkHktLmj2xmx/+CYJYXOx8cNdHQAbmrpL3wBpXpHfEoytAxG8WgB/d9+IAdJX4HfHYwWrli7MgQAfWewCTnoiDkDt03GkNAFwHqvjAklPAcgAiqanfFCn3AAMUewD1P+6CwBrF9RRhJFLwngrw5Hp2d+T3IJotTfVlJDyWt/A4jAW4PDvzZ3fCm85sfr3CayAcOI2i5ipDs6ANTJL2GAm3lkyvLVRrcPUpEx456RU0XMZ2jCcYODyygFtmEVt6GyLiSwUQ4jpmGWSi92CEuDbWn5ixZd4HrsQA+19AeE8Z3cZUEDlBoIQ8MqWIDK6HIxqPOMQlYq5bFZlwAUYDxEXcIAhlR9Bv6di4nZE/aOo3TFNfJwCuvhUVICnBxGUE3CgjSULMDjcbU1B/VQcgLoYG1KgQT2PgXjYXAY1HPIHEWoIxUQJ0xEUDtsjpGfrWydumlRKS6ozsjEPeLxEAF0xdVwCPyuIej1kwo8jNy0hUAxbo30WTNsvAGjDwWJ9RUkXFe9xqbAZh6i/SMJgRopOV3RFxC0qghoA1qgtinFcAxbm+XADRjjpQZm5cj5B7UQFq+tby60UXpAXMFvZEA6K+3Cb3GfvBskypwHX/wwJTsJKQltnydkKjVyZjJ/0nCSAGC7c7DYxnZYWEBKZdUJ4a4Ka5FKw1ICPOFlUykK3Z78R/3zY1OZinlMUL+spEbkbP2jbS/xcLwBfM2MCQb5MGmL1cAQBywXf/giVRb4inGggicjeCpflE0hqYsr/e+IqFGhf5W7MA3DsVYML+jVlsA+v6agH4RIhqMGceAGxj1pVEoLRbC7ZhzXambVxXgDnvbyoBV5keF35k24aJoLJrC5Sq5YJly31wBmR97E8UAJfT/5Y5upm7x5oH+RswV5Ew9rwj2lQKSjHcJ70T/yYlPLMNPOXu4wrA1CYNvIIDsAaj9f9jBeDNADIo2iGvWVeAJ13QdrULslEcwPCbyrAlugMoHdfeU9gA59tpA0N9KAKWXe5/tjv9z/0KAPWrtkdr1Pr/sQLggl5O/7ATLkoqY7zRwfOX4eiiDmjlffZLBkr5CdSfMyeOEgRaQf3bGijXb6uVMHu7uYvYRGtUxzIVAVxy/58vgICUObWL98zC+MwwTQE2Ru+kzVHYDx7uFRlk4g6sarBlSWg9brLlx1aoCbA2rQdfkgHL4HTCAPU/kJVRFUDvEaUp9JCU4EJB/JsIAA2Q9RPRRd/UGo2VyZABklD3sll1LwPAcrBlQCRPRYqAY/CeSCMyyA1OJcJHPRspH7ylCkCkyP0Bv5XgTX2oDCb7motIhZFgWoDpY2LVxylzoWDxp/H0f/4nPvHqse2HHaC9RkA74m247YXl9gimkht9uIzj11amXx/XO25/TRHp/s134R5zoF9tCiInjhxs06+uaDnSTlwDdAienNhuEURc5QANNxpjIDm2K3IRQOCiKJQAwI2IbyqAgOUbpBf7zXsYzxgZe0QDwzWzesKWQS0A/6zqEd+DCKOp79+qiQI3cJKBx2M2GhEsCgGY+qpaZn8jkhjvsQlDeilBGhDghZ/vKABrAADd5+z3GBMNrNO/S4FJP6bC6Z94Ir15X/5ah8Qg0uvbs1mDW2V9sF/ag9+MTvzrIgBgdAW4oQFGWiDY/40FwAXprQFKAXi4ywrgMYGoQZcSNEoAkbCARlO/W4mKtFIGZr9BJDxANdabdYMGuFcBGNkhgDP7cWH/9xaANbCsAANoTDIAjBHqj6CoP22E3A6FlDCCVAMidf8DWAgAa/MuCBCxeksvUtszsJufOvFbBuT7MwIg2XucVwCx//sLYK0Bs38r2B9qhAZg9E6ACPzGiBQVQOlfjZA0QKRiP26Ot0oDcomo+VERKEb0MIwIFFf3D2AE0AjhMm6lBsz+v1AAJxfd/GzL/idR/1IFcBdk7PS/boQiYbQxa4FK6q9lULdA4VIgXFDfYL0HaJcqAJFiRAa0PSoFrf2dAqg14J2AeV/sB1QBBGoZ9CsbYjdC6xbIMhCeW0uYcdECgd38MM43AGBAM2BU309cG1+VgoL9f7EArIGbZ0GRMeMRDFzJ4M5OoJaBd8NVETCQdThtDRg4/XvvW1P/VvcP0b0TaLiMDXzrDNTs/5sF4P0AYLg6EVpXgPVBUCupf1EAOhiNajMgMQCya2t2RXq3/jA+BS8JoJZBWx8BLSuAT370nXDq+/96AXA1bQNyNbh/GLpugeRWR6LBVF0HrATznjjBy81PEASY93Xuh9bEt0oD4GkLdP8AVFnfG4CIf58A0MCK+g6GS8EIqgUCh7CPhjojSvAewADGgxOIywKIughYBgb+phZcHfiI9Am7BWq460dgtQy+lv1cW3zp1beX7Rvvxp34cBmxYEEGrCTuKTALiGBRrI8pCLuOT60dVsTlFgBrRZzs6/XgjamBNQUYGBPv81kn7P/3CYALvsJslCBrLEh3MYrWTaLCiNyyMGB2LYMobEn9tqD+fZMGIKubeFjLGgBv78jGAt8V8S8WAFciNLirFEgnZxz2N9UHXEVYvLDQiEsEHIovNdCWWd9xa0DBuW2Qu0jkuCRvgs3Mdhc0ZiWYiLcA0ACMhK+2RGiAxpr02GXq2ywG6+HjxPFB/HDBmKYabrQPGA+Y0/2WDDDHwR6ZAmOY9Haw/y0Aa0BFwMYsQMJw5KftIzFeo4D0IIwkTHfcKeMNPLahnNtmWlcRAFim2RYRbwGUGlgUAdPaANfY5LaZ1vUt8XGOccxmfg/wYQ3IIDq3NCmkjX+ijTEZEUkF0y1L9ssVANuYOtn/FsD8Et0xTQE0PtXAx2HmesKMuKwpNGAz+8Grjp81YOzjsEfsBzAKuAJ46rjeArjbDn2UFWAfDIb3HwMfcQDYRJeZ+kglsz/ROsmj0sDazH6AxPAh3hOUDGzm64fwANvxd9DAcMsK8PG07fn7H4Strz22G2/FAQLAQ+JQ3NbBgRt6NEbwBN0/YGOgn2ol0vICIoBojPqpPGarb2a36+/kwi2/oejiO3Ccnx7XWwA/fV16JwKQNGAgSawFEAmfwIwvNGDGAxgFSvbXo38wLxYCMN1NeoB/Q0ky8BjxFsAve2lCYkhKOAEjEb0a5IgFEOFIB7gaMKIBIoUr3uNm9hNhzOwHZLorgkFrRRCGXwES7yWG8ZDrLYBPLAVEyPq4lzUg646kImCAq/QvPSwqgBhvGUgDAqxcpf+L7M/ND26Z/iPeAvikK2lA3b8bIWsAGRApBRDaDBhYAy4FYFyNmfpO/GZ/kf6V+wmW7IfusF/NDy4gj8f1FsDvKAUDFI2QcYDr/UBIA8U+eFoBCApfG5vwtAIwhQySsVIUJyIlNGOyfoBJ/G8BfEUpiAKE2iFtf5mSQWsiIT3M2G8Z3Kf+QgMw3p0Py5bNj7O+PwAgoMT/FsBvvaCveiGnf4JEFA8zXvGVBiyGE1+uAGR0kX7J/tWuN+pzT4CLQNX5jKl4C+BLZeANgD8oc78IeAOgUgD1q1JAfCmGaC4FdeIHK/FrG3A//fuDL9oGQP23AP6Eq3wgsCoCdm0hGaABcFUKBpTLKK7jAsT4hHHBpTW74v38+P+43gL40y6x/1IRsABiWg2CiCrAHJjxRbwtAHqQa/Y70i6m/4FF/bcA/uTrRhEwrpXg7l+Jf81+N0LK+kvqg70TAIBt7W76h/pvAXyPC7rnrF8L4J4GXA2gNaRX2+MIoCkiDdDwuAgAhC8KQNUADbyutwC+3yXqSw8IAGYr7j2AqU/ESiAINoDiBe/d9zN6DwCnLYk2638IDuq/BfDdL1F/UQHCkQREevdCuGp7uIThujWA2ywGKwFrjghbBsf1FsBfdmXqG+DGtBEikomuU6A6/de4JRyhfB9u+nHBuPWxj2QwrrcA/uKrFgC40ABArvsfImCu0m0ZuwtiLNyy7QEbfPL1/kTYn3O18eHdaxZYYBu4WkzkvrXDFFF8K26/bOOE5y2AtxIym/vg1m2FFPG+JH3B4/v8Hsu2IPLm/VsAt2pC/ABjzELHi5KIpV2mO7M/pjL48c73bwH8lBJiymlmfzCFJJJJMDYTup5FEqycqSXevH9vgp9efYwA4g3s8x+AXU9Gk1ufBTVvfwFvur8F8DmXBeARYKzjUVOfiHGrxjfj3wL4yvpwSwMO32X/O8e/BfBttGHsmNn/ZvnvuP4PtTtAHicLMAUAAAAASUVORK5CYII=" result="lensMap"/>
+    <feDisplacementMap in="SourceGraphic" in2="lensMap"
+                       xChannelSelector="R" yChannelSelector="G" scale="0"/>
+  </filter>
+</svg>
+<!-- ==== BALL:END ==== -->
 </body>
 </html>

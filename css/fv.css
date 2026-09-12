@@ -88,33 +88,274 @@
 :root{
 --band:url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 799 695' preserveAspectRatio='none'%3E%3Cpath d='M0 152.3C44.4 132.7 88.8 122.4 133.2 114.3C177.6 106.3 221.9 100.6 266.3 94.8C310.7 89.1 355.1 83.3 399.5 77.0C443.9 70.6 488.3 63.7 532.7 56.0C577.1 48.3 621.4 39.8 665.8 30.5C710.2 21.1 754.6 10.8 799.0 0.5L799 671.7C710.2 688.2 621.4 694.1 532.7 694.5C443.9 695.0 355.1 689.9 266.3 679.6C177.6 669.3 88.8 653.8 0.0 628.1Z' fill='%23fff'/%3E%3C/svg%3E");
 }
-/* SP の地。横幅は画面幅ちょうど、上端は画面の上。高さは元の比のまま伸びる。
-   曲線の帯（映像）はこの上に重なるので、帯が広がるにつれて隠れていく */
+/* SP の地。1枚で画面いっぱいを覆う。写真の高さを画面の高さに合わせるので、
+   横は画面からはみ出して切れる。どこを見せるかは object-position で決める。
+   曲線の帯（映像）はこの上に重なり、広がるにつれて写真を覆い隠す */
 .fv-bg{
-  position:fixed;left:0;width:100%;height:auto;
+  position:fixed;top:0;left:0;width:100%;height:auto;
+  /* 幅を画面幅に合わせる。写真は電話の縦横比へ切り出してあるので、
+     iPhone 14 と Pro Max では高さもちょうど画面に収まる。
+     背の低い機種でははみ出すが、上端で固定しているので切れるのは下（水面）だけ。
+     ★min-height と cover は「画面のほうが縦長で画像が届かない機種」への保険。
+       これが無いと下に地色の帯が出る（Android の 412x915 で 22px） */
+  min-height:100%;object-fit:cover;object-position:center top;
+  z-index:0;pointer-events:none;
+  /* 写真の明るさ。元画像の平均輝度は 106.8/255（41.9%）で暗めなので少し持ち上げる。
+     ★調整はこの1つの数字だけ。1 で元のまま、1.15 でだいぶ明るい。
+       上げすぎると .fv__meta（日付と都市名）と SP の CTA が地に溶ける */
+  filter:brightness(var(--fv-bg-b,1.08));
+}
+/* 画面の下、左右に立つ参加者。地の写真の上、曲線の帯の下に置くので、
+   帯が広がると映像に飲み込まれていく。
+   ★大きさは幅で決める。2枚は元の画素の縮尺が同じになる比にしてあるので、
+     顔の大きさが揃う（高さで揃えると胸から上の1枚だけ顔が大きくなる）。
+     合計が画面幅を超えるぶんだけ中央で重なる */
+.fv-person{
+  position:fixed;bottom:0;height:auto;max-width:none;
   z-index:0;pointer-events:none;
 }
-.fv-bg--top{top:0}
-.fv-bg--bottom{bottom:0}
+/* 置き方は「顔をどこに置きたいか」から逆算する。目分量で寄せない。
+   目の位置は実測で fv7（右）= 画像の (51%, 28%) / fv6（左）= (59%, 31%)。
+   高さ = 幅 × 1448/1086。顔の高さは2人とも床から 52.1vw に揃える。
+
+   ★2026-09-11: 画像の下端を画面の下端に合わせた（bottom:0）。切り落とさず全身を出す指定。
+     そのぶん顔が上がり、2枚の高さが揃わなくなった（高さも幅も違うため）。
+     fv7（右・手前）: 右端を画面の右端に合わせる（right:0）
+       幅 67vw → 高さ 89.33vw / 顔 x = 100 − (1−0.51)×67 = 67.17vw
+       顔の高さ = 89.33 × (1−0.28) = 64.32vw
+     fv6（左・奥）  : 幅 62vw → 高さ 82.67vw / 顔 x = 0.59×62 − 8.18 = 28.40vw
+       顔の高さ = 82.67 × (1−0.31) = 57.04vw
+
+   ★2026-09-11: 水晶玉は「顔の中点」でなく「2人の手のあいだ」に置く指定に変わった。
+     実測（肌色の無い帯を画素で採寸）: 床から 21.00〜31.75vw ＝ すき間 10.75vw。
+     玉は直径 9.1vw（上下に 0.8vw ずつ余白）、中心は床から 26.38vw・左から 42vw。
+     ★そのうえで CTA の帯を作るために 3つとも 26vw 上げてある（いまの玉の中心は 52.38vw）。
+     ★素材や大きさを動かしたらこの採寸をやり直すこと。手に重なると意味が壊れる。
+   ★2人の縮尺はもう揃っていない（fv7 が 1.08 倍）。手前と奥の差として意図したもの */
+.fv-person--r{right:0;width:67vw;top:calc(var(--fv-cut,152vw) + 4vw - 89.33vw);bottom:auto;
+  /* fv7 は素材が暗い（不透明画素の中央値 56。fv6 は 79）。暗部を持ち上げる。
+     brightness だけだと明部が先に飛ぶので contrast を少し下げて併用する。
+     この値で 中央値 56→73 / 上位10% 154→183（fv6 は 79 / 184）*/
+  filter:brightness(var(--fv7-b,1.22)) contrast(var(--fv7-c,.92));
+}
+.fv-person--l{left:-8.18%;width:62vw;top:calc(var(--fv-cut,152vw) - 82.67vw);bottom:auto}
+/* ★2026-09-11: 画面下に CTA の帯を作るため、2人と水晶玉を 26vw まとめて上げた。
+   3つを同じ量だけ動かしているので、手と手のあいだに玉がある関係は変わらない。
+   上げたぶん切り抜きの下端（胴の切り口）が画面に出るので、下 7.2vw を透明へ落として
+   背景に溶かす。★直線で 14vw 落とすと胴が長く透けて幽霊に見えた。落ちを寝かせて短くする */
+.fv-person{
+  opacity:var(--people-a,1);
+  --fade:linear-gradient(to top,
+      transparent 0,
+      rgba(0,0,0,.12) 1.2vw,
+      rgba(0,0,0,.38) 2.6vw,
+      rgba(0,0,0,.70) 4.2vw,
+      rgba(0,0,0,.92) 5.6vw,
+      #000 7.2vw);
+  -webkit-mask-image:var(--fade); mask-image:var(--fade);
+}
+/* 奥行き。--dz は JS が書く（0→1・バネで追従）。
+   橋は遠いので小さく寄り、2人は近いので大きく外へ出る（真ん中を通り抜ける動き）。
+   --dz=0 では変形なしなので、初期状態の「顔の中点＝円の中心」は崩れない。
+   足もとを軸に拡大する（transform-origin 下端）ので、下端は床に着いたまま */
+.fv-bg{
+  transform-origin:50% 38%;
+  transform:translate3d(0,calc(var(--dz,0) * -3vh),0) scale(calc(1 + var(--dz,0) * .10));
+  opacity:calc(1 - var(--dz,0) * .45);
+  will-change:transform,opacity;
+}
+.fv-person{transform-origin:50% 100%;will-change:transform,opacity}
+.fv-person--r{transform:translate3d(calc(var(--dz,0) * 9vw),calc(var(--dz,0) * 6vw),0) scale(calc(1 + var(--dz,0) * .20))}
+.fv-person--l{transform:translate3d(calc(var(--dz,0) * -9vw),calc(var(--dz,0) * 6vw),0) scale(calc(1 + var(--dz,0) * .20))}
+@media (min-width:768px){ .fv-person{display:none} }
 @media (min-width:768px){ .fv-bg{display:none} }
-.stage-band{
-  position:fixed;inset:0;z-index:1;pointer-events:none;opacity:0;transition:opacity .6s;
-  -webkit-mask-image:var(--band);mask-image:var(--band);
-  -webkit-mask-size:var(--bandW,100vw) var(--bandH,36vh);mask-size:var(--bandW,100vw) var(--bandH,36vh);
+@media (min-width:768px){ .fv-scope{left:50%} }
+/* ============================================================
+   FV の覗き穴。2人の顔の真ん中を円の中心に置く。
+   ・中心の位置は画面幅から決まる。2人は幅を vw で指定し画面の端に
+     貼り付けてあるので、顔の位置も、その中点も、vw の一定倍になる。
+     右の顔 0.6717vw / 左の顔 0.284vw → 中点 0.4778vw（素材差し替えで再計算した）
+     床からの高さ 0.6432vw / 0.5704vw → 中点 0.6068vw（式は上の .fv-person--r の注記）
+   ・層は2人より後ろ。DOM でこの要素を先に置いてある
+   ・内側の落ち方はカーブ 2.2（段16枚・立ち上がりの傾きがゼロ）
+   ・いちばん外は 2px の完全な黒
+   ・スクロールでの上昇・拡大・曇り取りは js/main.js の writeScope が書く
+     （--scope-d / bottom / --fog / --mask-s / --rim-a / --vz / --vb / --ca / --glow）。
+     直接 p に結ばず、バネで追従させている（settle 0.42s・行き過ぎ 3.5%）
+   ============================================================ */
+.fv-scope{
+  position:fixed;z-index:0;pointer-events:none;
+  left:42vw; bottom:52.38vw;
+  width:var(--scope-d,52vw); height:var(--scope-d,52vw);
+  transform:translate(-50%,50%);
+  border-radius:50%;overflow:hidden;background:#0A0807;isolation:isolate;
+  opacity:0;transition:opacity .6s;
+  /* 穴から漏れる光。--glow は JS（中盤だけ 0→1→0）。overflow:hidden は自分の影を切らない */
+  box-shadow:
+    0 0 calc(var(--glow,0) * var(--scope-d,52vw) * .217) calc(var(--glow,0) * var(--scope-d,52vw) * .0246) rgba(255,228,190,.34),
+    /* 球が地に落とす影。大きさは直径に比例させる。--rim-a が 0 になると全項が 0 になって消える */
+    0 calc(var(--rim-a,1) * var(--scope-d,52vw) * .10)
+      calc(var(--rim-a,1) * var(--scope-d,52vw) * .13)
+      calc(var(--rim-a,1) * var(--scope-d,52vw) * -.05) rgba(26,5,8,.40);
+}
+.fv-scope.is-on{opacity:1}
+.stage-video{
+  position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
+  /* --vr は JS が書く回転。ボールレンズの実像は上下左右とも反転するので初期は 180deg。
+     広がるにつれて半回転し、全画面に着く前に本来の向き（0deg）へ戻る */
+  transform:rotate(var(--vr,180deg)) scale(var(--vz,1));transform-origin:50% 50%;
+  /* --vb は JS が書く明るさ。--fog は覗いている像のぼけ（あとで 0 にする） */
+  filter:blur(var(--fog,3px)) saturate(.95) contrast(.94) brightness(var(--vb,1));
+  -webkit-mask-image:radial-gradient(circle closest-side,
+    #000 0 93%,
+    rgba(0,0,0,0.994) 93.7%,
+    rgba(0,0,0,0.971) 94.4%,
+    rgba(0,0,0,0.929) 95.1%,
+    rgba(0,0,0,0.867) 95.8%,
+    rgba(0,0,0,0.782) 96.5%,
+    rgba(0,0,0,0.675) 97.2%,
+    rgba(0,0,0,0.544) 97.9%,
+    rgba(0,0,0,0.388) 98.6%,
+    rgba(0,0,0,0.207) 99.3%,
+    transparent 100.0%);
+          mask-image:radial-gradient(circle closest-side,
+    #000 0 93%,
+    rgba(0,0,0,0.994) 93.7%,
+    rgba(0,0,0,0.971) 94.4%,
+    rgba(0,0,0,0.929) 95.1%,
+    rgba(0,0,0,0.867) 95.8%,
+    rgba(0,0,0,0.782) 96.5%,
+    rgba(0,0,0,0.675) 97.2%,
+    rgba(0,0,0,0.544) 97.9%,
+    rgba(0,0,0,0.388) 98.6%,
+    rgba(0,0,0,0.207) 99.3%,
+    transparent 100.0%);
+  -webkit-mask-size:var(--mask-s,100%) var(--mask-s,100%);mask-size:var(--mask-s,100%) var(--mask-s,100%);
   -webkit-mask-position:50% 50%;mask-position:50% 50%;
   -webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;
 }
-.stage-band.is-on{opacity:1}
-/* --vz はスクロールで少しずつ上げる。帯に近づくぶんだけ画が寄る。
-   マスクは親に置いてあるので、この拡大は形に影響しない */
-.stage-video{
-  position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
-  transform:scale(var(--vz,1));transform-origin:50% 50%;
-  /* --vb は JS が書く。最初は少し暗く、スクロールで明るく、螺旋に入ると再び落とす */
-  filter:brightness(var(--vb,1));
+/* 樽型の歪み。ボールレンズは中心を拡大し、縁へ向かって像を詰める。
+   ★球が小さい間だけ掛ける。全画面のまま掛け続けると画面いっぱいに毎フレーム
+     変位マップを適用することになって重い。scale=0 は無変位なので外す瞬間に飛びは出ない。
+   ★変位マップは円の外を読まない作りにしてある（R(1)=1 で端が固定）。
+     読む作りにすると縁が透明に欠ける */
+.stage-video.is-lens{
+  filter:url(#ballLens) blur(var(--fog,3px)) saturate(.95) contrast(.94) brightness(var(--vb,1));
 }
-/* JS が無い: 映像の1コマ目（ポスター）を FV の背景として全面に敷く。video 要素は出さない */
-.no-js .stage-band{display:none}
+/* ==== BALL:BEGIN  ball_css.py が生成。手で直さない（つまみは ball_css.py の P）==== */
+.fv-scope{--lens-k:0.13591}  /* 変位マップの最大変位（半径比）。JS が scale を組み立てる */
+.fv-scope__rim{position:absolute;inset:0;pointer-events:none;opacity:var(--rim-a,1);
+  /* 上から順に重なる。
+     1本目＝全反射側の暗い帯。縁のすぐ内側がいちばん暗い。純黒で締めない（締めると穴に戻る）。
+     2本目＝球の立体。主光源のある左上を持ち上げ、反対の右下を落とす。
+       ★これが無いと、正しく作っても『ガラスの円盤』にしか見えない（中が一様に明るいため）。
+     3本目＝ガラスの身（Beer-Lambert）。球の中を通る光路長は 2R√(1-r²) なので
+       ★縁でなく中心がいちばん厚い。縁を緑に濁らせる作りは物理的に逆 */
+  background:
+    radial-gradient(circle closest-side at 50% 50%,
+    transparent 83.60%,
+    rgba(10,6,5,0.000) 84.62%,
+    rgba(10,6,5,0.000) 85.65%,
+    rgba(10,6,5,0.001) 86.67%,
+    rgba(10,6,5,0.004) 87.70%,
+    rgba(10,6,5,0.012) 88.72%,
+    rgba(10,6,5,0.035) 89.75%,
+    rgba(10,6,5,0.084) 90.77%,
+    rgba(10,6,5,0.170) 91.80%,
+    rgba(10,6,5,0.290) 92.83%,
+    rgba(10,6,5,0.416) 93.85%,
+    rgba(10,6,5,0.504) 94.88%,
+    rgba(10,6,5,0.513) 95.90%,
+    rgba(10,6,5,0.441) 96.92%,
+    rgba(10,6,5,0.319) 97.95%,
+    rgba(10,6,5,0.194) 98.98%,
+    rgba(10,6,5,0.100) 100.00%),
+    linear-gradient(135deg,rgba(255,252,246,.13) 0%,rgba(255,252,246,.04) 26%,rgba(255,252,246,0) 42%,rgba(10,6,5,.06) 60%,rgba(10,6,5,.15) 80%,rgba(10,6,5,.24) 100%),
+    radial-gradient(circle closest-side at 50% 50%,
+    rgba(176,206,198,0.121) 0.00%,
+    rgba(176,206,198,0.121) 8.33%,
+    rgba(176,206,198,0.120) 16.67%,
+    rgba(176,206,198,0.118) 25.00%,
+    rgba(176,206,198,0.115) 33.33%,
+    rgba(176,206,198,0.112) 41.67%,
+    rgba(176,206,198,0.107) 50.00%,
+    rgba(176,206,198,0.101) 58.33%,
+    rgba(176,206,198,0.094) 66.67%,
+    rgba(176,206,198,0.085) 75.00%,
+    rgba(176,206,198,0.072) 83.33%,
+    rgba(176,206,198,0.053) 91.67%,
+    rgba(176,206,198,0.000) 100.00%)}
+/* 圧縮された周囲の映り込み。球の縁では背景が細い輪へ潰れて入る。
+   ★レンズに見えるかどうかの本体。しかも実像なので上下が逆＝空は輪の「下」に出る。
+   ★もう1つの役目は「縁の明るさを角度で変えること」。一定の明るさで1周させると
+     水晶でなくポータルの輪に見える（実測で確認）。主光源のある左上を白く、
+     反対の右下に回り込みの弱い光、上は地面（反転）で暗く、下は空で青い */
+.fv-scope__lens{position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+  opacity:calc(var(--rim-a,1) * 0.90);
+  background:conic-gradient(from 0deg at 50% 50%,
+    rgba(46,24,20,.88) 0deg, rgba(70,38,30,.74) 42deg, rgba(150,124,108,.56) 84deg,
+    rgba(236,231,223,.80) 118deg, rgba(176,212,244,.94) 162deg, rgba(186,220,248,.98) 180deg,
+    rgba(176,212,244,.94) 198deg, rgba(198,194,188,.64) 242deg, rgba(255,253,248,.99) 302deg,
+    rgba(255,253,248,.92) 326deg, rgba(120,72,54,.74) 350deg, rgba(46,24,20,.88) 360deg);
+  -webkit-mask-image:radial-gradient(circle closest-side,transparent 0 87.50%,rgba(0,0,0,.55) 90.50%,#000 93.30%,#000 99.3%,transparent 100%);
+          mask-image:radial-gradient(circle closest-side,transparent 0 87.50%,rgba(0,0,0,.55) 90.50%,#000 93.30%,#000 99.3%,transparent 100%)}
+/* Fresnel の縁と輪郭の芯、そして分散。
+   Schlick を r=0.955〜1.00 に実数で置いた。外側 4.5% だけが光る。
+   ★輪郭の芯（inset の 1.6px）が水晶に見えるかの決め手。これが無いと霜のドームになる。
+   分散は RGB を 1:2:4 でずらす（青がいちばん強く曲がる）*/
+.fv-scope__edge{position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+  opacity:var(--rim-a,1);
+  /* ★px 固定にしない。玉は 6.4vw〜画面対角まで 40倍近く伸縮するので、
+     固定値だと小さいときに輪郭と内側の光が玉を塗りつぶして白い粒になる。
+     直径 203px のときの見え方を基準に比率へ直した（下限だけ 0.8px で残す）*/
+  box-shadow:inset 0 0 0 clamp(.8px,calc(var(--scope-d,52vw) * 0.00788),3px) rgba(255,253,250,.92),
+             inset 0 0 calc(var(--scope-d,52vw) * 0.04335) calc(var(--scope-d,52vw) * 0.00946) rgba(255,250,242,.34);
+  background:
+    radial-gradient(circle closest-side at 50% 50%,transparent 0 97.80%,rgba(255,72,48,0.200) 98.80%,rgba(255,72,48,0) 99.40%),
+    radial-gradient(circle closest-side at 50% 50%,transparent 0 97.20%,rgba(86,255,132,0.144) 98.20%,rgba(86,255,132,0) 98.80%),
+    radial-gradient(circle closest-side at 50% 50%,transparent 0 96.00%,rgba(64,150,255,0.200) 97.00%,rgba(64,150,255,0) 97.60%),
+    radial-gradient(circle closest-side at 50% 50%,
+    transparent 95.50%,
+    rgba(255,252,247,0.224) 95.95%,
+    rgba(255,252,247,0.245) 96.40%,
+    rgba(255,252,247,0.269) 96.85%,
+    rgba(255,252,247,0.298) 97.30%,
+    rgba(255,252,247,0.334) 97.75%,
+    rgba(255,252,247,0.377) 98.20%,
+    rgba(255,252,247,0.433) 98.65%,
+    rgba(255,252,247,0.508) 99.10%,
+    rgba(255,252,247,0.624) 99.55%,
+    rgba(255,252,247,0.970) 100.00%)}
+/* 光源の映り込み。球は曲率が強いので光源は小さく鋭く写る。
+   1本目＝主光源の芯（ほぼ白飛び）。2本目＝その滲み。
+   3本目＝裏面で1回反射して戻る像（主光源の反対側に小さく暗く出る。ガラスの厚みの証拠）。
+   4本目＝下へ回り込む戻り光。★ここを広げると一気に濁って真珠になる */
+.fv-scope__glass{position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:var(--rim-a,1);
+  background:
+    radial-gradient(ellipse 5.4% 4.0% at 29% 20%,rgba(255,255,255,1),rgba(255,255,254,.72) 48%,rgba(255,255,254,0) 80%),
+    radial-gradient(ellipse 13% 9.5% at 30% 21%,rgba(255,252,246,.20),rgba(255,252,246,0) 76%),
+    radial-gradient(ellipse 2.4% 1.8% at 66% 74%,rgba(255,248,236,.52),rgba(255,248,236,0) 84%),
+    radial-gradient(ellipse 24% 16% at 70% 80%,rgba(255,238,209,.10),rgba(255,238,209,0) 74%)}
+/* ==== BALL:END ==== */
+/* 粒子。映像の上に薄い粒を敷き、13回/秒で位置を飛ばす（フィルムの粒）。
+   混色モードは使わない（映像の上での合成が重い）。不透明度だけで重ねる。
+   200px のタイルなので、飛ばす量はタイルの倍数を避ける（同じ絵に戻ってしまう） */
+.fv-scope__grain{position:absolute;inset:0;pointer-events:none;
+  background:var(--paper) 0 0/200px 200px repeat;opacity:.075;
+  will-change:transform;
+  animation:fv-grain .6s steps(1) infinite}
+@keyframes fv-grain{
+  0%{background-position:0 0}12.5%{background-position:-37px 61px}25%{background-position:83px -29px}
+  37.5%{background-position:-113px -97px}50%{background-position:47px 131px}62.5%{background-position:-151px 23px}
+  75%{background-position:19px -167px}87.5%{background-position:-71px 109px}}
+/* 速く送ったときだけ出る縁の色ずれ（左に赤・右に青）。--ca は JS（バネの速度） */
+.fv-scope__ca{position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:var(--ca,0);
+  box-shadow:inset 3px 0 0 1px rgba(255,86,64,.42),inset -3px 0 0 1px rgba(64,196,255,.42)}
+@media (prefers-reduced-motion:reduce){
+  .fv-scope__grain{animation:none}
+  .fv-bg,.fv-person{will-change:auto}
+}
+.no-js .fv-scope{display:none}
 .no-js .fv{height:auto}
 .no-js .fv__sticky{position:relative}
 .no-js .fv__sticky::before{content:'';position:absolute;inset:0;z-index:0;
@@ -176,7 +417,23 @@
   padding:0 var(--px) 28px;
   overflow:hidden;
 }
-.fv__copy{grid-area:copy;position:relative;z-index:2;padding-top:10px;text-align:center}
+/* 見出しを画面から外したので、この箱は SP では中身が無い。
+   画面いっぱいに広がる箱が前面に残るとボタンのタップを奪うため、透過させる */
+.fv__copy{grid-area:copy;position:relative;z-index:2;padding-top:10px;text-align:center;pointer-events:none}
+.fv__copy a,.fv__copy button{pointer-events:auto}
+/* FV の縦書き見出し。書体はよくあるご質問の見出しと同じ明朝。
+   ★縦書きでは block が右から左へ積まれるので、先の句が右の列に来る＝読み順どおり。
+   ★横方向の中央寄せは width:max-content + 左右 auto。text-align では block は動かない */
+.fv__vtitle span{display:block}
+/* ★PC では出さない。PC の .fv__copy にはリード文と CTA が入っていて、縦書きの見出しを
+   同じ列に積むと本文が水晶玉の上まで押し出されて読めなくなる（実測で確認）。
+   h1 は DOM に残したいので display:none でなく読み上げ専用にする */
+@media (min-width:768px){
+  .fv__vtitle{
+    position:absolute;width:1px;height:1px;margin:-1px;padding:0;
+    overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0;
+  }
+}
 /* SP は画面のちょうど真ん中に置く。中央寄せに transform を使うと、下の
    「スクロールで消える」ルールの transform に上書きされるので grid で寄せる。
    inset:0 は sticky の padding box に対して効くので、下の余白の影響も受けない */
@@ -200,8 +457,30 @@
     0 2px 12px rgba(26,5,8,.72), 0 0 26px rgba(26,5,8,.55);
 }
 .fv__lead,.fv__meta,.fv__eyebrow{text-shadow:0 1px 3px rgba(26,5,8,.7),0 0 14px rgba(26,5,8,.55)}
-.fv__eyebrow{font-size:10.5px;letter-spacing:.22em;opacity:.78;margin-bottom:16px}
-.fv__eyebrow-sep{opacity:.5;margin:0 6px}
+/* ★縦書きの見出しは「上の塊」と「水晶玉」のあいだに収める。
+   以前は画面の中央に置いていたが、2人と玉を上端基準へ移したときに玉が上がり、
+   4機種とも重なった（実測で玉の上端が見出しの下端より 15〜17vw 上）。
+   下端を玉の上端（--fv-cut − 30.93vw）より 2vw 上に固定し、大きさもその帯に収める */
+.fv__vtitle{
+  position:absolute;left:0;right:0;z-index:2;
+  bottom:calc(100% - var(--fv-cut,152vw) + 33vw);
+  writing-mode:vertical-rl;
+  width:max-content;margin:0 auto;
+  font-family:var(--ff-serif);font-weight:700;
+  font-size:clamp(18px,5.8vw,27px);line-height:1.66;letter-spacing:.06em;
+  color:var(--cream);
+  text-shadow:0 1px 3px rgba(26,5,8,.72),0 0 14px rgba(26,5,8,.55);
+}
+.fv__vtitle span{display:block}
+/* ★PC では出さない。PC の .fv__copy にはリード文と CTA が入っていて、縦書きの見出しを
+   同じ列に積むと本文が水晶玉の上まで押し出されて読めなくなる（実測で確認）。
+   h1 は DOM に残したいので display:none でなく読み上げ専用にする */
+@media (min-width:768px){
+  .fv__vtitle{
+    position:absolute;width:1px;height:1px;margin:-1px;padding:0;
+    overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0;
+  }
+}
 .fv__title{
   font-family:var(--ff-serif);font-weight:700;
   font-size:clamp(32px,9.6vw,48px);line-height:1.32;letter-spacing:.02em;
@@ -218,9 +497,8 @@
 .fv__cta{
   grid-area:cta;position:relative;z-index:2;
   justify-self:center;
-  /* コメントがボタンの上半分に重なるまで引き上げる。
-     吹き出し自身の下マージン(14px)ぶんも足して引く必要がある */
-  margin-top:-33px;
+  /* 上に重ねる吹き出しは外してあるので引き上げない */
+  margin-top:0;
 }
 .fv__cta .btn{min-height:68px;padding:16px 62px;font-size:18px}
 /* 吹き出しはボタンより前に出す */
@@ -240,7 +518,7 @@
    高さの条件だけだと横長のPCにも当たるので、幅の条件を必ず併記する。
    ★この塊は .fv__eye の後に置く。前に置くと同じ詳細度で後勝ちに負けて効かない */
 @media (max-width:767px) and (max-height:700px){
-  .fv__cta{margin-top:-28px}
+  .fv__cta{margin-top:0}
   .fv__cta .btn{min-height:60px;padding:13px 46px;font-size:16px}
   .fv__mascot .say{font-size:11.5px;margin-bottom:10px}
   .fv__eye{width:96px;height:96px}
@@ -263,9 +541,41 @@
 
 
 /* スクロールで文字が消えていく（JS が --fp を書く） */
-.fv__copy,.fv__cta,.fv__mascot,.fv__meta{
+.fv__copy,.fv__cta,.fv__mascot,.fv__meta,.fv__lockup,.fv__vtitle{
   opacity:calc(1 - var(--fp,0) * 3.2);
   transform:translateY(calc(var(--fp,0) * -60px));
+}
+/* FV 上部の名札と派遣先。書体は Oswald。
+   ★傾きは塊に1回だけ掛ける。2つを別々に回すと、回す中心の高さが違うぶん左端がずれる。
+   ★左端は padding-left で揃える。名札は字面が画面幅の 92% なので、左端は 4vw */
+.fv__lockup{
+  position:absolute;top:15%;left:0;right:0;z-index:2;pointer-events:none;
+  /* ★消え方は縦書きの見出し（.fv__copy の中）と同じ --fp に乗せる。
+     上のまとめ規則に .fv__lockup を入れてあるので、ここでは傾きを足すだけ */
+  transform:translateY(calc(var(--fp,0) * -60px)) rotate(-10deg);
+}
+.fv__eyebrow,.fv__places{
+  margin:0;padding-left:4vw;text-align:left;
+  font-family:var(--ff-cond);font-weight:700;
+  color:var(--cream);
+  text-shadow:0 1px 3px rgba(26,5,8,.72),0 0 14px rgba(26,5,8,.55);
+}
+.fv__eyebrow{
+  /* 字面が画面幅の 92% になる大きさ（太字で測り直した値。3機種とも同じ比になる） */
+  font-size:11.87vw;letter-spacing:.02em;line-height:1;
+}
+.fv__places{
+  font-size:5.1vw;letter-spacing:.06em;line-height:1.2;
+  margin-top:.1em;opacity:.9;
+}
+.fv__places span{display:block}
+/* ★SP だけ。PC の FV はリード文と CTA が主役で、この大きさの名札は入らない */
+@media (min-width:768px){ .fv__lockup{display:none} }
+/* 背の低い機種は バー + 塊 で縦書きの見出しに届いてしまう。一回り小さくして場所を作る
+   （高さの条件だけだと横長のPCにも当たるので幅の条件を併記する）*/
+@media (max-width:767px) and (max-height:720px){
+  .fv__eyebrow{font-size:10.2vw}
+  .fv__places{font-size:4.4vw}
 }
 .fv.is-through .fv__mascot,.fv.is-through .fv__cta{visibility:hidden}
 /* 透明になっても要素は残るのでリンクは押せてしまう。消えたら当たり判定も外す */
@@ -281,7 +591,7 @@
     align-items:center;
   }
   .fv__copy{text-align:left;padding-top:0;align-self:center}
-  .fv__eyebrow{font-size:11px;margin-bottom:26px}
+  .fv__eyebrow{font-size:22px}
   .fv__title{font-size:clamp(40px,4.2vw,64px);line-height:1.28}
   .fv__lead,.fv__ctas{display:flex}
   .fv__lead{display:block}
