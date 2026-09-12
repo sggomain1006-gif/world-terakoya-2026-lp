@@ -26,5 +26,21 @@
 .sp-force .fv-scope{margin-left:calc((100vw - var(--sp-w)) / 2)}
 /* 右端に貼り付く縦書きCTAは、桁の右端に合わせる */
 .sp-force .side-cta{left:auto;right:calc(50% - var(--sp-w) / 2);margin-left:0}
-/* パソコン専用の飾りはスマホには無いので消す */
+/* ★桁の外へはみ出す分を隠す幕。position:fixed の要素は親の overflow では切れないので、
+   桁の左右を同じ地色の帯で覆う。fv6 は left:-8.18% で桁の外へ出ており、
+   実機なら画面外で切れる部分がパソコンでは見えてしまう。
+   スクロール中は 2人が 1.20 倍に拡大して左右へも動くので、両側に置く */
+.sp-force::before,
+.sp-force::after{
+  content:'';position:fixed;top:0;bottom:0;z-index:80;pointer-events:none;
+  width:calc((100vw - var(--sp-w)) / 2 + 1px);background:#120306;
+}
+.sp-force::before{left:0}
+.sp-force::after{right:0}
+
+/* パソコン専用の飾り（追従する丸いカーソル）はスマホには無いので消す。
+   ★ただし .has-cursor が cursor:none を当てているので、素のカーソルを戻す。
+     消すだけだと矢印まで見えなくなる */
 .sp-force .cursor{display:none}
+.sp-force{cursor:auto}
+.sp-force a,.sp-force button,.sp-force summary,.sp-force [role="tab"]{cursor:pointer}
