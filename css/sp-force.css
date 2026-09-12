@@ -1,0 +1,30 @@
+/* ★一時措置：パソコンでもスマホ版を表示する。
+   .sp-force は js/sp-force.js が幅 400px 以上のときだけ付ける。実機のスマホには一切かからない。
+   戻すときはこのファイルと js/sp-force.js、index.html の2行を消し、
+   css/*.css の min-width:100000px を 768/1024 に戻す（--vw はそのままでよい）。 */
+.sp-force{--sp-w:390px;background:#120306}
+/* ★vw は窓の幅を指すので、桁の幅の1%に読み替える。これをしないと
+   clamp(25px, 6.9vw, 32px) などが上限に張り付き、見出しだけ実機より大きくなる */
+.sp-force{--vw:calc(var(--sp-w) / 100)}
+.sp-force body{
+  width:var(--sp-w);margin-left:auto;margin-right:auto;
+  box-shadow:0 0 0 1px rgba(245,239,230,.14);
+}
+/* position:fixed の要素は窓が基準なので、桁と同じ幅・同じ位置へ寄せ直す。
+   ★FV の地・2人・水晶玉もここに入れる（入れ忘れると窓の中央に取り残される） */
+.sp-force .veil,
+.sp-force .stage,
+.sp-force .fv-bg,
+.sp-force .bar{
+  left:50%;right:auto;width:var(--sp-w);margin-left:calc(var(--sp-w) / -2);
+}
+/* ★2人と水晶玉は fixed で、left/right の % が「窓幅」に対して効いてしまう。
+   fv6 の left:-8.18% は桁幅の -8.18% でなければならないので、桁幅で計算し直す。
+   fv7 は right:0 なので桁の右端へ寄せるだけでよい */
+.sp-force .fv-person--l{left:calc((100vw - var(--sp-w)) / 2 - 0.0818 * var(--sp-w));margin-left:0}
+.sp-force .fv-person--r{right:calc((100vw - var(--sp-w)) / 2);margin-right:0}
+.sp-force .fv-scope{margin-left:calc((100vw - var(--sp-w)) / 2)}
+/* 右端に貼り付く縦書きCTAは、桁の右端に合わせる */
+.sp-force .side-cta{left:auto;right:calc(50% - var(--sp-w) / 2);margin-left:0}
+/* パソコン専用の飾りはスマホには無いので消す */
+.sp-force .cursor{display:none}

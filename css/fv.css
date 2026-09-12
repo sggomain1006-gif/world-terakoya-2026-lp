@@ -116,42 +116,42 @@
 }
 /* 置き方は「顔をどこに置きたいか」から逆算する。目分量で寄せない。
    目の位置は実測で fv7（右）= 画像の (51%, 28%) / fv6（左）= (59%, 31%)。
-   高さ = 幅 × 1448/1086。顔の高さは2人とも床から 52.1vw に揃える。
+   高さ = 幅 × 1448/1086。顔の高さは2人とも床から calc(52.1 * var(--vw)) に揃える。
 
    ★2026-09-11: 画像の下端を画面の下端に合わせた（bottom:0）。切り落とさず全身を出す指定。
      そのぶん顔が上がり、2枚の高さが揃わなくなった（高さも幅も違うため）。
      fv7（右・手前）: 右端を画面の右端に合わせる（right:0）
-       幅 67vw → 高さ 89.33vw / 顔 x = 100 − (1−0.51)×67 = 67.17vw
-       顔の高さ = 89.33 × (1−0.28) = 64.32vw
-     fv6（左・奥）  : 幅 62vw → 高さ 82.67vw / 顔 x = 0.59×62 − 8.18 = 28.40vw
-       顔の高さ = 82.67 × (1−0.31) = 57.04vw
+       幅 calc(67 * var(--vw)) → 高さ calc(89.33 * var(--vw)) / 顔 x = 100 − (1−0.51)×67 = calc(67.17 * var(--vw))
+       顔の高さ = 89.33 × (1−0.28) = calc(64.32 * var(--vw))
+     fv6（左・奥）  : 幅 calc(62 * var(--vw)) → 高さ calc(82.67 * var(--vw)) / 顔 x = 0.59×62 − 8.18 = calc(28.40 * var(--vw))
+       顔の高さ = 82.67 × (1−0.31) = calc(57.04 * var(--vw))
 
    ★2026-09-11: 水晶玉は「顔の中点」でなく「2人の手のあいだ」に置く指定に変わった。
-     実測（肌色の無い帯を画素で採寸）: 床から 21.00〜31.75vw ＝ すき間 10.75vw。
-     玉は直径 9.1vw（上下に 0.8vw ずつ余白）、中心は床から 26.38vw・左から 42vw。
-     ★そのうえで CTA の帯を作るために 3つとも 26vw 上げてある（いまの玉の中心は 52.38vw）。
+     実測（肌色の無い帯を画素で採寸）: 床から 21.00〜calc(31.75 * var(--vw)) ＝ すき間 calc(10.75 * var(--vw))。
+     玉は直径 calc(9.1 * var(--vw))（上下に calc(0.8 * var(--vw)) ずつ余白）、中心は床から calc(26.38 * var(--vw))・左から calc(42 * var(--vw))。
+     ★そのうえで CTA の帯を作るために 3つとも calc(26 * var(--vw)) 上げてある（いまの玉の中心は calc(52.38 * var(--vw))）。
      ★素材や大きさを動かしたらこの採寸をやり直すこと。手に重なると意味が壊れる。
    ★2人の縮尺はもう揃っていない（fv7 が 1.08 倍）。手前と奥の差として意図したもの */
-.fv-person--r{right:0;width:67vw;top:calc(var(--fv-cut,152vw) + 4vw - 89.33vw);bottom:auto;
+.fv-person--r{right:0;width:calc(67 * var(--vw));top:calc(var(--fv-cut,calc(152 * var(--vw))) + calc(4 * var(--vw)) - calc(89.33 * var(--vw)));bottom:auto;
   /* fv7 は素材が暗い（不透明画素の中央値 56。fv6 は 79）。暗部を持ち上げる。
      brightness だけだと明部が先に飛ぶので contrast を少し下げて併用する。
      この値で 中央値 56→73 / 上位10% 154→183（fv6 は 79 / 184）*/
   filter:brightness(var(--fv7-b,1.22)) contrast(var(--fv7-c,.92));
 }
-.fv-person--l{left:-8.18%;width:62vw;top:calc(var(--fv-cut,152vw) - 82.67vw);bottom:auto}
-/* ★2026-09-11: 画面下に CTA の帯を作るため、2人と水晶玉を 26vw まとめて上げた。
+.fv-person--l{left:-8.18%;width:calc(62 * var(--vw));top:calc(var(--fv-cut,calc(152 * var(--vw))) - calc(82.67 * var(--vw)));bottom:auto}
+/* ★2026-09-11: 画面下に CTA の帯を作るため、2人と水晶玉を calc(26 * var(--vw)) まとめて上げた。
    3つを同じ量だけ動かしているので、手と手のあいだに玉がある関係は変わらない。
-   上げたぶん切り抜きの下端（胴の切り口）が画面に出るので、下 7.2vw を透明へ落として
-   背景に溶かす。★直線で 14vw 落とすと胴が長く透けて幽霊に見えた。落ちを寝かせて短くする */
+   上げたぶん切り抜きの下端（胴の切り口）が画面に出るので、下 calc(7.2 * var(--vw)) を透明へ落として
+   背景に溶かす。★直線で calc(14 * var(--vw)) 落とすと胴が長く透けて幽霊に見えた。落ちを寝かせて短くする */
 .fv-person{
   opacity:var(--people-a,1);
   --fade:linear-gradient(to top,
       transparent 0,
-      rgba(0,0,0,.12) 1.2vw,
-      rgba(0,0,0,.38) 2.6vw,
-      rgba(0,0,0,.70) 4.2vw,
-      rgba(0,0,0,.92) 5.6vw,
-      #000 7.2vw);
+      rgba(0,0,0,.12) calc(1.2 * var(--vw)),
+      rgba(0,0,0,.38) calc(2.6 * var(--vw)),
+      rgba(0,0,0,.70) calc(4.2 * var(--vw)),
+      rgba(0,0,0,.92) calc(5.6 * var(--vw)),
+      #000 calc(7.2 * var(--vw)));
   -webkit-mask-image:var(--fade); mask-image:var(--fade);
 }
 /* 奥行き。--dz は JS が書く（0→1・バネで追従）。
@@ -165,17 +165,17 @@
   will-change:transform,opacity;
 }
 .fv-person{transform-origin:50% 100%;will-change:transform,opacity}
-.fv-person--r{transform:translate3d(calc(var(--dz,0) * 9vw),calc(var(--dz,0) * 6vw),0) scale(calc(1 + var(--dz,0) * .20))}
-.fv-person--l{transform:translate3d(calc(var(--dz,0) * -9vw),calc(var(--dz,0) * 6vw),0) scale(calc(1 + var(--dz,0) * .20))}
-@media (min-width:768px){ .fv-person{display:none} }
-@media (min-width:768px){ .fv-bg{display:none} }
-@media (min-width:768px){ .fv-scope{left:50%} }
+.fv-person--r{transform:translate3d(calc(var(--dz,0) * calc(9 * var(--vw))),calc(var(--dz,0) * calc(6 * var(--vw))),0) scale(calc(1 + var(--dz,0) * .20))}
+.fv-person--l{transform:translate3d(calc(var(--dz,0) * -9vw),calc(var(--dz,0) * calc(6 * var(--vw))),0) scale(calc(1 + var(--dz,0) * .20))}
+@media (min-width:100000px){ .fv-person{display:none} }
+@media (min-width:100000px){ .fv-bg{display:none} }
+@media (min-width:100000px){ .fv-scope{left:50%} }
 /* ============================================================
    FV の覗き穴。2人の顔の真ん中を円の中心に置く。
    ・中心の位置は画面幅から決まる。2人は幅を vw で指定し画面の端に
      貼り付けてあるので、顔の位置も、その中点も、vw の一定倍になる。
-     右の顔 0.6717vw / 左の顔 0.284vw → 中点 0.4778vw（素材差し替えで再計算した）
-     床からの高さ 0.6432vw / 0.5704vw → 中点 0.6068vw（式は上の .fv-person--r の注記）
+     右の顔 calc(0.6717 * var(--vw)) / 左の顔 calc(0.284 * var(--vw)) → 中点 calc(0.4778 * var(--vw))（素材差し替えで再計算した）
+     床からの高さ calc(0.6432 * var(--vw)) / calc(0.5704 * var(--vw)) → 中点 calc(0.6068 * var(--vw))（式は上の .fv-person--r の注記）
    ・層は2人より後ろ。DOM でこの要素を先に置いてある
    ・内側の落ち方はカーブ 2.2（段16枚・立ち上がりの傾きがゼロ）
    ・いちばん外は 2px の完全な黒
@@ -185,18 +185,18 @@
    ============================================================ */
 .fv-scope{
   position:fixed;z-index:0;pointer-events:none;
-  left:42vw; bottom:52.38vw;
-  width:var(--scope-d,52vw); height:var(--scope-d,52vw);
+  left:calc(42 * var(--vw)); bottom:calc(52.38 * var(--vw));
+  width:var(--scope-d,calc(52 * var(--vw))); height:var(--scope-d,calc(52 * var(--vw)));
   transform:translate(-50%,50%);
   border-radius:50%;overflow:hidden;background:#0A0807;isolation:isolate;
   opacity:0;transition:opacity .6s;
   /* 穴から漏れる光。--glow は JS（中盤だけ 0→1→0）。overflow:hidden は自分の影を切らない */
   box-shadow:
-    0 0 calc(var(--glow,0) * var(--scope-d,52vw) * .217) calc(var(--glow,0) * var(--scope-d,52vw) * .0246) rgba(255,228,190,.34),
+    0 0 calc(var(--glow,0) * var(--scope-d,calc(52 * var(--vw))) * .217) calc(var(--glow,0) * var(--scope-d,calc(52 * var(--vw))) * .0246) rgba(255,228,190,.34),
     /* 球が地に落とす影。大きさは直径に比例させる。--rim-a が 0 になると全項が 0 になって消える */
-    0 calc(var(--rim-a,1) * var(--scope-d,52vw) * .10)
-      calc(var(--rim-a,1) * var(--scope-d,52vw) * .13)
-      calc(var(--rim-a,1) * var(--scope-d,52vw) * -.05) rgba(26,5,8,.40);
+    0 calc(var(--rim-a,1) * var(--scope-d,calc(52 * var(--vw))) * .10)
+      calc(var(--rim-a,1) * var(--scope-d,calc(52 * var(--vw))) * .13)
+      calc(var(--rim-a,1) * var(--scope-d,calc(52 * var(--vw))) * -.05) rgba(26,5,8,.40);
 }
 .fv-scope.is-on{opacity:1}
 .stage-video{
@@ -305,11 +305,11 @@
    分散は RGB を 1:2:4 でずらす（青がいちばん強く曲がる）*/
 .fv-scope__edge{position:absolute;inset:0;border-radius:inherit;pointer-events:none;
   opacity:var(--rim-a,1);
-  /* ★px 固定にしない。玉は 6.4vw〜画面対角まで 40倍近く伸縮するので、
+  /* ★px 固定にしない。玉は calc(6.4 * var(--vw))〜画面対角まで 40倍近く伸縮するので、
      固定値だと小さいときに輪郭と内側の光が玉を塗りつぶして白い粒になる。
      直径 203px のときの見え方を基準に比率へ直した（下限だけ 0.8px で残す）*/
-  box-shadow:inset 0 0 0 clamp(.8px,calc(var(--scope-d,52vw) * 0.00788),3px) rgba(255,253,250,.92),
-             inset 0 0 calc(var(--scope-d,52vw) * 0.04335) calc(var(--scope-d,52vw) * 0.00946) rgba(255,250,242,.34);
+  box-shadow:inset 0 0 0 clamp(.8px,calc(var(--scope-d,calc(52 * var(--vw))) * 0.00788),3px) rgba(255,253,250,.92),
+             inset 0 0 calc(var(--scope-d,calc(52 * var(--vw))) * 0.04335) calc(var(--scope-d,calc(52 * var(--vw))) * 0.00946) rgba(255,250,242,.34);
   background:
     radial-gradient(circle closest-side at 50% 50%,transparent 0 97.80%,rgba(255,72,48,0.200) 98.80%,rgba(255,72,48,0) 99.40%),
     radial-gradient(circle closest-side at 50% 50%,transparent 0 97.20%,rgba(86,255,132,0.144) 98.20%,rgba(86,255,132,0) 98.80%),
@@ -379,11 +379,11 @@
 .bar__meta{margin-left:auto;display:none;font-size:11px;letter-spacing:.14em;opacity:.7;align-items:center;gap:10px}
 .bar__meta .mono{letter-spacing:.2em}
 .bar__sep{opacity:.5}
-@media (min-width:768px){.bar__meta{margin-left:auto;display:flex}}
+@media (min-width:100000px){.bar__meta{margin-left:auto;display:flex}}
 
 /* ---------- 章レール（PC） ---------- */
 .rail{display:none}
-@media (min-width:1024px){
+@media (min-width:100000px){
   .rail{
     position:fixed;left:26px;top:50%;transform:translateY(-50%);z-index:55;
     display:flex;flex-direction:column;gap:12px;
@@ -428,7 +428,7 @@
 /* ★PC では出さない。PC の .fv__copy にはリード文と CTA が入っていて、縦書きの見出しを
    同じ列に積むと本文が水晶玉の上まで押し出されて読めなくなる（実測で確認）。
    h1 は DOM に残したいので display:none でなく読み上げ専用にする */
-@media (min-width:768px){
+@media (min-width:100000px){
   .fv__vtitle{
     position:absolute;width:1px;height:1px;margin:-1px;padding:0;
     overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0;
@@ -459,15 +459,15 @@
 .fv__lead,.fv__meta,.fv__eyebrow{text-shadow:0 1px 3px rgba(26,5,8,.7),0 0 14px rgba(26,5,8,.55)}
 /* ★縦書きの見出しは「上の塊」と「水晶玉」のあいだに収める。
    以前は画面の中央に置いていたが、2人と玉を上端基準へ移したときに玉が上がり、
-   4機種とも重なった（実測で玉の上端が見出しの下端より 15〜17vw 上）。
-   下端を玉の上端（--fv-cut − 30.93vw）より 2vw 上に固定し、大きさもその帯に収める */
+   4機種とも重なった（実測で玉の上端が見出しの下端より 15〜calc(17 * var(--vw)) 上）。
+   下端を玉の上端（--fv-cut − calc(30.93 * var(--vw))）より calc(2 * var(--vw)) 上に固定し、大きさもその帯に収める */
 .fv__vtitle{
   position:absolute;left:0;right:0;z-index:2;
-  bottom:calc(100% - var(--fv-cut,152vw) + 33vw);
+  bottom:calc(100% - var(--fv-cut,calc(152 * var(--vw))) + calc(33 * var(--vw)));
   writing-mode:vertical-rl;
   width:max-content;margin:0 auto;
   font-family:var(--ff-serif);font-weight:700;
-  font-size:clamp(18px,5.8vw,27px);line-height:1.66;letter-spacing:.06em;
+  font-size:clamp(18px,calc(5.8 * var(--vw)),27px);line-height:1.66;letter-spacing:.06em;
   color:var(--cream);
   text-shadow:0 1px 3px rgba(26,5,8,.72),0 0 14px rgba(26,5,8,.55);
 }
@@ -475,7 +475,7 @@
 /* ★PC では出さない。PC の .fv__copy にはリード文と CTA が入っていて、縦書きの見出しを
    同じ列に積むと本文が水晶玉の上まで押し出されて読めなくなる（実測で確認）。
    h1 は DOM に残したいので display:none でなく読み上げ専用にする */
-@media (min-width:768px){
+@media (min-width:100000px){
   .fv__vtitle{
     position:absolute;width:1px;height:1px;margin:-1px;padding:0;
     overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0;
@@ -483,7 +483,7 @@
 }
 .fv__title{
   font-family:var(--ff-serif);font-weight:700;
-  font-size:clamp(32px,9.6vw,48px);line-height:1.32;letter-spacing:.02em;
+  font-size:clamp(32px,calc(9.6 * var(--vw)),48px);line-height:1.32;letter-spacing:.02em;
   text-wrap:balance;
 }
 .fv__line{display:block}
@@ -503,7 +503,7 @@
 .fv__cta .btn{min-height:68px;padding:16px 62px;font-size:18px}
 /* 吹き出しはボタンより前に出す */
 .fv__mascot{z-index:3}
-@media (min-width:768px){ .fv__cta{display:none} }
+@media (min-width:100000px){ .fv__cta{display:none} }
 
 .fv__mascot{
   grid-area:foot;position:relative;z-index:2;justify-self:end;align-self:end;
@@ -547,7 +547,7 @@
 }
 /* FV 上部の名札と派遣先。書体は Oswald。
    ★傾きは塊に1回だけ掛ける。2つを別々に回すと、回す中心の高さが違うぶん左端がずれる。
-   ★左端は padding-left で揃える。名札は字面が画面幅の 92% なので、左端は 4vw */
+   ★左端は padding-left で揃える。名札は字面が画面幅の 92% なので、左端は calc(4 * var(--vw)) */
 .fv__lockup{
   position:absolute;top:15%;left:0;right:0;z-index:2;pointer-events:none;
   /* ★消え方は縦書きの見出し（.fv__copy の中）と同じ --fp に乗せる。
@@ -555,33 +555,33 @@
   transform:translateY(calc(var(--fp,0) * -60px)) rotate(-10deg);
 }
 .fv__eyebrow,.fv__places{
-  margin:0;padding-left:4vw;text-align:left;
+  margin:0;padding-left:calc(4 * var(--vw));text-align:left;
   font-family:var(--ff-cond);font-weight:700;
   color:var(--cream);
   text-shadow:0 1px 3px rgba(26,5,8,.72),0 0 14px rgba(26,5,8,.55);
 }
 .fv__eyebrow{
   /* 字面が画面幅の 92% になる大きさ（太字で測り直した値。3機種とも同じ比になる） */
-  font-size:11.87vw;letter-spacing:.02em;line-height:1;
+  font-size:calc(11.87 * var(--vw));letter-spacing:.02em;line-height:1;
 }
 .fv__places{
-  font-size:5.1vw;letter-spacing:.06em;line-height:1.2;
+  font-size:calc(5.1 * var(--vw));letter-spacing:.06em;line-height:1.2;
   margin-top:.1em;opacity:.9;
 }
 .fv__places span{display:block}
 /* ★SP だけ。PC の FV はリード文と CTA が主役で、この大きさの名札は入らない */
-@media (min-width:768px){ .fv__lockup{display:none} }
+@media (min-width:100000px){ .fv__lockup{display:none} }
 /* 背の低い機種は バー + 塊 で縦書きの見出しに届いてしまう。一回り小さくして場所を作る
    （高さの条件だけだと横長のPCにも当たるので幅の条件を併記する）*/
 @media (max-width:767px) and (max-height:720px){
-  .fv__eyebrow{font-size:10.2vw}
-  .fv__places{font-size:4.4vw}
+  .fv__eyebrow{font-size:calc(10.2 * var(--vw))}
+  .fv__places{font-size:calc(4.4 * var(--vw))}
 }
 .fv.is-through .fv__mascot,.fv.is-through .fv__cta{visibility:hidden}
 /* 透明になっても要素は残るのでリンクは押せてしまう。消えたら当たり判定も外す */
 .fv.is-dim .fv__cta,.fv.is-dim .fv__copy{pointer-events:none}
 
-@media (min-width:768px){
+@media (min-width:100000px){
   .fv{height:260vh;height:260svh}
   .fv__sticky{
     grid-template-columns:minmax(0,46%) 1fr;
@@ -592,7 +592,7 @@
   }
   .fv__copy{text-align:left;padding-top:0;align-self:center}
   .fv__eyebrow{font-size:22px}
-  .fv__title{font-size:clamp(40px,4.2vw,64px);line-height:1.28}
+  .fv__title{font-size:clamp(40px,calc(4.2 * var(--vw)),64px);line-height:1.28}
   .fv__lead,.fv__ctas{display:flex}
   .fv__lead{display:block}
   .fv__meta{
@@ -604,7 +604,7 @@
   .fv__mascot .rig{width:104px}
   .fv__eye{width:210px;height:210px}
 }
-@media (min-width:1024px){
+@media (min-width:100000px){
   .fv__sticky{grid-template-columns:minmax(0,48%) 1fr;padding-left:calc(var(--px) + 80px)}
 }
 
@@ -665,7 +665,7 @@
 .side-cta:active{transform:translate(2px,-50%)}
 .side-cta__sub{font-size:10px;font-weight:700;line-height:1.2;opacity:.75;white-space:nowrap}
 .side-cta__main{font-size:15px;font-weight:700;line-height:1.25;letter-spacing:.02em;white-space:nowrap}
-@media (min-width:768px){
+@media (min-width:100000px){
   .side-cta{padding:30px 16px;border-radius:16px 0 0 16px;gap:8px}
   .side-cta__sub{font-size:13px}
   .side-cta__main{font-size:21px}

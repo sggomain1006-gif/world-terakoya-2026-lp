@@ -3,16 +3,16 @@
    幕 → 覗き穴 → スクロール進捗 → 章の色 → 各UI
    ============================================================================= */
 
-import { createDoorScene } from './door.js?v=2026091192';
-import { mountRigs, attachFace, attachWalker, attachBow, attachPointing } from './mascot.js?v=2026091192';
-import { initSpiral } from './spiral.js?v=2026091192';
-import { initEye } from './eye.js?v=2026091192';
-import { Spring, safeDt } from './lib/spring.js?v=2026091192';
+import { createDoorScene } from './door.js?v=2026091196';
+import { mountRigs, attachFace, attachWalker, attachBow, attachPointing } from './mascot.js?v=2026091196';
+import { initSpiral } from './spiral.js?v=2026091196';
+import { initEye } from './eye.js?v=2026091196';
+import { Spring, safeDt } from './lib/spring.js?v=2026091196';
 import {
   reduceMotion, finePointer, track, splitChars, initTabs, initFaq, initGates,
   initReveal, initCounters, initClips, initMagnets, initTilt, initCursor, initShare, initCtas,
   initVoiceGallery, initTicketTouch, initProgramAutoOpen, initProgramFolds,
-} from './ui.js?v=2026091192';
+} from './ui.js?v=2026091196';
 
 const root = document.documentElement;
 const $ = (s, r = document) => r.querySelector(s);

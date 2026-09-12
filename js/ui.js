@@ -4,7 +4,7 @@
    マグネットボタン / チケットの傾き / カーソル / 共有 / 計測
    ============================================================================= */
 
-import { Spring, expSmooth, safeDt } from './lib/spring.js?v=2026091192';
+import { Spring, expSmooth, safeDt } from './lib/spring.js?v=2026091196';
 
 export const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 export const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)');
@@ -445,7 +445,10 @@ export function initVoiceGallery() {
     /* 送り箱の左端は画面の左端とは限らない（PCでは .wrap が中央寄せなので内側から始まる）。
        0 と決めつけると、最後の札が画面の右へはみ出したまま止まる。
        いま当てている送り量を足し戻して、変形なしの左端を出してから測る */
-    const left = track.getBoundingClientRect().left + maxShift * rendered;
+    /* ★原点は桁の左端。SP強制（パソコンでスマホ版）のとき body は窓の中央に寄るので、
+       窓の左端を 0 とみなすと送り量が桁の外側ぶんだけ余計になる（実測で 439px 高くなった）*/
+    const origin = document.body.getBoundingClientRect().left;
+    const left = track.getBoundingClientRect().left - origin + maxShift * rendered;
     /* ★端の札も画面の中心に来られるよう、送り箱の左右に余白を入れる。
        入れないと1枚目と最後の札は中心に届かず、そこに対応する数字が一度も出ない
        （実測: PC で 1つ目「挑戦意欲の変化」と4つ目「全体満足度」が出なかった）。

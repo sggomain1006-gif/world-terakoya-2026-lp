@@ -184,7 +184,7 @@
   opacity: 0.55;
 }
 
-@media (min-width:768px){
+@media (min-width:100000px){
 /* FAQ（寄付 desktop.css と同じ値） */
 .faq{width:min(960px,calc(100% - 64px));margin:0 auto;padding:0}
 .faq__q{font-size:20px;padding:28px 0}
@@ -192,7 +192,7 @@
 .faq__a > p{font-size:17px}
 .faq__item.is-open .faq__a > p{padding-bottom:28px}
 
-.endorsements,.media-section,.s-foot{--px:max(32px,calc((100vw - 720px) / 2))}
+.endorsements,.media-section,.s-foot{--px:max(32px,calc((calc(100 * var(--vw)) - 720px) / 2))}
 .endorsements { margin-bottom: 48px; }
 .endorsements__title,
 .media-section__title {
@@ -246,7 +246,7 @@
 .voices-head{text-align:center;padding:76px var(--px) 26px}
 .voices-title{
   font-family:var(--ff-serif);font-weight:700;color:var(--wine);
-  font-size:clamp(19px,5.6vw,34px);line-height:1.4;margin:0;white-space:nowrap;
+  font-size:clamp(19px,calc(5.6 * var(--vw)),34px);line-height:1.4;margin:0;white-space:nowrap;
 }
 .founder-card{position:relative;margin:0;border-radius:0;overflow:hidden;text-align:left}
 .founder-card__photo-wrap{width:auto;height:auto;aspect-ratio:16/10;margin:0 var(--px);border-radius:14px;overflow:hidden;background:var(--cream-3)}
@@ -291,7 +291,7 @@
 .founder-card--coo{margin-top:44px}
 .founder-card--coo .founder-card__photo{object-position:center 20%}
 
-@media (min-width:768px){
+@media (min-width:100000px){
   .voices-head{padding-top:104px;padding-bottom:8px}
   .founder-card{
     display:flex;align-items:center;min-height:0;width:100%;

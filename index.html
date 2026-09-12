@@ -31,22 +31,24 @@
   root.classList.add('is-veiled');
 }());
 </script>
-<link rel="stylesheet" href="fonts/fonts.css?v=2026091192">
-<link rel="stylesheet" href="css/base.css?v=2026091192">
-<link rel="stylesheet" href="css/fv.css?v=2026091192">
-<link rel="stylesheet" href="css/sections.css?v=2026091192">
-<link rel="stylesheet" href="css/spiral.css?v=2026091192">
-<link rel="stylesheet" href="css/kifu-parity.css?v=2026091192">
+<link rel="stylesheet" href="fonts/fonts.css?v=2026091196">
+<link rel="stylesheet" href="css/base.css?v=2026091196">
+<link rel="stylesheet" href="css/fv.css?v=2026091196">
+<link rel="stylesheet" href="css/sections.css?v=2026091196">
+<link rel="stylesheet" href="css/spiral.css?v=2026091196">
+<link rel="stylesheet" href="css/kifu-parity.css?v=2026091196">
+<!-- ★一時措置：パソコンでもスマホ版を表示する。戻すときはこの2行を消す -->
+<link rel="stylesheet" href="css/sp-force.css?v=2026091196">
 <link rel="preload" as="image" href="img/poster-door.webp" fetchpriority="high">
-<link rel="modulepreload" href="js/main.js?v=2026091192">
-<link rel="modulepreload" href="js/door.js?v=2026091192">
-<link rel="modulepreload" href="js/ui.js?v=2026091192">
-<link rel="modulepreload" href="js/mascot.js?v=2026091192">
-<link rel="modulepreload" href="js/eye.js?v=2026091192">
-<link rel="modulepreload" href="js/lib/gl.js?v=2026091192">
-<link rel="modulepreload" href="js/lib/mat4.js?v=2026091192">
-<link rel="modulepreload" href="js/lib/spring.js?v=2026091192">
-<link rel="modulepreload" href="js/lib/geom.js?v=2026091192">
+<link rel="modulepreload" href="js/main.js?v=2026091196">
+<link rel="modulepreload" href="js/door.js?v=2026091196">
+<link rel="modulepreload" href="js/ui.js?v=2026091196">
+<link rel="modulepreload" href="js/mascot.js?v=2026091196">
+<link rel="modulepreload" href="js/eye.js?v=2026091196">
+<link rel="modulepreload" href="js/lib/gl.js?v=2026091196">
+<link rel="modulepreload" href="js/lib/mat4.js?v=2026091196">
+<link rel="modulepreload" href="js/lib/spring.js?v=2026091196">
+<link rel="modulepreload" href="js/lib/geom.js?v=2026091196">
 <title>ワールド寺子屋プログラム2026（第5回）｜NPO法人EdFuture</title>
 <meta name="description" content="高校生が自分の探究テーマを持って渡米し、現地校で学び、自分でアポを取って大学や企業を訪ね、探究発表を行う海外探究プログラム。2027年3月派遣・3便。説明会は無料・オンライン・全3回。">
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
@@ -84,7 +86,7 @@
      電話の縦横比へ切り出し済みなので、object-position で寄せる必要はない。
      柱は切り出しの時点で右寄りに置いてある。
      曲線の帯（映像）はこの上に乗り、スクロールで広がって覆い隠す -->
-<img class="fv-bg" src="img/fv-bg.webp?v=2026091192" width="1290" height="2796" decoding="async" alt="" aria-hidden="true">
+<img class="fv-bg" src="img/fv-bg.webp?v=2026091196" width="1290" height="2796" decoding="async" alt="" aria-hidden="true">
 <!-- 覗き穴。2人の顔の真ん中が円の中心。層は2人より後ろなので、ここに置く -->
 
 <!-- ★前後は DOM の順で決まる（どれも z-index:0）。いまは fv6(女子) → 水晶玉 → fv7(男子) の順。
@@ -94,7 +96,7 @@
      ★前面は DOM の後ろ。fv7（右・男子）を後ろに書いて前に出している。
        fv7 は右端を画面の右端に合わせ、fv6 より 1.08 倍だけ大きい（手前にいる分）。
        横位置と高さは「顔を狙った vw に置く」逆算値（式は css/fv.css） -->
-<img class="fv-person fv-person--l" src="img/fv-left.webp?v=2026091192" width="880" height="1173" decoding="async" alt="" aria-hidden="true">
+<img class="fv-person fv-person--l" src="img/fv-left.webp?v=2026091196" width="880" height="1173" decoding="async" alt="" aria-hidden="true">
 <div class="fv-scope" id="stageBand" aria-hidden="true">
   <video class="stage-video" id="doorVideo" playsinline muted loop preload="none"
        width="1280" height="720" poster="img/poster-door.webp" data-src="video/door.mp4"
@@ -107,7 +109,7 @@
   <span class="fv-scope__ca"></span>
   <span class="fv-scope__edge"></span>
 </div>
-<img class="fv-person fv-person--r" src="img/fv-right.webp?v=2026091192" width="880" height="1173" decoding="async" alt="" aria-hidden="true">
+<img class="fv-person fv-person--r" src="img/fv-right.webp?v=2026091196" width="880" height="1173" decoding="async" alt="" aria-hidden="true">
 
 <!-- SVG シンボル（ロゴマーク・足あと・矢印） -->
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -340,7 +342,7 @@
               </summary>
               <div class="plist__body">
                 <figure class="plist__scene">
-                  <img src="img/prog-sf.webp?v=2026091192" width="1200" height="799" loading="lazy" decoding="async" alt="ゴールデンゲートブリッジの全景。2本の主塔と海、対岸の丘">
+                  <img src="img/prog-sf.webp?v=2026091196" width="1200" height="799" loading="lazy" decoding="async" alt="ゴールデンゲートブリッジの全景。2本の主塔と海、対岸の丘">
                 </figure>
                 <p class="plist__lead">西海岸の大学と企業を、自分の問いを持って回る10日間。</p>
                 <dl class="plist__facts">
@@ -393,7 +395,7 @@
               </summary>
               <div class="plist__body">
                 <figure class="plist__scene">
-                  <img class="plist__scene--liberty" src="img/prog-bn1.webp?v=2026091192" width="1200" height="900" loading="lazy" decoding="async" alt="青空の下に立つ自由の女神像">
+                  <img class="plist__scene--liberty" src="img/prog-bn1.webp?v=2026091196" width="1200" height="900" loading="lazy" decoding="async" alt="青空の下に立つ自由の女神像">
                 </figure>
                 <p class="plist__lead">ニューヨークで3日、ボストンで6日。都市を移りながら現地校に入る。</p>
                 <dl class="plist__facts">
@@ -447,7 +449,7 @@
               </summary>
               <div class="plist__body">
                 <figure class="plist__scene">
-                  <img src="img/prog-bn2.webp?v=2026091192" width="1200" height="800" loading="lazy" decoding="async" alt="マサチューセッツ工科大学のグレートドームと、手前の芝生の広場">
+                  <img src="img/prog-bn2.webp?v=2026091196" width="1200" height="800" loading="lazy" decoding="async" alt="マサチューセッツ工科大学のグレートドームと、手前の芝生の広場">
                 </figure>
                 <p class="plist__lead">3派遣でいちばん長い14日間。都市のあとに、バーモントの生活が入る。</p>
                 <dl class="plist__facts">
@@ -757,9 +759,9 @@
 
   <div class="wrap">
     <ul class="tickets" data-reveal>
-      <li class="ticket" data-tilt><img src="img/ticket-1.webp?v=2026091192" width="1200" height="602" loading="lazy" decoding="async" alt="第1回 オンライン説明会 2026年9月26日（土）19:00〜20:00"></li>
-      <li class="ticket" data-tilt><img src="img/ticket-2.webp?v=2026091192" width="1200" height="604" loading="lazy" decoding="async" alt="第2回 オンライン説明会 2026年10月5日（月）19:00〜20:00"></li>
-      <li class="ticket" data-tilt><img src="img/ticket-3.webp?v=2026091192" width="1200" height="601" loading="lazy" decoding="async" alt="第3回 オンライン説明会 2026年10月16日（金）19:00〜20:00"></li>
+      <li class="ticket" data-tilt><img src="img/ticket-1.webp?v=2026091196" width="1200" height="602" loading="lazy" decoding="async" alt="第1回 オンライン説明会 2026年9月26日（土）19:00〜20:00"></li>
+      <li class="ticket" data-tilt><img src="img/ticket-2.webp?v=2026091196" width="1200" height="604" loading="lazy" decoding="async" alt="第2回 オンライン説明会 2026年10月5日（月）19:00〜20:00"></li>
+      <li class="ticket" data-tilt><img src="img/ticket-3.webp?v=2026091196" width="1200" height="601" loading="lazy" decoding="async" alt="第3回 オンライン説明会 2026年10月16日（金）19:00〜20:00"></li>
     </ul>
 
     <!-- GP の LP（edfuture_gp_upload_server）の .sched-note を、この章の地に合わせて置き直した -->
@@ -931,7 +933,8 @@
 <!-- カーソル（PC・fine pointer のときだけ JS が有効化） -->
 <div class="cursor" id="cursor" aria-hidden="true"><i></i><span></span></div>
 
-<script type="module" src="js/main.js?v=2026091192"></script>
+<script src="js/sp-force.js?v=2026091196"></script>
+<script type="module" src="js/main.js?v=2026091196"></script>
 <!-- ==== BALL:BEGIN  ball_css.py が生成。手で直さない ==== -->
 <svg width="0" height="0" aria-hidden="true" focusable="false"
      style="position:absolute;width:0;height:0;overflow:hidden">
