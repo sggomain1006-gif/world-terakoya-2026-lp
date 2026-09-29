@@ -607,9 +607,18 @@
 .sched tr:first-child{border-top:none}
 .sched th[scope="row"]{
   grid-row:1 / span 3;align-self:start;text-align:left;font-weight:700;color:var(--wine);
-  display:flex;align-items:baseline;gap:5px;padding-top:1px;
+  /* 角丸の札を1枚置くだけになったので、ベースライン揃えでなく上揃えにする。
+     baseline のままだと札の上padding のぶんだけ本文より下がって見える */
+  display:flex;align-items:flex-start;gap:5px;padding-top:0;
 }
-.sched th b{font-size:14px;font-variant-numeric:tabular-nums}
+/* 日次の札。地は cream なのでワインの淡い面で角丸の四角を作る */
+.sched th b{
+  display:inline-block;
+  font-size:13px;font-variant-numeric:tabular-nums;letter-spacing:.01em;line-height:1.3;
+  padding:3px 8px;border-radius:8px;
+  background:rgba(85,22,31,.10);color:var(--wine);
+  white-space:nowrap;
+}
 .sched th span{font-size:11px;opacity:.7}
 .sched td{text-align:left;color:var(--text);padding:0}
 .sched td::before{

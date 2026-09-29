@@ -11,19 +11,19 @@
   box-shadow:0 0 0 1px rgba(245,239,230,.14);
 }
 /* position:fixed の要素は窓が基準なので、桁と同じ幅・同じ位置へ寄せ直す。
-   ★FV の地・2人・水晶玉もここに入れる（入れ忘れると窓の中央に取り残される） */
+   ★FV の地・2人・映像もここに入れる（入れ忘れると窓の中央に取り残される） */
 .sp-force .veil,
 .sp-force .stage,
 .sp-force .fv-bg,
+.sp-force .fv-film,
 .sp-force .bar{
   left:50%;right:auto;width:var(--sp-w);margin-left:calc(var(--sp-w) / -2);
 }
-/* ★2人と水晶玉は fixed で、left/right の % が「窓幅」に対して効いてしまう。
+/* ★2人は fixed で、left/right の % が「窓幅」に対して効いてしまう。
    fv6 の left:-8.18% は桁幅の -8.18% でなければならないので、桁幅で計算し直す。
    fv7 は right:0 なので桁の右端へ寄せるだけでよい */
 .sp-force .fv-person--l{left:calc((100vw - var(--sp-w)) / 2 - 0.0818 * var(--sp-w));margin-left:0}
 .sp-force .fv-person--r{right:calc((100vw - var(--sp-w)) / 2);margin-right:0}
-.sp-force .fv-scope{margin-left:calc((100vw - var(--sp-w)) / 2)}
 /* 右端に貼り付く縦書きCTAは、桁の右端に合わせる */
 .sp-force .side-cta{left:auto;right:calc(50% - var(--sp-w) / 2);margin-left:0}
 /* ★桁の外へはみ出す分を隠す幕。position:fixed の要素は親の overflow では切れないので、

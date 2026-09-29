@@ -4,7 +4,7 @@
    マグネットボタン / チケットの傾き / カーソル / 共有 / 計測
    ============================================================================= */
 
-import { Spring, expSmooth, safeDt } from './lib/spring.js?v=2026091198';
+import { Spring, expSmooth, safeDt } from './lib/spring.js?v=2026092807';
 
 export const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 export const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)');
@@ -395,128 +395,161 @@ export function initCtas() {
 }
 
 /* --------------------------- 参加者の声（紐で吊るした札） ---------------------------
-   縦にスクロールすると札が横へ流れる。
-   ★2026-09-11 に振り子の揺れ（速さに応じた回転）を外した。単純な横移動だけにしている。
-     札の意匠・位置・段差は CSS 側なので、そのまま残っている。
+   ★2026-09-12 に作り直した。それまでは帯を sticky で画面に貼り付け、pin に持たせた
+     高さぶんの縦スクロールを横送りに変換していた。読む側から見ると、この区間では
+     下へスクロールしても次のセクションへ進めない（札が横に流れるだけ）状態だった。
+     いまは縦スクロールを素通しにして、札は 4 秒ごとの自動送りと指のスワイプだけで動く。
 
-   帯は sticky で画面に貼り付け、pin の高さで「横に流すぶんの縦の距離」を確保する。
-   sticky はブラウザ自身が固定するので、毎フレーム transform で留めるのと違って
-   スクロールと1フレームもずれない */
+   ・送りは transform ＋ CSS の transition。1回につき1枚ぶん動く
+   ・両端でつなぎ目が出ないよう、先頭と末尾に1枚ずつ複製を置く。複製の上で止まった
+     瞬間に transition を切り、見た目を変えずに本物の同じ札へ番号を付け替える
+   ・段差（札ごとに紐の長さを変えて吊り位置をずらしていた分）は CSS 側で撤去済み */
 export function initVoiceGallery() {
   const pin = document.querySelector('.vcards__pin');
   if (!pin) return;
   const stage = pin.querySelector('.vcards__stage');
   const track = pin.querySelector('.vcards__track');
   if (!stage || !track) return;
-  const cards = Array.from(track.children);
-  if (cards.length < 2) return;
+  const real = Array.from(track.children);
+  if (real.length < 2) return;
 
-  /* モーション低減の設定では動かさない。横スクロールで全部読める形に戻す（紐は残る） */
+  /* モーション低減の設定では自動送りをしない。指で送る横スクロールに戻す */
   if (reduceMotion.matches) { pin.classList.add('is-static'); return; }
 
-  /* ★追従は「1フレームごとに何割詰めるか」でなく半減期で書く。
-     割合だと 60Hz と 120Hz で追従が倍違い、同じ指の動きでも機種によって重さが変わる
-     （実測: 旧 SCRUB=0.14 は 60Hz で半減期 77ms、120Hz で 38ms）*/
-  const HALF_LIFE = 0.045; // 秒。小さいほど指にぴったり付く
-  const TAIL = 1.04;       // 横に流す距離に対する縦の余裕。1.15 だと最後の2割が動かない帯になっていた
+  const N = real.length;
+  const INTERVAL = 4000;   /* 自動送りの間隔（ミリ秒） */
+  const SWIPE = 42;        /* これ以上横へ動かしたら1枚送る（px） */
+  const AXIS = 8;          /* 縦か横かを決めるまでの遊び（px） */
 
-  const clamp01 = (v) => (v < 0 ? 0 : v > 1 ? 1 : v);
+  /* 端のつなぎ目を消すための複製。読み上げからは外す */
+  const head = real[N - 1].cloneNode(true);
+  const tail = real[0].cloneNode(true);
+  [head, tail].forEach((c) => { c.setAttribute('aria-hidden', 'true'); c.classList.add('is-clone'); });
+  track.insertBefore(head, real[0]);
+  track.appendChild(tail);
+  const cards = Array.from(track.children);   /* [複製, 本物×N, 複製] */
 
-  let maxShift = 0, travel = 0, pinTop = 0;
-  let rendered = 0;
-  let lastNow = 0;
-  let snapNext = true;     // 画面に入った最初の1フレームは追従させず即座に合わせる
+  let offsets = cards.map(() => 0);
+  let index = 1;           /* 本物の1枚目 */
+  let timer = 0;
+  let visible = true;
 
-  const barH = () =>
-    parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--bar-h')) || 64;
+  const at = (i) => -offsets[i];
 
-  /* 帯の貼り付け位置と pin の高さを実測して入れる。
-     帯は画面の中ほどに置く。上部バーの下にはもぐらせない */
+  /* still = true のあいだは transition を切って、その位置にそのまま置く */
+  const put = (x, still) => {
+    track.classList.toggle('is-still', !!still);
+    track.style.transform = 'translate3d(' + x.toFixed(1) + 'px,0,0)';
+  };
+
+  /* いま画面に出ている送り量。送りの途中でも実際の位置が取れる */
+  const currentX = () => {
+    const t = getComputedStyle(track).transform;
+    if (!t || t === 'none') return 0;
+    const m = t.match(/matrix3?d?\(([^)]+)\)/);
+    if (!m) return 0;
+    const v = m[1].split(',').map(parseFloat);
+    return v.length > 6 ? v[12] : v[4];      /* matrix3d は13番目、matrix は5番目 */
+  };
+
+  /* 複製の上に来ていたら、見た目を1pxも変えずに本物の同じ札へ番号を移す */
+  const unclone = (x) => {
+    if (index === 0)     { const d = at(N) - at(0);     index = N; return x + d; }
+    if (index === N + 1) { const d = at(1) - at(N + 1); index = 1; return x + d; }
+    return x;
+  };
+
   const layout = () => {
-    pin.style.height = '';
-    const stageH = stage.offsetHeight;
-    const centre = Math.round((window.innerHeight - stageH) / 2);
-    /* 上部バーの下に収まる高さなら、バーを避けて中ほどに置く。
-       収まらない背の低い機種（SEなど）では、下がはみ出す方が読めないので上へ詰める */
-    pinTop = stageH <= window.innerHeight - barH() - 24
-      ? Math.max(barH() + 12, centre)
-      : Math.max(8, centre);
-    stage.style.setProperty('--vc-top', pinTop + 'px');
-    /* 送り箱の左端は画面の左端とは限らない（PCでは .wrap が中央寄せなので内側から始まる）。
-       0 と決めつけると、最後の札が画面の右へはみ出したまま止まる。
-       いま当てている送り量を足し戻して、変形なしの左端を出してから測る */
+    /* 変形なしの位置で測る。端の札も画面の中心に来られるよう、送り箱の左右に
+       (桁の幅 - 札の幅)/2 の余白を入れる */
+    put(0, true);
     /* ★原点は桁の左端。SP強制（パソコンでスマホ版）のとき body は窓の中央に寄るので、
-       窓の左端を 0 とみなすと送り量が桁の外側ぶんだけ余計になる（実測で 439px 高くなった）*/
+       窓の左端を 0 とみなすと送り量が桁の外側ぶんだけ余計になる */
     const origin = document.body.getBoundingClientRect().left;
-    const left = track.getBoundingClientRect().left - origin + maxShift * rendered;
-    /* ★端の札も画面の中心に来られるよう、送り箱の左右に余白を入れる。
-       入れないと1枚目と最後の札は中心に届かず、そこに対応する数字が一度も出ない
-       （実測: PC で 1つ目「挑戦意欲の変化」と4つ目「全体満足度」が出なかった）。
-       余白は padding なので、ここで測った border box の左端（left）は動かない */
+    const colW = document.documentElement.clientWidth;
+    const left = track.getBoundingClientRect().left - origin;
     const cw = cards[0].getBoundingClientRect().width;
-    const pad = Math.max(0, Math.round(window.innerWidth / 2 - cw / 2 - left));
+    const pad = Math.max(0, Math.round(colW / 2 - cw / 2 - left));
     track.style.paddingLeft = pad + 'px';
     track.style.paddingRight = pad + 'px';
-    maxShift = Math.max(0, Math.round(left + track.scrollWidth - document.documentElement.clientWidth));
-    travel = Math.round(maxShift * TAIL);
-    pin.style.height = (stageH + travel) + 'px';
+    const base = cards[0].getBoundingClientRect().left;
+    offsets = cards.map((c) => Math.round(c.getBoundingClientRect().left - base));
+    put(at(index), true);
   };
 
-  /* 送り箱ごと横へ動かすだけ。札には何も書かない（回転を外したのはここ） */
-  const paint = () => {
-    track.style.transform = 'translate3d(' + (-maxShift * rendered).toFixed(1) + 'px,0,0)';
+  const goTo = (i) => { index = i; put(at(index), false); };
+
+  const stop = () => { if (timer) { clearInterval(timer); timer = 0; } };
+  const start = () => { stop(); if (visible) timer = setInterval(() => goTo(index + 1), INTERVAL); };
+
+  /* 送り終わりが複製の上だったら、その場で本物へ差し替える */
+  track.addEventListener('transitionend', (e) => {
+    if (e.propertyName !== 'transform' || e.target !== track) return;
+    const before = index;
+    const x = unclone(at(index));
+    if (index !== before) put(x, true);
+  });
+
+  /* ---- 指（とマウス）で送る。縦のスクロールは奪わない ----
+     touch-action:pan-y を CSS で当ててあるので、縦に動かしたぶんはブラウザが
+     そのままページのスクロールに使い、こちらには pointercancel が来る */
+  let dragging = false, axis = null, sx = 0, sy = 0, dx = 0, from = 0;
+
+  track.addEventListener('pointerdown', (e) => {
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    stop();
+    dragging = true; axis = null; dx = 0;
+    sx = e.clientX; sy = e.clientY;
+    /* 送りの途中で掴まれても、いま見えている位置から引き継ぐ */
+    const cur = unclone(currentX());
+    put(cur, true);
+    from = cur;
+  });
+
+  window.addEventListener('pointermove', (e) => {
+    if (!dragging) return;
+    const mx = e.clientX - sx, my = e.clientY - sy;
+    if (axis === null) {
+      if (Math.abs(mx) < AXIS && Math.abs(my) < AXIS) return;
+      axis = Math.abs(mx) > Math.abs(my) ? 'x' : 'y';
+      if (axis === 'y') { dragging = false; goTo(index); start(); return; }
+      if (track.setPointerCapture) { try { track.setPointerCapture(e.pointerId); } catch (_) {} }
+    }
+    dx = mx;
+    put(from + dx, true);
+  }, { passive: true });
+
+  const release = () => {
+    if (!dragging) return;
+    dragging = false;
+    if (axis === 'x' && Math.abs(dx) > SWIPE) goTo(index + (dx < 0 ? 1 : -1));
+    else goTo(index);
+    start();
   };
-
-  let near = false;
-  let rafId = null;
-
-  /* 1フレームにつき読み取りを先にまとめ、そのあとに書き込む。
-     交互にやると強制同期レイアウトでスクロールがカクつく */
-  const frame = (now) => {
-    rafId = null;
-    if (!near) return;
-
-    const top = pin.getBoundingClientRect().top;      // 読み取り
-    const target = travel > 0 ? clamp01((pinTop - top) / travel) : 0;
-    const dt = lastNow ? Math.min(0.1, (now - lastNow) / 1000) : 0;
-    lastNow = now;
-    /* ★入り直したときは詰めずに合わせる。詰めると、前に見終わった位置（右端）から
-       左へ巻き戻る動きが見えてしまう */
-    if (snapNext || dt === 0) { rendered = target; snapNext = false; }
-    else rendered += (target - rendered) * (1 - Math.pow(0.5, dt / HALF_LIFE));
-    if (Math.abs(rendered - target) < 0.0002) rendered = target;
-
-    paint();                                          // 書き込み
-    rafId = requestAnimationFrame(frame);
-  };
-
-  const sync = () => {
-    if (near && rafId === null) rafId = requestAnimationFrame(frame);
-    else if (!near && rafId !== null) { cancelAnimationFrame(rafId); rafId = null; }
-  };
+  window.addEventListener('pointerup', release);
+  window.addEventListener('pointercancel', release);
 
   layout();
-  paint();
+  put(at(index), true);
 
-  /* 画面から遠い間はループごと止める */
+  /* 画面から出ているあいだは自動送りを止める。裏のタブでも止める */
   if ('IntersectionObserver' in window) {
     new IntersectionObserver((es) => {
-      es.forEach((e) => {
-        if (e.isIntersecting && !near) { snapNext = true; lastNow = 0; }
-        near = e.isIntersecting;
-      });
-      sync();
-    }, { rootMargin: '300px 0px 300px 0px' }).observe(pin);
+      es.forEach((e) => { visible = e.isIntersecting; });
+      if (visible) start(); else stop();
+    }, { rootMargin: '120px 0px 120px 0px' }).observe(pin);
   } else {
-    near = true;
-    sync();
+    start();
   }
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) stop(); else start();
+  });
 
   let rt = 0;
-  const relayout = () => { clearTimeout(rt); rt = setTimeout(() => { layout(); paint(); }, 120); };
+  const relayout = () => { clearTimeout(rt); rt = setTimeout(layout, 120); };
   window.addEventListener('resize', relayout, { passive: true });
   window.addEventListener('orientationchange', relayout, { passive: true });
-  /* 写真とフォントが入ると札の高さが変わる。変わったら測り直す */
+  /* 写真とフォントが入ると札の幅・高さが変わる。変わったら測り直す */
   if ('ResizeObserver' in window) new ResizeObserver(relayout).observe(stage);
   track.querySelectorAll('img').forEach((img) => {
     if (!img.complete) img.addEventListener('load', relayout, { once: true });

@@ -1,18 +1,17 @@
 /* =============================================================================
    main.js — 起動と結線
-   幕 → 覗き穴 → スクロール進捗 → 章の色 → 各UI
+   幕 → 地の映像 → スクロール進捗 → 章の色 → 各UI
    ============================================================================= */
 
-import { createDoorScene } from './door.js?v=2026091198';
-import { mountRigs, attachFace, attachWalker, attachBow, attachPointing } from './mascot.js?v=2026091198';
-import { initSpiral } from './spiral.js?v=2026091198';
-import { initEye } from './eye.js?v=2026091198';
-import { Spring, safeDt } from './lib/spring.js?v=2026091198';
+import { createDoorScene } from './door.js?v=2026092807';
+import { mountRigs, attachFace, attachWalker, attachBow, attachPointing } from './mascot.js?v=2026092807';
+import { initEye } from './eye.js?v=2026092807';
+import { Spring, safeDt } from './lib/spring.js?v=2026092807';
 import {
   reduceMotion, finePointer, track, splitChars, initTabs, initFaq, initGates,
   initReveal, initCounters, initClips, initMagnets, initTilt, initCursor, initShare, initCtas,
   initVoiceGallery, initTicketTouch, initProgramAutoOpen, initProgramFolds,
-} from './ui.js?v=2026091198';
+} from './ui.js?v=2026092807';
 
 const root = document.documentElement;
 const $ = (s, r = document) => r.querySelector(s);
@@ -27,7 +26,7 @@ const bar = $('#bar');
 const rail = $('#rail');
 const sideCta = $('#sideCta');
 const foot = $('#foot');
-const spiralEl = $('#spiral');
+const introHeroEl = $('#introHero');
 const purposeEl = $('#purpose');
 /* 追従CTA の表示区間の境目。節の上端で切り替える */
 const progSfEl  = $('#prog-sf');
@@ -38,7 +37,7 @@ const briefEl   = $('#briefing');
 splitChars(fv);
 
 /* --------------------------- 扉（WebGL・最終CTA だけ） ---------------------------
-   FV は CSS の正方形の覗き穴に変えたので、WebGL の扉は最終CTA（THE DOOR, AGAIN）
+   FV は素の映像に変えたので、WebGL の扉は最終CTA（THE DOOR, AGAIN）
    でだけ使う。WebGL が無い環境ではその節の扉が出ないだけで、他は何も変わらない */
 let scene = null;
 try {
@@ -50,15 +49,10 @@ try {
 if (scene) { root.classList.add('has-gl'); scene.setMode('final'); }
 
 const band = $('#stageBand');
-/* 樽型の歪み。--lens-k は ball_css.py が CSS に出した「変位マップの最大変位（半径比）」。
-   feDisplacementMap の scale は user space の px なので、球の直径に比例して毎フレーム組み立てる */
-const lensNode = document.querySelector('#ballLens feDisplacementMap');
-const LENS_K = band ? parseFloat(getComputedStyle(band).getPropertyValue('--lens-k')) || 0 : 0;
-let lensScale = -1, lensOn = false;
 /* 奥行き（--dz）と2人の濃さ（--people-a）は :root でなく、この3枚に直接書く。
    :root の変数を毎フレーム変えると文書全体のスタイル再計算になる（CPU 4倍抑制で rAF 54→45Hz に落ちた） */
 const depthEls = [$('.fv-bg'), ...document.querySelectorAll('.fv-person')].filter(Boolean);
-/* 覗き穴の広がり方は updateFixed の中（バネ追従）。大きさは CSS の --scope-d、ぼけは --fog */
+/* 映像の立ち上がり方は updateFixed の中（バネ追従）。濃さは --va、寄りは --vz */
 
 /* ---------------------------------- 映像の読み込み ---------------------------------- */
 let videoWanted = false;
@@ -114,7 +108,10 @@ if (video) {
 /* ---------------------------- スクロール: 進捗・章の色・レール ---------------------------- */
 const THEMES = [
   ['#top', 'dark', 'top'],
-  ['#spiral', 'dark', 'flow'],
+  // 導入の章。ほぼ白地だが、最初の問いかけだけ映像の上に置くので暗い扱いにする。
+  // ★後にある方が勝つので、内側の #introHero を #intro の後ろに置くこと
+  ['#intro', 'light', 'flow'],
+  ['#introHero', 'dark', 'flow'],
   ['#purpose', 'light', 'flow'],
   // 3つのプログラムの一覧は白い章の中にある。レールの「3つの派遣」はここで光る
   ['#dispatch', 'light', 'dispatch'],
@@ -138,88 +135,39 @@ let videoOn = false;
 const clamp01 = (v) => (v < 0 ? 0 : v > 1 ? 1 : v);
 const ez = (v) => { const k = clamp01(v); return k * k * (3 - 2 * k); };
 
-/* ------------------------------ 覗き穴（バネ追従） ------------------------------
+/* ------------------------------ 地の映像（バネ追従） ------------------------------
+   ★2026-09-13: 水晶玉をやめた。FV には物体を置かず、スクロールに合わせて
+     映像そのものが全画面へ立ち上がる。入れ替わりに地の写真と2人が奥へ引いて薄れる。
    つまみは「何秒で止まるか」と「何%行き過ぎるか」の2つ。距離に依らない。
-     --scope-d  直径。初期は画面幅の52%、最後は画面の対角より少し大きく
-     bottom     円の中心の高さ。2人の顔の中点 → 画面の中央
-     --fog      覗いている像のぼけ。3px → 0。速く送るとそのぶん流れる（最大+1.6px）
-     --mask-s   縁が溶ける帯の大きさ。100% だと縁が円の中、340% 足すと外へ出る
-     --rim-a    縁の暗がり・黒枠・ガラスの照り返し。広がるにつれて消す
-     --people-a 手前の2人。円より前の層なので、消さないと映像の上に残る
-     --dz       奥行き（0→1）。橋は遠く小さく動き、2人は近く大きく外へ動く
-     --vz       映像の寄り。1.30 → 1（ボールレンズの拡大が解けていく）。止まっている間は呼吸で±1%
-     --vr       映像の向き。180deg → 0deg。水晶の中は実像で逆さ。0.68 で戻し切る
-     （歪み）   樽型。#ballLens の scale を直径に比例させる。0.55 で抜けフィルタごと外す
-     --ca       速さで出る縁の色ずれ（0→1）
-     --glow     穴から漏れる光。中盤だけ */
+     --va       映像の濃さ。0 → 1（0.56 で出し切る）
+     --vz       映像の寄り。1.08 → 1.00（0.78 でちょうど等倍＝変形なし）
+     --people-a 手前の2人。0.40 で消える。映像より後ろの層なので先に消す
+     --dz       奥行き（0→1）。地の写真は遠いので小さく寄り、2人は近いので大きく外へ出る
+   ★p=0.78 で --va=1 / --vz=1 に着く。ここから先は螺旋の章がこの映像を地に使うので、
+     この2つの着地点は動かさないこと（動かすと章の入りが飛ぶ）*/
 const SCOPE_FEEL = { settle: 0.42, overshoot: 0.035 };
 const SCOPE_LAG = 0.07;          // 指の位置からこれ以上は遅れない（進捗の単位）
-const SCOPE_SPEED_FULL = 2.2;    // この速さ（進捗/秒）で流れの効果が頭打ち
-const BREATH_PERIOD = 5.5;       // 呼吸の周期（秒）
+const VZ_FROM = 1.08;            // 映像の入りの寄り。等倍へ寄りながら濃くなる
 const scopeSpring = Spring.fromFeel(SCOPE_FEEL);
 let scopeTarget = 0;
 let scopeSeen = false;           // 直前の描画で FV が見えていたか
 let scopeInit = false;           // 一度でも書いたか
-let scopeAnimating = false;      // 次のフレームも描く必要があるか（バネが動いている／呼吸中）
+let scopeAnimating = false;      // 次のフレームも描く必要があるか（バネが動いている）
 let scopeLast = 0;
-const scopeT0 = performance.now();
-let vbBase = 1;                  // 映像の明るさ（呼吸を掛ける前）
 
-function writeScope(s, vel, now) {
+function writeScope(s) {
   scopeInit = true;
-  const vw = window.innerWidth, vh = window.innerHeight;
-  const wide = vw >= 768;
   const still = reduceMotion.matches;
   const q = ez(clamp01(s / 0.78));
-  /* SP は2人の手のあいだに収める大きさ。肌色の無い帯を画素で実測して 21.00〜31.75vw、
-     すき間 10.75vw。上下に 0.8vw ずつ余白を残して直径 9.1vw、中心は床から 26.38vw */
-  const d0 = wide ? Math.min(vw * 0.34, 520) : vw * 0.091;
-  const d1 = Math.hypot(vw, vh) * 1.06;
-  const scopeD = d0 + (d1 - d0) * Math.pow(q, 1.5);
-  band.style.setProperty('--scope-d', scopeD.toFixed(1) + 'px');
-  /* ★SP の初期の高さは「2人の顔の中点」。CSS の .fv-scope の bottom と同じ値を持つ。
-     素材を差し替えたら css/fv.css の式で出し直して両方そろえること（ここだけ直すと
-     読み込み直後の1フレームがずれる。CSSだけ直すと JS に上書きされて効かない）*/
-  /* 玉は女子の切れ目から 26.38vw 上。切れ目は syncFvCut と同じ式で出す（css/fv.css の --fv-cut）*/
-  const cut = Math.max(vw * 2.1674, vh) * 0.765 - vw * 0.138;
-  const b0 = wide ? vh / 2 : vh - (cut - vw * 0.2638);
-  band.style.bottom = (b0 + (vh / 2 - b0) * q).toFixed(1) + 'px';
-  // 速さ。バネの速度は進捗/秒。全画面に近いほど効かせない
-  const speed = still ? 0 : Math.min(1, Math.abs(vel) / SCOPE_SPEED_FULL) * (1 - q);
-  /* ぼけも直径に比例させる。px 固定だと小さいときに玉が真っ白に溶ける
-     （直径 203px のとき 1.1px / 速さの分 1.6px だった比率をそのまま使う）*/
-  const fogK = scopeD / 203;
-  const fog = fogK * (1.1 * (1 - ez(clamp01(s / 0.52))) + 1.6 * speed);
-  band.style.setProperty('--fog', fog.toFixed(2) + 'px');
-  band.style.setProperty('--mask-s', (100 + 340 * ez(clamp01((s - 0.20) / 0.56))).toFixed(0) + '%');
-  const rim = 1 - ez(clamp01((s - 0.18) / 0.55));
-  band.style.setProperty('--rim-a', rim.toFixed(3));
-  band.style.setProperty('--ca', (speed * rim).toFixed(3));
-  // 穴から漏れる光。s=0.05 から立ち上がり 0.38 で最大、0.72 で消える
-  const glow = ez(clamp01((s - 0.05) / 0.33)) * (1 - ez(clamp01((s - 0.42) / 0.30)));
-  band.style.setProperty('--glow', glow.toFixed(3));
-  const peopleA = (1 - ez(clamp01((s - 0.30) / 0.36))).toFixed(3);
+  /* 濃さ。0.08 から立ち上がり 0.56 で出し切る。
+     ★2人と地の写真の引きより少し遅らせてある。同時に動かすと、橋と2人と映像が
+       3枚とも半透明で重なる帯が長く、二重写しに見えた */
+  band.style.setProperty('--va', ez(clamp01((s - 0.08) / 0.48)).toFixed(3));
+  /* 寄り。1.08 から等倍へ。0.78（全画面）でちょうど変形なしに着く */
+  band.style.setProperty('--vz', (VZ_FROM - (VZ_FROM - 1) * q).toFixed(4));
+  const peopleA = (1 - ez(clamp01((s - 0.05) / 0.35))).toFixed(3);
   const dz = still ? '0' : ez(clamp01(s / 0.70)).toFixed(3);
   for (const el of depthEls) { el.style.setProperty('--people-a', peopleA); el.style.setProperty('--dz', dz); }
-  // 呼吸。止まっている間だけ分かる程度。全画面では止める
-  const t = (now - scopeT0) / 1000;
-  const breath = still ? 0 : Math.sin(t * 2 * Math.PI / BREATH_PERIOD) * (1 - q);
-  const vz = (1.30 - 0.30 * q) * (1 + 0.010 * breath);
-  band.style.setProperty('--vz', vz.toFixed(4));
-  /* 中の像の向き。ボールレンズの実像は上下左右とも反転する（＝180°回転）ので、
-     止まっている水晶の中は逆さに見える。広がるにつれて半回転して本来の向きへ戻す。
-     ★0.68 で戻し切る。全画面（0.78）に着いてから回すと画面全体が回って酔うため。
-     動きを減らす設定では回さない（逆さのまま置かず 0 にする）*/
-  band.style.setProperty('--vr', (still ? 0 : 180 * (1 - ez(clamp01((s - 0.04) / 0.64)))).toFixed(2) + 'deg');
-  /* 樽型の歪みの強さ。0.55 で抜け切る（そこから先は球でなく「広がる映像」なので歪ませない）。
-     属性の書き換えはフィルタの作り直しを起こすので、0.15px 以上変わったときだけ書く */
-  if (lensNode && video) {
-    const ls = still ? 0 : LENS_K * scopeD * (1 - ez(clamp01(s / 0.55)));
-    if (Math.abs(ls - lensScale) > 0.15) { lensNode.setAttribute('scale', ls.toFixed(2)); lensScale = ls; }
-    const on = ls > 0.3;
-    if (on !== lensOn) { video.classList.toggle('is-lens', on); lensOn = on; }
-  }
-  band.style.setProperty('--vb', (vbBase * (1 + 0.025 * Math.sin(t * 2 * Math.PI / BREATH_PERIOD + 0.9) * (1 - q))).toFixed(3));
 }
 /* バネを1段進めて描く。updateFixed の「書く」段から毎フレーム呼ぶ */
 function stepScope(p, now) {
@@ -227,7 +175,7 @@ function stepScope(p, now) {
   scopeSpring.setTarget(p).step(dt);
   // 速いフリックで置いていかれないよう、描く値だけ遅れの上限で挟む（バネの状態は触らない）
   const s = Math.min(p + SCOPE_LAG, Math.max(p - SCOPE_LAG, scopeSpring.value));
-  writeScope(s, scopeSpring.velocity, now);
+  writeScope(s);
 }
 
 function updateFixed(now = performance.now()) {
@@ -243,16 +191,11 @@ function updateFixed(now = performance.now()) {
   }
   let finalVisible = false;
   if (final) { const r = final.getBoundingClientRect(); finalVisible = r.top < vh && r.bottom > 0; }
-  // 螺旋の章は地を透かして映像を見せるので、その間も舞台を回したままにする
-  let spiralVisible = false, sp = 0;
-  if (spiralEl && spiralEl.classList.contains('is-3d')) {
-    const sr = spiralEl.getBoundingClientRect();
-    spiralVisible = sr.top < vh && sr.bottom > 0;
-    if (spiralVisible) {
-      const tr = spiralEl.querySelector('.spiral__track');
-      const span = (tr ? tr.offsetHeight : sr.height) - vh;
-      sp = span > 2 ? clamp01(-sr.top / span) : 0;
-    }
+  // 導入の問いかけは地を敷かず映像の上に出すので、その間も舞台を回したままにする
+  let heroVisible = false;
+  if (introHeroEl) {
+    const hr = introHeroEl.getBoundingClientRect();
+    heroVisible = hr.top < vh && hr.bottom > 0;
   }
   // 章の色（上部バーの真下に何があるか）と、レール（画面の 40% 位置にある章）
   const probeY = (bar ? bar.offsetHeight : 64) * 0.5;
@@ -287,7 +230,7 @@ function updateFixed(now = performance.now()) {
   }
 
   // ---- 地の映像（FV と螺旋で見せる。最終CTAでは扉のテクスチャとして要る）----
-  const videoShow = fvVisible || spiralVisible;
+  const videoShow = fvVisible || heroVisible;
   if (videoShow !== videoOn) {
     videoOn = videoShow;
     if (band) band.classList.toggle('is-on', videoShow);
@@ -298,19 +241,19 @@ function updateFixed(now = performance.now()) {
      最初は少し暗く。スクロールが始まるとすぐ明るくなり、螺旋で1枚目のカードが
      出てくるところからまた落とす。カードと文字を前に出すための落とし方なので、
      幕を敷かずに映像そのものの明るさで作る。
-     FV の間は writeScope が呼吸を掛けて --vb を書くので、ここでは基準値だけ持つ */
+     ★呼吸（水晶玉が止まっている間の揺らぎ）はやめたので、ここで書き切る */
   if (band) {
     let vb = 1;
-    if (fvVisible) vb = 1.02 + 0.10 * ez(p / 0.18);   // 覗き穴の中は明るく見せる
-    if (spiralVisible) vb = Math.min(vb, 1 - 0.38 * ez(sp / 0.06));
-    vbBase = vb;
-    if (!fvVisible) band.style.setProperty('--vb', vb.toFixed(3));
+    if (fvVisible) vb = 1.02 + 0.10 * ez(p / 0.18);   // 立ち上がりぎわは少し明るく
+    // 問いかけの文字を前に出すため、映像は一段落とす（螺旋のときの進捗連動はやめ、固定値にした）
+    if (heroVisible) vb = Math.min(vb, 0.62);
+    band.style.setProperty('--vb', vb.toFixed(3));
   }
 
-  /* ---- 覗き穴の動き ----
-     スクロールに連れて、少し上がりながら大きくなり、曇りが取れて全画面になる。
+  /* ---- 地の映像の立ち上がり ----
+     スクロールに連れて濃くなりながら等倍へ寄り、全画面になる。
      直接 p を書かず、バネ（settle 0.42s・行き過ぎ 3.5%）に p を目標として渡す。
-     指を止めても円は少し遅れて止まり、速く送れば速さのぶんだけ像が流れる。
+     指を止めても濃さは少し遅れて追いつく。
      ★FV を抜ける前に必ず全画面へ。p が 0.93 を越えたらバネを使わず直書きし、
        FV が画面から消えた瞬間にも 1 で書き切る（螺旋の章がこの映像を地に使う） */
   scopeAnimating = false;
@@ -318,16 +261,15 @@ function updateFixed(now = performance.now()) {
     if (fvVisible) {
       scopeTarget = p;
       scopeSeen = true;
-      if (reduceMotion.matches || p >= 0.93) { scopeSpring.snap(p); writeScope(p, 0, now); }
+      if (reduceMotion.matches || p >= 0.93) { scopeSpring.snap(p); writeScope(p); }
       else {
         stepScope(p, now);
-        // バネが動いている間、または止まって呼吸している間（全画面になるまで）は次のフレームも描く
-        scopeAnimating = !scopeSpring.isSettled(1e-3, 1e-2) || (!document.hidden && p < 0.78);
+        scopeAnimating = !scopeSpring.isSettled(1e-3, 1e-2);
       }
     } else if (scopeSeen || !scopeInit) {
       // FV を抜けた（または最初から下にいる）。全画面の状態で止める
       scopeSeen = false; scopeTarget = 1;
-      scopeSpring.snap(1); writeScope(1, 0, now);
+      scopeSpring.snap(1); writeScope(1);
     }
   }
   scopeLast = now;
@@ -427,8 +369,7 @@ initVoiceGallery();
 initProgramFolds();
 initProgramAutoOpen();
 initTicketTouch();
-const spiral = initSpiral({ reduceMotion: reduceMotion.matches });
-initClips({ skip: spiral ? '#spiral' : null });
+initClips();
 initMagnets();
 initTilt();
 initShare();
