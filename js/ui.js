@@ -4,7 +4,7 @@
    マグネットボタン / チケットの傾き / カーソル / 共有 / 計測
    ============================================================================= */
 
-import { Spring, expSmooth, safeDt } from './lib/spring.js?v=2026092807';
+import { Spring, expSmooth, safeDt } from './lib/spring.js?v=2026093015';
 
 export const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 export const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)');
@@ -40,7 +40,9 @@ export function splitChars(root = document) {
 }
 
 /* ------------------------------------- タブ ------------------------------------ */
-const PERSONAS = ['student', 'parent', 'university'];
+/* ★保護者タブは無い。data-tab は student と university の2つだけ。
+   'parent' を残すと #parent 直リンクで全タブ非選択・全パネル hidden になる */
+const PERSONAS = ['student', 'university'];
 export function initTabs() {
   const tabs = Array.from(document.querySelectorAll('[role="tab"]'));
   if (!tabs.length) return { open() {} };
@@ -374,7 +376,8 @@ export function initShare() {
   document.querySelectorAll('[data-share]').forEach((btn) => {
     btn.addEventListener('click', () => {
       track('share_click', {});
-      const data = { title: document.title, url: location.href.split('#')[0] + '#parent' };
+      /* ★'#parent' は実在しないアンカーだった。タブを含む節は #who */
+      const data = { title: document.title, url: location.href.split('#')[0] + '#who' };
       if (navigator.share) navigator.share(data).catch(() => {});
       else if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(data.url).catch(() => {});
       else window.prompt('このURLをコピーしてください', data.url);
@@ -404,157 +407,9 @@ export function initCtas() {
    ・両端でつなぎ目が出ないよう、先頭と末尾に1枚ずつ複製を置く。複製の上で止まった
      瞬間に transition を切り、見た目を変えずに本物の同じ札へ番号を付け替える
    ・段差（札ごとに紐の長さを変えて吊り位置をずらしていた分）は CSS 側で撤去済み */
-export function initVoiceGallery() {
-  const pin = document.querySelector('.vcards__pin');
-  if (!pin) return;
-  const stage = pin.querySelector('.vcards__stage');
-  const track = pin.querySelector('.vcards__track');
-  if (!stage || !track) return;
-  const real = Array.from(track.children);
-  if (real.length < 2) return;
+/* ★initVoiceGallery（4秒の自動送り・端の複製・スワイプ）は 2026-09-30 に廃止した。
+   参加者の声は素の横スクロール1本で、JS は関与しない */
 
-  /* モーション低減の設定では自動送りをしない。指で送る横スクロールに戻す */
-  if (reduceMotion.matches) { pin.classList.add('is-static'); return; }
-
-  const N = real.length;
-  const INTERVAL = 4000;   /* 自動送りの間隔（ミリ秒） */
-  const SWIPE = 42;        /* これ以上横へ動かしたら1枚送る（px） */
-  const AXIS = 8;          /* 縦か横かを決めるまでの遊び（px） */
-
-  /* 端のつなぎ目を消すための複製。読み上げからは外す */
-  const head = real[N - 1].cloneNode(true);
-  const tail = real[0].cloneNode(true);
-  [head, tail].forEach((c) => { c.setAttribute('aria-hidden', 'true'); c.classList.add('is-clone'); });
-  track.insertBefore(head, real[0]);
-  track.appendChild(tail);
-  const cards = Array.from(track.children);   /* [複製, 本物×N, 複製] */
-
-  let offsets = cards.map(() => 0);
-  let index = 1;           /* 本物の1枚目 */
-  let timer = 0;
-  let visible = true;
-
-  const at = (i) => -offsets[i];
-
-  /* still = true のあいだは transition を切って、その位置にそのまま置く */
-  const put = (x, still) => {
-    track.classList.toggle('is-still', !!still);
-    track.style.transform = 'translate3d(' + x.toFixed(1) + 'px,0,0)';
-  };
-
-  /* いま画面に出ている送り量。送りの途中でも実際の位置が取れる */
-  const currentX = () => {
-    const t = getComputedStyle(track).transform;
-    if (!t || t === 'none') return 0;
-    const m = t.match(/matrix3?d?\(([^)]+)\)/);
-    if (!m) return 0;
-    const v = m[1].split(',').map(parseFloat);
-    return v.length > 6 ? v[12] : v[4];      /* matrix3d は13番目、matrix は5番目 */
-  };
-
-  /* 複製の上に来ていたら、見た目を1pxも変えずに本物の同じ札へ番号を移す */
-  const unclone = (x) => {
-    if (index === 0)     { const d = at(N) - at(0);     index = N; return x + d; }
-    if (index === N + 1) { const d = at(1) - at(N + 1); index = 1; return x + d; }
-    return x;
-  };
-
-  const layout = () => {
-    /* 変形なしの位置で測る。端の札も画面の中心に来られるよう、送り箱の左右に
-       (桁の幅 - 札の幅)/2 の余白を入れる */
-    put(0, true);
-    /* ★原点は桁の左端。SP強制（パソコンでスマホ版）のとき body は窓の中央に寄るので、
-       窓の左端を 0 とみなすと送り量が桁の外側ぶんだけ余計になる */
-    const origin = document.body.getBoundingClientRect().left;
-    const colW = document.documentElement.clientWidth;
-    const left = track.getBoundingClientRect().left - origin;
-    const cw = cards[0].getBoundingClientRect().width;
-    const pad = Math.max(0, Math.round(colW / 2 - cw / 2 - left));
-    track.style.paddingLeft = pad + 'px';
-    track.style.paddingRight = pad + 'px';
-    const base = cards[0].getBoundingClientRect().left;
-    offsets = cards.map((c) => Math.round(c.getBoundingClientRect().left - base));
-    put(at(index), true);
-  };
-
-  const goTo = (i) => { index = i; put(at(index), false); };
-
-  const stop = () => { if (timer) { clearInterval(timer); timer = 0; } };
-  const start = () => { stop(); if (visible) timer = setInterval(() => goTo(index + 1), INTERVAL); };
-
-  /* 送り終わりが複製の上だったら、その場で本物へ差し替える */
-  track.addEventListener('transitionend', (e) => {
-    if (e.propertyName !== 'transform' || e.target !== track) return;
-    const before = index;
-    const x = unclone(at(index));
-    if (index !== before) put(x, true);
-  });
-
-  /* ---- 指（とマウス）で送る。縦のスクロールは奪わない ----
-     touch-action:pan-y を CSS で当ててあるので、縦に動かしたぶんはブラウザが
-     そのままページのスクロールに使い、こちらには pointercancel が来る */
-  let dragging = false, axis = null, sx = 0, sy = 0, dx = 0, from = 0;
-
-  track.addEventListener('pointerdown', (e) => {
-    if (e.pointerType === 'mouse' && e.button !== 0) return;
-    stop();
-    dragging = true; axis = null; dx = 0;
-    sx = e.clientX; sy = e.clientY;
-    /* 送りの途中で掴まれても、いま見えている位置から引き継ぐ */
-    const cur = unclone(currentX());
-    put(cur, true);
-    from = cur;
-  });
-
-  window.addEventListener('pointermove', (e) => {
-    if (!dragging) return;
-    const mx = e.clientX - sx, my = e.clientY - sy;
-    if (axis === null) {
-      if (Math.abs(mx) < AXIS && Math.abs(my) < AXIS) return;
-      axis = Math.abs(mx) > Math.abs(my) ? 'x' : 'y';
-      if (axis === 'y') { dragging = false; goTo(index); start(); return; }
-      if (track.setPointerCapture) { try { track.setPointerCapture(e.pointerId); } catch (_) {} }
-    }
-    dx = mx;
-    put(from + dx, true);
-  }, { passive: true });
-
-  const release = () => {
-    if (!dragging) return;
-    dragging = false;
-    if (axis === 'x' && Math.abs(dx) > SWIPE) goTo(index + (dx < 0 ? 1 : -1));
-    else goTo(index);
-    start();
-  };
-  window.addEventListener('pointerup', release);
-  window.addEventListener('pointercancel', release);
-
-  layout();
-  put(at(index), true);
-
-  /* 画面から出ているあいだは自動送りを止める。裏のタブでも止める */
-  if ('IntersectionObserver' in window) {
-    new IntersectionObserver((es) => {
-      es.forEach((e) => { visible = e.isIntersecting; });
-      if (visible) start(); else stop();
-    }, { rootMargin: '120px 0px 120px 0px' }).observe(pin);
-  } else {
-    start();
-  }
-  document.addEventListener('visibilitychange', () => {
-    if (document.hidden) stop(); else start();
-  });
-
-  let rt = 0;
-  const relayout = () => { clearTimeout(rt); rt = setTimeout(layout, 120); };
-  window.addEventListener('resize', relayout, { passive: true });
-  window.addEventListener('orientationchange', relayout, { passive: true });
-  /* 写真とフォントが入ると札の幅・高さが変わる。変わったら測り直す */
-  if ('ResizeObserver' in window) new ResizeObserver(relayout).observe(stage);
-  track.querySelectorAll('img').forEach((img) => {
-    if (!img.complete) img.addEventListener('load', relayout, { once: true });
-  });
-}
 
 /* --------------------------- 折りたたみを開くときの動き ---------------------------
    <details> は open を付けた瞬間に高さが確定するので、何もしないと中身が一段で
@@ -637,5 +492,97 @@ export function initTicketTouch() {
     el.addEventListener('pointerup', off, { passive: true });
     el.addEventListener('pointercancel', off, { passive: true });
     el.addEventListener('pointerleave', off, { passive: true });
+  });
+}
+
+/* ------------------------- 参加者の声: 長い札を畳む -------------------------
+   手で送る横スクロールにしたので、1枚が画面より高いと「縦に読むか、横へ送るか」の
+   二択になり、送った先にも空きが出る。既定の行数を超える札だけ畳んで開けるようにする。
+   ★行数で判定せず実測の高さで判定する。文言を差し替えても自動で効く */
+export function initVoiceFolds({ lines = 8 } = {}) {
+  const cards = Array.from(document.querySelectorAll('.vcard'));
+  if (!cards.length) return;
+  cards.forEach((card) => {
+    const quote = card.querySelector('.vcard__quote');
+    if (!quote) return;
+    card.style.setProperty('--fold-lines', String(lines));
+    /* 畳んだときの高さを CSS に決めさせてから、中身がはみ出すかを見る */
+    card.classList.add('is-foldable');
+    if (quote.scrollHeight <= quote.clientHeight + 4) {
+      card.classList.remove('is-foldable');   /* 畳む必要がない札は元に戻す */
+      return;
+    }
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'vcard__more';
+    btn.textContent = '続きを読む';
+    btn.setAttribute('aria-expanded', 'false');
+    const id = 'vq-' + Math.random().toString(36).slice(2, 8);
+    quote.id = id;
+    btn.setAttribute('aria-controls', id);
+    btn.addEventListener('click', () => {
+      const open = card.classList.toggle('is-open');
+      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      btn.textContent = open ? '閉じる' : '続きを読む';
+      track('voice_expand', { open: open ? 1 : 0 });
+    });
+    quote.insertAdjacentElement('afterend', btn);
+  });
+}
+
+/* --------------------- FV の吹き出しを1文字ずつ出す ---------------------
+   ★先に全文を span に割ってから隠す。あとから足すと吹き出しが打つたびに広がり、
+     マスコットと CTA の位置がずれる。箱の大きさは最初から最終形で確定させる。
+   ★モーション低減では何もしない（全文がそのまま出る） */
+export function initTypewriter({ selector = '.fv__buddy-say', speed = 58, delay = 1100 } = {}) {
+  const el = document.querySelector(selector);
+  if (!el) return;
+  if (reduceMotion.matches) return;
+
+  const chars = [];
+  const walk = (node) => {
+    Array.from(node.childNodes).forEach((n) => {
+      if (n.nodeType === 3) {
+        const frag = document.createDocumentFragment();
+        for (const ch of n.nodeValue) {
+          const s = document.createElement('span');
+          s.className = 'tw';
+          s.textContent = ch;
+          frag.appendChild(s);
+          chars.push(s);
+        }
+        n.replaceWith(frag);
+      } else if (n.nodeType === 1 && n.tagName !== 'BR') {
+        walk(n);
+      }
+    });
+  };
+  walk(el);
+  if (!chars.length) return;
+
+  el.classList.add('is-typing');
+  let i = 0;
+  let timer = 0;
+  const step = () => {
+    chars[i].classList.add('is-on');
+    i += 1;
+    if (i < chars.length) timer = setTimeout(step, speed);
+    else el.classList.remove('is-typing');
+  };
+  /* 幕が上がって FV の中身が出そろってから打ち始める */
+  const start = () => { timer = setTimeout(step, delay); };
+  if (document.querySelector('.fv.is-in')) start();
+  else {
+    const mo = new MutationObserver(() => {
+      if (document.querySelector('.fv.is-in')) { mo.disconnect(); start(); }
+    });
+    const fv = document.querySelector('.fv');
+    if (fv) mo.observe(fv, { attributes: true, attributeFilter: ['class'] });
+    else start();
+  }
+  /* 画面外へ出たら打つのをやめる（戻ってきたら全文を出す） */
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden && timer) { clearTimeout(timer); timer = 0;
+      chars.forEach((c) => c.classList.add('is-on')); el.classList.remove('is-typing'); }
   });
 }

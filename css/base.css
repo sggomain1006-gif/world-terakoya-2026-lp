@@ -252,7 +252,10 @@ p + p{margin-top:1em}
   -webkit-backface-visibility:hidden;backface-visibility:hidden;
 }
 .rig img{width:100%;height:auto}
-.rig svg #trail{display:none}
+/* 足あとは動的に置くものと二重になるので隠す。★-rev（白フチ付き）は白フチ層と本体の
+   二層構造で、本体側の #trail を消しても白フチ層の複製が白い足あととして残る。
+   白フチ層側には 2026-09-30 に #trail-edge を付けたので、両方まとめて消す */
+.rig svg #trail,.rig svg #trail-edge{display:none}
 
 /* ---------- 動きを減らす ---------- */
 @media (prefers-reduced-motion:reduce){

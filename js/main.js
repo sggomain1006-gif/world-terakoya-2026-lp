@@ -3,22 +3,15 @@
    幕 → 地の映像 → スクロール進捗 → 章の色 → 各UI
    ============================================================================= */
 
-import { createDoorScene } from './door.js?v=2026092807';
-import { mountRigs, attachFace, attachWalker, attachBow, attachPointing } from './mascot.js?v=2026092807';
-import { initEye } from './eye.js?v=2026092807';
-import { Spring, safeDt } from './lib/spring.js?v=2026092807';
-import {
-  reduceMotion, finePointer, track, splitChars, initTabs, initFaq, initGates,
-  initReveal, initCounters, initClips, initMagnets, initTilt, initCursor, initShare, initCtas,
-  initVoiceGallery, initTicketTouch, initProgramAutoOpen, initProgramFolds,
-} from './ui.js?v=2026092807';
+import { mountRigs, attachFace, attachWalker, attachBow, attachPointing } from './mascot.js?v=2026093015';
+import { Spring, safeDt } from './lib/spring.js?v=2026093015';
+import { reduceMotion, finePointer, track, splitChars, initTabs, initFaq, initGates, initReveal, initCounters, initClips, initMagnets, initTilt, initCursor, initShare, initCtas, initTicketTouch, initProgramAutoOpen, initProgramFolds, initVoiceFolds, initTypewriter } from './ui.js?v=2026093015';
 
 const root = document.documentElement;
 const $ = (s, r = document) => r.querySelector(s);
 
 const veil = $('#veil');
-const canvas = $('#stage');
-const video = $('#doorVideo');
+const video = $('#fvVideo');
 const fv = $('#top');
 const fvSticky = $('.fv__sticky');
 const final = $('#cta-final');
@@ -36,17 +29,9 @@ const briefEl   = $('#briefing');
 /* ------------------------------ 文字の分割（幕の前に） ------------------------------ */
 splitChars(fv);
 
-/* --------------------------- 扉（WebGL・最終CTA だけ） ---------------------------
-   FV は素の映像に変えたので、WebGL の扉は最終CTA（THE DOOR, AGAIN）
-   でだけ使う。WebGL が無い環境ではその節の扉が出ないだけで、他は何も変わらない */
-let scene = null;
-try {
-  scene = createDoorScene({ canvas, video, poster: 'img/poster-door.webp', reduceMotion: reduceMotion.matches });
-} catch (e) {
-  console.warn('[door] WebGL を使わない表示に切り替えます:', e && e.message);
-  scene = null;
-}
-if (scene) { root.classList.add('has-gl'); scene.setMode('final'); }
+/* ★扉（WebGL・旧「THE DOOR, AGAIN」）は 2026-09-30 に撤去した。
+   FV の地は素の縦映像1本になったので、このLPは WebGL を一切使わない。
+   js/door.js は削除済み（戻すときは git 履歴から。最後に在るのは 03abd66） */
 
 const band = $('#stageBand');
 /* 奥行き（--dz）と2人の濃さ（--people-a）は :root でなく、この3枚に直接書く。
@@ -86,7 +71,6 @@ function openVeil() {
     V.release();
     videoWanted = true;
     playVideo();
-    if (scene) scene.intro();
     setTimeout(() => fv && fv.classList.add('is-in'), 120);
     if (sideCta) setTimeout(requestFrame, 900);
     requestFrame();
@@ -129,7 +113,6 @@ const railLinks = rail ? Array.from(rail.querySelectorAll('[data-rail]')) : [];
 
 let lastTheme = '';
 let lastRail = '';
-let stageOn = false;
 let videoOn = false;
 
 const clamp01 = (v) => (v < 0 ? 0 : v > 1 ? 1 : v);
@@ -274,13 +257,6 @@ function updateFixed(now = performance.now()) {
   }
   scopeLast = now;
 
-  // ---- 舞台（最終CTAの扉だけ）----
-  if (scene && finalVisible !== stageOn) {
-    stageOn = finalVisible;
-    canvas.classList.toggle('is-on', finalVisible);
-    if (finalVisible) scene.start(); else scene.stop();
-  }
-
   // ---- 章の色・レール ----
   if (theme !== lastTheme) {
     lastTheme = theme;
@@ -294,6 +270,9 @@ function updateFixed(now = performance.now()) {
   if (bar) bar.classList.toggle('is-hidden', through);
   if (rail) rail.classList.toggle('is-hidden', through || finalVisible);
   if (sideCta) sideCta.classList.toggle('is-on', sideOn);
+  /* ★追従CTAは幅57pxで、本文の右端まで 20px しかない（実測で37px被る）。
+     出ている間だけ html に印を付け、CSS 側で当たる本文の右余白を広げる */
+  document.documentElement.classList.toggle('has-side-cta', sideOn);
 }
 /* 右端で追従CTAに隠されると困るもの。CTA の縦の帯にかかる間だけ引っ込める。
      .tbl      … 隠れると金額が読めなくなる
@@ -345,17 +324,10 @@ window.addEventListener('resize', requestFrame);
 updateFixed();
 if (scopeAnimating) requestFrame();
 
-/* --------------------------------- ポインタ → 扉 --------------------------------- */
-if (scene) {
-  window.addEventListener('pointermove', (e) => {
-    scene.setPointer(e.clientX / window.innerWidth * 2 - 1, -(e.clientY / window.innerHeight * 2 - 1), true);
-  }, { passive: true });
-  document.addEventListener('pointerleave', () => scene.setPointer(0, 0, false));
-}
 // タブが隠れたら止める（WebGL の有無に関わらず映像は止める）
 document.addEventListener('visibilitychange', () => {
-  if (document.hidden) { if (scene) scene.stop(); pauseVideo(); }
-  else { stageOn = false; videoOn = false; scopeLast = performance.now(); requestFrame(); }
+  if (document.hidden) { pauseVideo(); }
+  else { videoOn = false; scopeLast = performance.now(); requestFrame(); }
 });
 
 /* ------------------------------------- UI ------------------------------------- */
@@ -365,20 +337,22 @@ initFaq();
 initGates(cursor);
 initReveal();
 initCounters();
-initVoiceGallery();
 initProgramFolds();
 initProgramAutoOpen();
 initTicketTouch();
 initClips();
+/* ★16行。2〜4枚目（200〜230字）は全文が収まり、長い1枚目（約600字）だけが畳まれる。
+   結果として札の高さも揃う */
+initVoiceFolds({ lines: 16 });
+initTypewriter();
 initMagnets();
 initTilt();
 initShare();
 initCtas();
 
-/* ------------------------------------ FV の目 ------------------------------------ */
-// ポートフォリオから移植。WebGL2 が無ければ null が返るだけで、他には影響しない
-try { initEye({ canvas: $('#fvEye'), reduceMotion: reduceMotion.matches }); }
-catch (e) { console.warn('[eye]', e && e.message); }
+/* ★FV の目（#fvEye）は 2026-09-28 にマスコットごと作り替えたときに外した。
+   canvas も initEye の呼び出しも無いので、eye.js は読み込まない
+   （js/eye.js と CSS の .fv__eye は戻せるように残してある） */
 
 /* ----------------------------------- マスコット ----------------------------------- */
 mountRigs().then((hosts) => {

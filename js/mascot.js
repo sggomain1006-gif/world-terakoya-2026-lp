@@ -11,7 +11,7 @@
    - #trail は隠す（動的に置く足あとと二重になる）
    ============================================================================= */
 
-import { Spring, expSmooth, safeDt } from './lib/spring.js?v=2026092807';
+import { Spring, expSmooth, safeDt } from './lib/spring.js?v=2026093015';
 
 const rigCache = new Map();
 

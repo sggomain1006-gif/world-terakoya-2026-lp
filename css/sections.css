@@ -214,11 +214,26 @@ main{position:relative;z-index:2}
      文字とボタンだけが上に固まって見えた */
   align-items:center;
   padding:calc(var(--bar-h) + 40px) 0 22vh;
+  /* ★幕は寄付LD（edfuture.jp/kifu/）の .final-cta__overlay と同じ2枚重ね。
+     上の楕円で中央上部を抜き、下の縦グラデで足元を沈める。値はあちらの実物に合わせた */
   background:
-    linear-gradient(rgba(26,5,8,.86) 0%,rgba(26,5,8,.70) 26%,
-                    rgba(26,5,8,.58) 52%,rgba(26,5,8,.80) 78%,rgba(26,5,8,.93) 100%),
+    radial-gradient(ellipse 130% 75% at 50% 8%,rgba(85,22,31,0) 35%,rgba(26,5,8,.7) 100%),
+    linear-gradient(to bottom,rgba(26,5,8,.12) 0%,rgba(85,22,31,.42) 42%,rgba(26,5,8,.97) 100%),
     url(../img/poster-clip-group.webp) center 32%/cover no-repeat;
 }
+/* ---- 黄の枠線（寄付LPの .final-cta__frame と同値）----
+   細い線を一周させ、左上と右下にだけ太い鉤を重ねる。
+   ★pointer-events:none。通すと CTA の上に透明な板が乗ってボタンが押せなくなる */
+.final__frame{
+  position:absolute;inset:16px;z-index:1;
+  border:1px solid rgba(255,216,62,.32);
+  pointer-events:none;
+}
+.final__frame::before,.final__frame::after{
+  content:'';position:absolute;width:26px;height:26px;border:2px solid var(--yellow);
+}
+.final__frame::before{top:-1px;left:-1px;border-right:none;border-bottom:none}
+.final__frame::after{bottom:-1px;right:-1px;border-left:none;border-top:none}
 .final__inner{width:100%;text-align:center;display:flex;flex-direction:column;align-items:center}
 .final__h{max-width:720px;text-shadow:0 2px 30px rgba(26,5,8,.6);font-size:clamp(24px,calc(6.6 * var(--vw)),30px)}
 .final__ctas{margin-top:28px}
@@ -407,38 +422,31 @@ main{position:relative;z-index:2}
 .vcards__track{
   list-style:none;margin:18px calc(-1 * var(--px)) 0;
   padding:0 var(--px) 6px;
-  display:flex;align-items:stretch;gap:16px;
+  /* ★stretch にしない。長い声が1枚あると他の札まで同じ高さに伸びて空白だらけになる */
+  display:flex;align-items:flex-start;gap:16px;
   overflow-x:auto;overscroll-behavior-x:contain;
   scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;
   scrollbar-width:none;
 }
-.vcards__track::-webkit-scrollbar{display:none}
-/* JS が動く環境では横スクロールをやめ、transform で送る */
-.js .vcards__track{
-  width:max-content;overflow:visible;scroll-snap-type:none;will-change:transform;
-  transition:transform .58s cubic-bezier(.22,.61,.36,1);
-  touch-action:pan-y;          /* 縦はブラウザに渡し、横だけこちらで受け取る */
-}
-/* 指で持っている間と、複製から本物へ無音で差し替えるときは追従を切る */
-.js .vcards__track.is-still{transition:none}
-/* モーション低減のときは横スクロールに戻す。紐はそのまま残す */
-.js .vcards__pin.is-static{height:auto !important}
-.js .vcards__pin.is-static .vcards__stage{position:static}
-.js .vcards__pin.is-static .vcards__track{width:auto;overflow-x:auto;scroll-snap-type:x mandatory;transform:none}
-.js .vcards__pin.is-static .vcard{transform:none}
+/* ★スクロールバーは出す。自動送りをやめて手で送る作りにしたので、
+   「横へ動く」ことが分かる手掛かりが無いと気づかれない */
+.vcards__track{scrollbar-width:thin;scrollbar-color:rgba(245,239,230,.45) transparent}
+.vcards__track::-webkit-scrollbar{height:6px}
+.vcards__track::-webkit-scrollbar-thumb{background:rgba(245,239,230,.45);border-radius:3px}
+.vcards__track::-webkit-scrollbar-track{background:transparent}
+/* キーボードでも送れるように focus を受け取る（HTML 側で tabindex=0 を付けた） */
+.vcards__track:focus-visible{outline:2px solid var(--yellow);outline-offset:4px;border-radius:6px}
+/* ★2026-09-30 に自動送りをやめた。JS の transform 送り・端の複製・4秒の送りは
+   すべて外し、素のまま指で送る横スクロール1本にした（initVoiceGallery は
+   呼んでいない）。挙動は JS の有無にもモーション低減設定にも依存しない */
 /* 札の中心を画面の中心に合わせる。端の札も中心に来られるよう、
    送り箱の左右に (箱の幅 - 札の幅)/2 の余白を JS が入れている */
 .vcard{
   flex:0 0 clamp(252px,calc(74 * var(--vw)),300px);scroll-snap-align:center;
   position:relative;
   display:flex;flex-direction:column;
-  background:var(--cream);border-radius:14px;
+  background:var(--cream);border-radius:14px;overflow:hidden;
   box-shadow:0 24px 50px -30px rgba(0,0,0,.7);
-  /* 紐は札の外側（上）に描くので overflow:hidden は使えない。角は中身側で丸める。
-     支点を紐の上端に置くと、回したときに振り子のように見える */
-  margin-top:var(--cord);
-  transform-origin:center calc(-1 * var(--cord));
-  will-change:transform;
 }
 .vcard__photo{width:100%;height:220px;object-fit:cover;flex:none;display:block;background:var(--cream-3);border-radius:14px 14px 0 0}
 /* 本文はクリームの地。地が反転するので、文字と罫もワイン側に寄せる */
@@ -446,23 +454,10 @@ main{position:relative;z-index:2}
 .vcard__prog{margin:0;font-size:10px;font-weight:700;letter-spacing:.1em;color:var(--wine)}
 .vcard__quote{margin:0;flex:1;padding-left:14px;border-left:2px solid rgba(85,22,31,.28)}
 .vcard__quote p{margin:0;font-size:13px;line-height:1.85;color:var(--text)}
+.vcard__quote p + p{margin-top:.9em}
 .vcard__name{margin:2px 0 0;font-size:11px;color:var(--text-2)}
-/* ---- 吊り下げの紐（寄付LPの展示と同じ作り） ----
-   ★紐の長さは全部そろえる。以前は札ごとに変えて吊り位置をずらしていたが、
-     段差が出るのでやめた。地がワインなので紐はクリーム側 */
-.vcard::before{
-  content:'';position:absolute;left:50%;bottom:100%;
-  width:2px;height:var(--cord);margin-left:-1px;
-  background:linear-gradient(to bottom,rgba(245,239,230,.55),rgba(245,239,230,.26));
-  transform:skewX(var(--cord-skew));transform-origin:top center;
-}
-/* 吊り元の留め具 */
-.vcard::after{
-  content:'';position:absolute;left:50%;bottom:calc(100% + var(--cord) - 6px);
-  width:11px;height:11px;margin-left:-5.5px;border-radius:50%;
-  background:var(--yellow);box-shadow:0 2px 5px rgba(0,0,0,.4);
-}
-.vcard{--cord:30px;--cord-skew:0deg}
+/* ★吊り下げの紐（.vcard::before）と留め具（.vcard::after）は 2026-09-30 に削除。
+   札は吊るさず、そのまま横に並べる */
 /* ★以前はここで背の低い機種だけ札を広げて行数を減らしていた。帯を画面に貼り付けて
    いた頃、札の全体を1画面に収める必要があったため。貼り付けをやめて縦スクロールを
    素通しにしたので不要になった。広げたままだと iPhone SE で札の右端が横の CTA に
@@ -563,8 +558,11 @@ main{position:relative;z-index:2}
 .intro__mascot{flex:0 0 auto;display:block;width:88px;height:auto}
 .intro__mascot img,.intro__mascot svg{display:block;width:100%;height:auto}
 
-/* ★この塊は基底より後ろに置く。前に置くと同じ詳細度で後勝ちに負けて一度も効かない */
-@media (min-width:768px){
+/* ★この塊は基底より後ろに置く。前に置くと同じ詳細度で後勝ちに負けて一度も効かない。
+   ★閾値は 100000px。このLPは PC 用メディアクエリを全部無効化し、sp-force が CSS で
+     body を 390px の桁に縮めて表示している。CSS のメディアクエリは実際の窓幅を見たままなので、
+     768 のままだと PC で発火し、390px の桁の中でカードが横3列（実測103px幅）になって読めない */
+@media (min-width:100000px){
   .intro__hero{min-height:66svh;padding:96px 0 104px}
   .intro__ask-body{font-size:16.5px;margin-top:24px}
   .intro__step{padding:104px 0 8px}
@@ -619,8 +617,9 @@ main{position:relative;z-index:2}
 .diff__t{font-weight:700;font-size:15px;color:var(--wine)}
 .diff__b{font-size:13px;line-height:1.7;color:var(--text-2)}
 
-/* ★媒体クエリは基底の後ろに置く。前に置くと同じ詳細度で後勝ちに負けて効かない */
-@media (min-width:768px){
+/* ★媒体クエリは基底の後ろに置く。前に置くと同じ詳細度で後勝ちに負けて効かない。
+   ★閾値は 100000px（上のブロックと同じ理由。PC 用は無効化するのがこのLPの規約） */
+@media (min-width:100000px){
   .fields{
     /* 横に3枚。カードの高さは本文の長さで変わるので、行の高さを揃えて頭を合わせる */
     flex-direction:row;gap:20px;margin-top:36px;
@@ -632,4 +631,79 @@ main{position:relative;z-index:2}
   .diffs{flex-direction:row;gap:14px;margin-top:24px}
   .diff{flex:1 1 0;min-width:0;padding:14px 18px}
   .diff__t{font-size:16px}
+}
+
+/* 教職員向けの問い合わせ先。ボタンでなく住所そのものを見せる
+   （「下記メールアドレス宛に」と本文で指しているため）。押せば直接メールが立つ */
+.foot__mail{
+  display:inline-block;margin-top:4px;
+  font-family:var(--ff-mono);font-size:14px;letter-spacing:.04em;
+  /* ★地はワイン。見出し（.h4）と同じ明るさに揃えるので --cream を使う。
+     このLPの「白」は #F5EFE6 で、純白だとここだけ浮く */
+  color:var(--cream);text-decoration:underline;text-underline-offset:4px;
+  text-decoration-thickness:1px;word-break:break-all;
+}
+
+
+/* ==========================================================================
+   追従CTA（右端・幅57px）が出ている間の本文の退避
+   2026-09-30 実測: 本文の右端は vw-20px、CTA の左端は vw-57px。差の 37px ぶん
+   本文・見出し・グラフのラベルに食い込んでいた（3幅とも）。
+   js/main.js が区間に入ったとき html に .has-side-cta を付けるので、その間だけ逃がす
+   ========================================================================== */
+.has-side-cta .purpose__lead,
+.has-side-cta .purpose__note,
+.has-side-cta .intro__lead,
+.has-side-cta .field__b,
+.has-side-cta .ilist__b,
+.has-side-cta .voice p,
+.has-side-cta .founder-card__message p{padding-right:44px}
+.has-side-cta .dial__label{padding-inline:10px}
+.has-side-cta .h2,
+.has-side-cta .h3{padding-right:44px;white-space:normal;text-wrap:balance}
+
+/* 375px で「サンフランシスコ／ボストン・ニューヨーク」の末尾1字だけが
+   2行目に落ちていた。字を一段小さくして1行に収める */
+@media (max-width:389px){
+  .diff__b{font-size:12.5px;letter-spacing:-.01em}
+}
+
+/* ---- 参加者の声: 長い札を畳む（js/ui.js の initVoiceFolds が付け外しする）----
+   ★畳んだ高さは行数 × 行送りで出す。font-size と line-height を変えたら
+     この式のぶんだけ自動で追従する */
+.vcard.is-foldable .vcard__quote{
+  max-height:calc(13px * 1.85 * var(--fold-lines,8));
+  overflow:hidden;
+  -webkit-mask-image:linear-gradient(#000 64%,transparent 100%);
+  mask-image:linear-gradient(#000 64%,transparent 100%);
+}
+.vcard.is-foldable.is-open .vcard__quote{
+  max-height:none;-webkit-mask-image:none;mask-image:none;
+}
+.vcard__more{
+  align-self:flex-start;margin:2px 0 0;padding:0;
+  background:none;border:0;cursor:pointer;
+  font-family:var(--ff-sans);font-size:12.5px;font-weight:700;letter-spacing:.02em;
+  color:var(--wine);text-decoration:underline;text-underline-offset:4px;
+  text-decoration-thickness:1px;
+}
+.vcard__more:hover{opacity:.72}
+.vcard__more:focus-visible{outline:2px solid var(--wine);outline-offset:3px;border-radius:4px}
+
+/* ---- FV の吹き出しを1文字ずつ出す（js/ui.js の initTypewriter）----
+   ★visibility で隠す。display:none や文字を後から足す方式だと、打つたびに
+     吹き出しが広がってマスコットと CTA の位置が動く */
+.fv__buddy-say .tw{visibility:hidden}
+.fv__buddy-say .tw.is-on{visibility:visible}
+/* 打っている間だけ、末尾に細い棒を出す */
+.fv__buddy-say.is-typing::before{
+  content:'';position:absolute;right:12px;bottom:9px;
+  width:1.5px;height:1em;background:var(--wine-2);opacity:.75;
+  animation:tw-blink 1s steps(1,end) infinite;
+}
+@keyframes tw-blink{0%,50%{opacity:.75}50.01%,100%{opacity:0}}
+@media (prefers-reduced-motion:reduce){
+  /* JS 側でも打たないが、CSS でも保険を掛ける */
+  .fv__buddy-say .tw{visibility:visible}
+  .fv__buddy-say.is-typing::before{display:none;animation:none}
 }

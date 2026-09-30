@@ -208,7 +208,7 @@
 }
 /* --- 説明文はマスコットのセリフ。吹き出しに入れる ----------------------------
    SP は下の足あとを歩くマスコットがそのまま話し手なので、しっぽの横位置を
-   マスコットに合わせて動かす（--tail-x は spiral.js が毎フレーム書く）。
+   マスコットに合わせて動かす（--tail-x を書いていた spiral.js は 2026-09-30 に削除済み）。
    PC は読み物欄の左に語り手を固定し、しっぽを左へ倒す。
 
    ★しっぽは padding-bottom の内側に描く。外へ出すと --read-h（いちばん長い本文で
@@ -249,7 +249,8 @@
   display:block;position:relative;height:62px;margin-top:8px;
   border-top:1px solid var(--rule,var(--line));
 }
-/* ★幅を変えたら spiral.js の歩ける距離も変わる。JS は offsetWidth を読むので追従する */
+/* ★螺旋の章ごと撤去したので、この規則を使う要素はもう無い（残骸）。
+   .sched / .plist / .purpose は現役なのでファイルごとは消せない */
 .spiral__walker{
   position:absolute;left:0;bottom:0;width:84px;
   transform:translateX(var(--walk,0px));will-change:transform;

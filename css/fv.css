@@ -201,7 +201,7 @@
 .no-js .fv{height:auto}
 .no-js .fv__sticky{position:relative}
 .no-js .fv__sticky::before{content:'';position:absolute;inset:0;z-index:0;
-  background:linear-gradient(rgba(26,5,8,.6),rgba(26,5,8,.3) 40%,rgba(26,5,8,.75)),url(../img/poster-door.webp) center/cover no-repeat}
+  background:linear-gradient(rgba(26,5,8,.6),rgba(26,5,8,.3) 40%,rgba(26,5,8,.75)),url(../img/poster-underfv.webp) center/cover no-repeat}
 .no-js .side-cta{display:none}
 
 /* ---------- 上部バー ---------- */
@@ -364,7 +364,9 @@
    ★ボタンの見た目は変えない。.fv__cta .btn には一切触れていない。
    ★pointer-events:none は必須。通すと吹き出しとリグが CTA のタップ領域を奪う */
 .fv__buddy{
-  position:absolute;left:100%;bottom:0;
+  /* bottom はボタンの下端が基準。少し持ち上げてボタンの上に乗るように見せる。
+     吹き出しは bottom:calc(100% + 6px) でリグに追従するので、ここだけ動かせば両方上がる */
+  position:absolute;left:100%;bottom:12px;
   margin-left:-34px;          /* ボタンに少し被せる（被りは許容されている） */
   width:76px;
   pointer-events:none;z-index:3;
@@ -389,7 +391,8 @@
   .fv__eye{width:96px;height:96px}
   /* 背が低い機種はボタンも縮むので案内役も一回り小さくし、セリフの行数を抑える */
   .fv__buddy{width:66px;margin-left:-28px}
-  .fv__buddy-say{font-size:11px;width:min(58vw,208px);padding:7px 11px}
+  /* ★背の低い機種は吹き出しが2人の手に重なる。幅を詰めて行を短くする */
+  .fv__buddy-say{font-size:11px;width:min(52vw,190px);padding:7px 11px}
 }
 @media (max-width:767px) and (max-height:600px){
   .fv__eye{width:80px;height:80px}
@@ -547,5 +550,8 @@
 @media (prefers-reduced-motion:reduce){
   .veil__mark svg{animation:none;opacity:1}
   .js .fv__copy .ch-c{transform:none;transition:none}
-  .js .fv [data-fade],.js .fv__mascot{opacity:1;transform:none;transition:none}
+  /* ★実際に opacity/transform を持つのは .fv__cta > * と .fv__mascot > * の「子」。
+     親だけ打ち消しても子のアニメが残る（Eddie と CTA がここに入る） */
+  .js .fv [data-fade],.js .fv__mascot,
+  .js .fv__mascot > *,.js .fv__cta > *{opacity:1;transform:none;transition:none;animation:none}
 }
