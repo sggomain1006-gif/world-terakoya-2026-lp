@@ -93,6 +93,11 @@
    必要な場所にだけ光を置く。縁が出ないよう端を 0 まで落としきる */
 .sp-force .pcside::before{
   content:'';position:absolute;z-index:-1;
+  /* ★当たり判定を持たせない。この光は inset:-18% で柱の中まで伸びており、
+     そのままだと柱側のボタンのクリックを吸う（実測で 1280px:81px / 1440px:95px /
+     1920px:101px ぶん食い込み、「続きを読む」が完全に押せなくなっていた）。
+     pointer-events は描画に影響しないので見た目は1pxも変わらない */
+  pointer-events:none;
   inset:-14% -18%;
   background:radial-gradient(58% 52% at 50% 50%,
     rgba(248,244,238,.86) 0%, rgba(248,244,238,.66) 42%,
@@ -120,6 +125,9 @@
   font-family:var(--ff-serif);font-size:17px;font-weight:500;
   letter-spacing:.14em;line-height:1;white-space:nowrap;
   color:var(--wine-2);text-decoration:none;
+  /* 押下域だけ広げる。縦書きで字面が17px幅しかなく狙いにくい。
+     padding と同じ量の負marginで相殺するので配置は変わらない */
+  padding-inline:12px;margin-inline:-12px;
   opacity:.82;transition:opacity .25s var(--ease-out),color .25s var(--ease-out);
 }
 @media (hover:hover){

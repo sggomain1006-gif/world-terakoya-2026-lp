@@ -25,6 +25,12 @@
 .endorsement-logo--jt { height: 72px; transform: translateX(-20px); }
 .endorsement-logo--mext { transform: translateX(-20px) scale(1.4); }
 .endorsement-logo--ireland { transform: translateX(70px); }
+/* ★320px では translateX(70px) の決め打ちのせいで「在アイルランド日本国大使館」と
+   Education in Ireland のロゴが右端から 8〜9px はみ出して切れていた（実測）。
+   設計幅（375/390/430）には一切かからない 340px 以下でだけ送りを詰める */
+@media (max-width:340px){
+  .endorsement-logo--ireland { transform: translateX(52px); }
+}
 .endorsements__names {
   list-style: none;
   display: flex;
@@ -39,6 +45,10 @@
   transform: translateX(43px);
   align-items: center;
 }
+/* ★320px では「在アイルランド日本国大使館」が右端から8px はみ出して切れていた（実測）。
+   設計幅（375/390/430）には一切かからない 340px 以下でだけ送りを詰める。
+   ★本体ルールの後ろに置くこと。前に置くと同詳細度で後勝ちに負けて一度も効かない */
+@media (max-width:340px){ .endorsements__names { transform: translateX(15px); } }
 .media-section,.sponsors { padding: 0 var(--px); }
 /* 協賛。ロゴは縦横比がばらばら（1.5:1 〜 5.7:1）なので、枠を揃えて
    その中で contain させる。枠の高さと中央が揃い、絵の中心も枠の中心に来る。
@@ -114,6 +124,9 @@
   opacity: 0.85;
   transition: opacity 0.3s ease, transform 0.3s ease;
 }
+/* ★押下域を 26px→44px に広げる。padding と同じ量の負marginで相殺するので、
+   並びも間隔も見た目は1pxも変わらない（gap:24px があるので誤タップも増えない） */
+.foot-social__link{padding:9px;margin:-9px}
 .foot-social__link:hover { opacity: 1; transform: translateY(-2px); }
 .foot-social__link svg { width: 26px; height: 26px; }
 
