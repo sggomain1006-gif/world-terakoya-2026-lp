@@ -3,9 +3,9 @@
    幕 → 地の映像 → スクロール進捗 → 章の色 → 各UI
    ============================================================================= */
 
-import { mountRigs, attachFace, attachWalker, attachBow, attachPointing, attachJump } from './mascot.js?v=2026100196';
-import { Spring, safeDt } from './lib/spring.js?v=2026100196';
-import { reduceMotion, finePointer, track, splitChars, initFaq, initGates, initReveal, initCounters, initClips, initMagnets, initTilt, initCursor, initShare, initCtas, initTicketTouch, initProgramAutoOpen, initProgramFolds, initVoiceFolds, initTypewriter, initShow, initSays, initHandoff } from './ui.js?v=2026100196';
+import { mountRigs, attachFace, attachWalker, attachBow, attachPointing, attachJump } from './mascot.js?v=2026100197';
+import { Spring, safeDt } from './lib/spring.js?v=2026100197';
+import { reduceMotion, finePointer, track, splitChars, initFaq, initGates, initReveal, initCounters, initClips, initMagnets, initTilt, initCursor, initShare, initCtas, initTicketTouch, initProgramAutoOpen, initProgramFolds, initVoiceFolds, initTypewriter, initShow, initSays, initHandoff } from './ui.js?v=2026100197';
 
 const root = document.documentElement;
 const $ = (s, r = document) => r.querySelector(s);
@@ -96,11 +96,19 @@ function warmPosters() {
   });
 }
 setTimeout(openVeil, V.MAX);
-/* ★幕を上げる合図を「映像が再生可能になったら」から「ページの読み込みが済んだら」に変えた。
-   前者だと 3MB の映像を初期表示の経路に載せることになり、実測で初期転送 4.9MB のうち
-   3.0MB をこれが占めて FCP/LCP を大きく遅らせていた。
-   幕の下限（V.MIN）と上限（V.MAX）のタイマーはそのままなので、幕の見え方は変わらない */
-window.addEventListener('load', openVeil, { once: true });
+/* ★幕を上げる合図は「FVの地の写真が出せるようになったら」。
+   ・元は映像の canplay だった → 3MB を初期表示の経路に載せることになり、
+     実測で初期転送 4.9MB のうち 3.0MB をこれが占めていた
+   ・load では遅すぎる → 書体も含む全部の読み込みを待つので、回線を絞ると幕が長く残る
+   地の写真は LCP 要素そのもの（fetchpriority=high）なので、これが出た時点が
+   「FVを見せられる最速の瞬間」。下限 V.MIN と上限 V.MAX のタイマーはそのままなので
+   幕の見え方は変わらない */
+const heroImg = $('.fv-bg');
+if (heroImg && heroImg.complete) openVeil();
+else if (heroImg) {
+  heroImg.addEventListener('load', openVeil, { once: true });
+  heroImg.addEventListener('error', openVeil, { once: true });
+} else window.addEventListener('load', openVeil, { once: true });
 
 /* ★映像（3.6MB）は「動かす意思が見えてから」取りに行く。
    濃さ（--va）が上がり始めるのは p=0.02 からで、それまではポスター
