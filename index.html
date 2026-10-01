@@ -11,7 +11,7 @@
      ★それでも object-src / base-uri / frame-src の封鎖には効く。
      ★frame-ancestors と X-Content-Type-Options は meta では無効＝ホスティング側の作業 -->
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; media-src 'self'; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'none'; frame-src 'none'; form-action 'none'">
-<meta name="build" content="2026100192">
+<meta name="build" content="2026100193">
 <script src="js/fresh.js" defer></script>
 <script>
 /* 起動の最小限。JS が動く印と、幕（veil）の制御だけをここに置く。
@@ -41,22 +41,22 @@
   root.classList.add('is-veiled');
 }());
 </script>
-<link rel="stylesheet" href="fonts/fonts.css?v=2026100192">
-<link rel="stylesheet" href="css/base.css?v=2026100192">
-<link rel="stylesheet" href="css/fv.css?v=2026100192">
-<link rel="stylesheet" href="css/sections.css?v=2026100192">
-<link rel="stylesheet" href="css/spiral.css?v=2026100192">
-<link rel="stylesheet" href="css/kifu-parity.css?v=2026100192">
+<link rel="stylesheet" href="fonts/fonts.css?v=2026100193">
+<link rel="stylesheet" href="css/base.css?v=2026100193">
+<link rel="stylesheet" href="css/fv.css?v=2026100193">
+<link rel="stylesheet" href="css/sections.css?v=2026100193">
+<link rel="stylesheet" href="css/spiral.css?v=2026100193">
+<link rel="stylesheet" href="css/kifu-parity.css?v=2026100193">
 <!-- ★一時措置：パソコンでもスマホ版を表示する。戻すときはこの2行を消す -->
-<link rel="stylesheet" href="css/sp-force.css?v=2026100192">
+<link rel="stylesheet" href="css/sp-force.css?v=2026100193">
 <!-- ★head で同期実行する。body末尾に置くと、先に全幅で1度描いてから桁へ縮むので
      パソコンで巨大なレイアウトシフトになる（実測 CLS 0.8419／body 1440px→580px） -->
-<script src="js/sp-force.js?v=2026100192"></script>
+<script src="js/sp-force.js?v=2026100193"></script>
 <link rel="preload" as="image" href="img/poster-underfv.webp" fetchpriority="high">
-<link rel="modulepreload" href="js/main.js?v=2026100192">
-<link rel="modulepreload" href="js/ui.js?v=2026100192">
-<link rel="modulepreload" href="js/mascot.js?v=2026100192">
-<link rel="modulepreload" href="js/lib/spring.js?v=2026100192">
+<link rel="modulepreload" href="js/main.js?v=2026100193">
+<link rel="modulepreload" href="js/ui.js?v=2026100193">
+<link rel="modulepreload" href="js/mascot.js?v=2026100193">
+<link rel="modulepreload" href="js/lib/spring.js?v=2026100193">
 <title>ワールド寺子屋プログラム2026（第5回）｜NPO法人EdFuture</title>
 <meta name="description" content="高校生が自分の探究テーマを持って渡米し、現地校で学び、自分でアポを取って大学や企業を訪ね、探究発表を行う海外探究プログラム。2027年3月派遣・3便。高校生に帯同する大学生の参加枠と、給付型の全額免除枠あり。説明会は無料・オンライン。">
 <!-- ★2026-10-01: アイコン一式を sinrogo（虹の輪の EdFuture ロゴ）から作り直した。
@@ -113,7 +113,7 @@
          ここは素の画像1枚を CSS だけで歩かせる（跳ねる・傾く・しゃがむ） -->
     <div class="veil__toon">
       <span class="veil__shadow"></span>
-      <img class="veil__walker" src="assets/mascot/pose-walk-a.svg?v=2026100192" width="104" height="104" alt="" decoding="async">
+      <img class="veil__walker" src="assets/mascot/pose-walk-a.svg?v=2026100193" width="104" height="104" alt="" decoding="async">
     </div>
     <span class="veil__dots" aria-hidden="true"><i></i><i></i><i></i></span>
   </div>
@@ -125,13 +125,13 @@
      電話の縦横比へ切り出し済みなので、object-position で寄せる必要はない。
      柱は切り出しの時点で右寄りに置いてある。
      曲線の帯（映像）はこの上に乗り、スクロールで広がって覆い隠す -->
-<img class="fv-bg" src="img/fv-bg.webp?v=2026100192" width="1290" height="2796" decoding="async" alt="" aria-hidden="true">
+<img class="fv-bg" src="img/fv-bg.webp?v=2026100193" width="1290" height="2796" decoding="async" alt="" aria-hidden="true">
 <!-- 画面の下、左右に立つ参加者（支給の fv7.png / fv6.png。どちらも支給時点で背景が抜いてある）。
      ★前面は DOM の後ろ。fv7（右・男子）を後ろに書いて前に出している。
        fv7 は右端を画面の右端に合わせ、fv6 より 1.08 倍だけ大きい（手前にいる分）。
        横位置と高さは「顔を狙った vw に置く」逆算値（式は css/fv.css） -->
-<img class="fv-person fv-person--l" src="img/fv-left.webp?v=2026100192" width="880" height="1173" decoding="async" alt="" aria-hidden="true">
-<img class="fv-person fv-person--r" src="img/fv-right.webp?v=2026100192" width="880" height="1173" decoding="async" alt="" aria-hidden="true">
+<img class="fv-person fv-person--l" src="img/fv-left.webp?v=2026100193" width="880" height="1173" decoding="async" alt="" aria-hidden="true">
+<img class="fv-person fv-person--r" src="img/fv-right.webp?v=2026100193" width="880" height="1173" decoding="async" alt="" aria-hidden="true">
 
 <!-- ★2026-09-13: 水晶玉をやめた。FV には何も置かず、スクロールに合わせて
      この映像が全画面へ立ち上がる（背景と2人は奥へ引いて薄れる）。
@@ -203,8 +203,8 @@
              太いクリームの複製を下に敷いた版。写真の上でも輪郭が沈まない。
              ★data-rig は残す。<img> のままだと外部CSSが中に届かず、
              #trail（虹の足あと）が消えずに出てしまう -->
-        <div class="rig" data-rig="assets/mascot/pose-l-point-rev.svg?v=2026100192">
-          <img src="assets/mascot/pose-l-point-rev.svg?v=2026100192" width="104" height="104" alt="" aria-hidden="true" decoding="async">
+        <div class="rig" data-rig="assets/mascot/pose-l-point-rev.svg?v=2026100193">
+          <img src="assets/mascot/pose-l-point-rev.svg?v=2026100193" width="104" height="104" alt="" aria-hidden="true" decoding="async">
         </div>
       </div>
     </div>
@@ -246,8 +246,8 @@
       <div class="intro__buddy intro__buddy--l">
         <div class="intro__buddy-col" aria-hidden="true">
           <div class="intro__buddy-lift">
-            <div class="rig rig--jump" data-rig="assets/mascot/rig-rev.svg?v=2026100192" data-pose="point">
-              <img loading="lazy" src="assets/mascot/pose-point-rev.svg?v=2026100192" width="96" height="85" alt="" aria-hidden="true" decoding="async">
+            <div class="rig rig--jump" data-rig="assets/mascot/rig-rev.svg?v=2026100193" data-pose="point">
+              <img loading="lazy" src="assets/mascot/pose-point-rev.svg?v=2026100193" width="96" height="85" alt="" aria-hidden="true" decoding="async">
             </div>
           </div>
         </div>
@@ -274,8 +274,8 @@
         </div>
         <div class="intro__buddy-col" aria-hidden="true">
           <div class="intro__buddy-lift">
-            <div class="rig" data-rig="assets/mascot/pose-l-point-rev.svg?v=2026100192">
-              <img loading="lazy" src="assets/mascot/pose-l-point-rev.svg?v=2026100192" width="96" height="85" alt="" aria-hidden="true" decoding="async">
+            <div class="rig" data-rig="assets/mascot/pose-l-point-rev.svg?v=2026100193">
+              <img loading="lazy" src="assets/mascot/pose-l-point-rev.svg?v=2026100193" width="96" height="85" alt="" aria-hidden="true" decoding="async">
             </div>
           </div>
         </div>
@@ -330,7 +330,7 @@
             <video class="clip" playsinline muted loop preload="none" data-poster="img/poster-clip-talk.webp" data-src="video/clip-talk.mp4" width="960" height="540" aria-label="現地バディと向かい合って話す参加者"></video>
           </div>
           <div class="show__item" aria-hidden="true">
-            <img src="img/step-03.webp?v=2026100192" width="1600" height="900" loading="lazy" decoding="async" alt="現地で相手に話を聞いている参加者">
+            <img src="img/step-03.webp?v=2026100193" width="1600" height="900" loading="lazy" decoding="async" alt="現地で相手に話を聞いている参加者">
           </div>
           <div class="show__item" aria-hidden="true">
             <video class="clip" playsinline muted loop preload="none" data-poster="img/poster-kigyo.webp" data-src="video/clip-kigyo.mp4" width="720" height="900" aria-label="現地の企業のキャンパスを訪ねている参加者たち"></video>
@@ -350,8 +350,8 @@
       </div>
 
       <div class="show__mascot" aria-hidden="true">
-        <div class="rig" data-rig="assets/mascot/pose-point-rev.svg?v=2026100192">
-          <img loading="lazy" src="assets/mascot/pose-point-rev.svg?v=2026100192" width="104" height="104" alt="" decoding="async">
+        <div class="rig" data-rig="assets/mascot/pose-point-rev.svg?v=2026100193">
+          <img loading="lazy" src="assets/mascot/pose-point-rev.svg?v=2026100193" width="104" height="104" alt="" decoding="async">
         </div>
       </div>
     </div>
@@ -389,7 +389,7 @@
             </summary>
             <div class="plist__body">
               <figure class="plist__scene">
-                <img src="img/prog-sf.webp?v=2026100192" width="1200" height="799" loading="lazy" decoding="async" alt="ゴールデンゲートブリッジの全景。2本の主塔と海、対岸の丘">
+                <img src="img/prog-sf.webp?v=2026100193" width="1200" height="799" loading="lazy" decoding="async" alt="ゴールデンゲートブリッジの全景。2本の主塔と海、対岸の丘">
               </figure>
               <p class="plist__lead">西海岸の大学と企業を、自分の問いを持って回る10日間。</p>
               <dl class="plist__facts">
@@ -424,8 +424,8 @@
               <div class="plist__guide" data-reveal>
                 <p class="say say--wine">スタンフォードもGoogleも、自分の足で回るよ！</p>
                 <!-- 左向きの完成ポーズ。吹き出しは左に置くので向きが合う -->
-                <div class="plist__mascot rig rig--face rig--point" data-rig="assets/mascot/pose-l-point.svg?v=2026100192">
-                  <img loading="lazy" src="assets/mascot/pose-l-point.svg?v=2026100192" width="104" height="104" alt="" aria-hidden="true" decoding="async">
+                <div class="plist__mascot rig rig--face rig--point" data-rig="assets/mascot/pose-l-point.svg?v=2026100193">
+                  <img loading="lazy" src="assets/mascot/pose-l-point.svg?v=2026100193" width="104" height="104" alt="" aria-hidden="true" decoding="async">
                 </div>
               </div>
             </div>
@@ -441,7 +441,7 @@
             </summary>
             <div class="plist__body">
               <figure class="plist__scene">
-                <img class="plist__scene--liberty" src="img/prog-bn1.webp?v=2026100192" width="1200" height="900" loading="lazy" decoding="async" alt="青空の下に立つ自由の女神像">
+                <img class="plist__scene--liberty" src="img/prog-bn1.webp?v=2026100193" width="1200" height="900" loading="lazy" decoding="async" alt="青空の下に立つ自由の女神像">
               </figure>
               <p class="plist__lead">ニューヨークで3日、ボストンで6日。都市を移りながら現地校に入る。</p>
               <dl class="plist__facts">
@@ -477,8 +477,8 @@
                 <p class="say say--wine">ニューヨークとボストン、2つの街で学ぶよ！</p>
                 <!-- 左に立って右を指すポーズ。完成ポーズなので rig--face は付けない
                      （付けると瞳と口がずれて重なり、目や口が二重に見える） -->
-                <div class="plist__mascot rig" data-rig="assets/mascot/pose-point.svg?v=2026100192">
-                  <img loading="lazy" src="assets/mascot/pose-point.svg?v=2026100192" width="104" height="104" alt="" aria-hidden="true" decoding="async">
+                <div class="plist__mascot rig" data-rig="assets/mascot/pose-point.svg?v=2026100193">
+                  <img loading="lazy" src="assets/mascot/pose-point.svg?v=2026100193" width="104" height="104" alt="" aria-hidden="true" decoding="async">
                 </div>
               </div>
             </div>
@@ -494,7 +494,7 @@
             </summary>
             <div class="plist__body">
               <figure class="plist__scene">
-                <img src="img/prog-bn2.webp?v=2026100192" width="1200" height="800" loading="lazy" decoding="async" alt="マサチューセッツ工科大学のグレートドームと、手前の芝生の広場">
+                <img src="img/prog-bn2.webp?v=2026100193" width="1200" height="800" loading="lazy" decoding="async" alt="マサチューセッツ工科大学のグレートドームと、手前の芝生の広場">
               </figure>
               <p class="plist__lead">3派遣でいちばん長い14日間。都市のあとに、バーモントの生活が入る。</p>
               <dl class="plist__facts">
@@ -533,8 +533,8 @@
               <div class="plist__guide plist__guide--right" data-reveal>
                 <p class="say say--wine">いちばん長い14日間。バーモントの生活も入るよ！</p>
                 <!-- 腕を上げたポーズ。これも完成ポーズなので rig--face は付けない -->
-                <div class="plist__mascot rig" data-rig="assets/mascot/pose-cheer.svg?v=2026100192">
-                  <img loading="lazy" src="assets/mascot/pose-cheer.svg?v=2026100192" width="104" height="104" alt="" aria-hidden="true" decoding="async">
+                <div class="plist__mascot rig" data-rig="assets/mascot/pose-cheer.svg?v=2026100193">
+                  <img loading="lazy" src="assets/mascot/pose-cheer.svg?v=2026100193" width="104" height="104" alt="" aria-hidden="true" decoding="async">
                 </div>
               </div>
             </div>
@@ -550,8 +550,8 @@
              js/mascot.js 側でも原点を補うようにしたが、ここは静止で確実にする） -->
     <div class="purpose__guide" data-reveal>
       <p class="say say--wine">3つのコースから選べるよ！</p>
-      <div class="purpose__mascot rig" data-rig="assets/mascot/pose-l-point-rev.svg?v=2026100192">
-        <img loading="lazy" src="assets/mascot/pose-l-point-rev.svg?v=2026100192" width="104" height="104" alt="" aria-hidden="true" decoding="async">
+      <div class="purpose__mascot rig" data-rig="assets/mascot/pose-l-point-rev.svg?v=2026100193">
+        <img loading="lazy" src="assets/mascot/pose-l-point-rev.svg?v=2026100193" width="104" height="104" alt="" aria-hidden="true" decoding="async">
       </div>
     </div>
   </div>
@@ -633,8 +633,8 @@
 
     <div class="schol__guide" data-reveal>
       <p class="say say--wine">費用が理由なら、まず相談してね！</p>
-      <div class="schol__mascot rig" data-rig="assets/mascot/pose-l-point-rev.svg?v=2026100192">
-        <img loading="lazy" src="assets/mascot/pose-l-point-rev.svg?v=2026100192" width="104" height="104" alt="" aria-hidden="true" decoding="async">
+      <div class="schol__mascot rig" data-rig="assets/mascot/pose-l-point-rev.svg?v=2026100193">
+        <img loading="lazy" src="assets/mascot/pose-l-point-rev.svg?v=2026100193" width="104" height="104" alt="" aria-hidden="true" decoding="async">
       </div>
     </div>
   </div>
@@ -778,9 +778,9 @@
 
   <div class="wrap">
     <ul class="tickets" data-reveal>
-      <li class="ticket" data-tilt><img src="img/ticket-1.webp?v=2026100192" width="1200" height="602" loading="lazy" decoding="async" alt="第1回 オンライン説明会 2026年9月26日（土）19:00〜20:00"></li>
-      <li class="ticket" data-tilt><img src="img/ticket-2.webp?v=2026100192" width="1200" height="604" loading="lazy" decoding="async" alt="第2回 オンライン説明会 2026年10月5日（月）19:00〜20:00"></li>
-      <li class="ticket" data-tilt><img src="img/ticket-3.webp?v=2026100192" width="1200" height="601" loading="lazy" decoding="async" alt="第3回 オンライン説明会 2026年10月16日（金）19:00〜20:00"></li>
+      <li class="ticket" data-tilt><img src="img/ticket-1.webp?v=2026100193" width="1200" height="602" loading="lazy" decoding="async" alt="第1回 オンライン説明会 2026年9月26日（土）19:00〜20:00"></li>
+      <li class="ticket" data-tilt><img src="img/ticket-2.webp?v=2026100193" width="1200" height="604" loading="lazy" decoding="async" alt="第2回 オンライン説明会 2026年10月5日（月）19:00〜20:00"></li>
+      <li class="ticket" data-tilt><img src="img/ticket-3.webp?v=2026100193" width="1200" height="601" loading="lazy" decoding="async" alt="第3回 オンライン説明会 2026年10月16日（金）19:00〜20:00"></li>
     </ul>
 
     <!-- GP の LP（edfuture_gp_upload_server）の .sched-note を、この章の地に合わせて置き直した -->
@@ -798,8 +798,8 @@
            画面幅が変わっても常にボタンの右端に付く。ボタンの規則は触っていない。
            ★pointer-events:none。通すと CTA のタップを奪う -->
       <span class="brief__buddy" aria-hidden="true">
-        <span class="rig" data-rig="assets/mascot/pose-l-point-rev.svg?v=2026100192">
-          <img loading="lazy" src="assets/mascot/pose-l-point-rev.svg?v=2026100192" width="104" height="104" alt="" decoding="async">
+        <span class="rig" data-rig="assets/mascot/pose-l-point-rev.svg?v=2026100193">
+          <img loading="lazy" src="assets/mascot/pose-l-point-rev.svg?v=2026100193" width="104" height="104" alt="" decoding="async">
         </span>
       </span>
     </p>
@@ -880,8 +880,8 @@
       <!-- ★FV と同じ扱い。rig--bow（おじぎ）を外して静止させ、白フチ付きの完成ポーズを使う。
            rig-rev.svg のままだと、手足を回すおじぎに白フチ層だけが追従せず、
            本体から取り残された白い影が背後に残る（2026-09-30 に実物で確認） -->
-      <div class="rig" data-rig="assets/mascot/pose-bow-rev.svg?v=2026100192">
-        <img loading="lazy" src="assets/mascot/pose-bow-rev.svg?v=2026100192" width="88" height="88" alt="" aria-hidden="true" decoding="async">
+      <div class="rig" data-rig="assets/mascot/pose-bow-rev.svg?v=2026100193">
+        <img loading="lazy" src="assets/mascot/pose-bow-rev.svg?v=2026100193" width="88" height="88" alt="" aria-hidden="true" decoding="async">
       </div>
       <p class="say say--dark">まずは話を聞きに来てね</p>
     </div>
@@ -968,8 +968,8 @@
        全画面のぼかしが毎フレーム、しかも帯2枚ぶん走る。
      ★src は js/sp-force.js が .sp-force を付けたときにだけ入れる。
        実機のスマホは1バイトも取りに行かない -->
-<div class="pcbg pcbg--l" aria-hidden="true"><video class="pcbg__v" playsinline muted loop preload="none" data-poster="img/pc-backdrop.webp?v=2026100192" data-src="video/pc-backdrop.mp4?v=2026100192"></video></div>
-<div class="pcbg pcbg--r" aria-hidden="true"><video class="pcbg__v" playsinline muted loop preload="none" data-poster="img/pc-backdrop.webp?v=2026100192" data-src="video/pc-backdrop.mp4?v=2026100192"></video></div>
+<div class="pcbg pcbg--l" aria-hidden="true"><video class="pcbg__v" playsinline muted loop preload="none" data-poster="img/pc-backdrop.webp?v=2026100193" data-src="video/pc-backdrop.mp4?v=2026100193"></video></div>
+<div class="pcbg pcbg--r" aria-hidden="true"><video class="pcbg__v" playsinline muted loop preload="none" data-poster="img/pc-backdrop.webp?v=2026100193" data-src="video/pc-backdrop.mp4?v=2026100193"></video></div>
 
 <!-- ==================== パソコン・タブレットの左右の飾り ====================
      SP版をそのまま中央の柱に置き、左右は固定の飾りにする構え。
@@ -1004,6 +1004,6 @@
 <!-- カーソル（PC・fine pointer のときだけ JS が有効化） -->
 <div class="cursor" id="cursor" aria-hidden="true"><i></i><span></span></div>
 
-<script type="module" src="js/main.js?v=2026100192"></script>
+<script type="module" src="js/main.js?v=2026100193"></script>
 </body>
 </html>

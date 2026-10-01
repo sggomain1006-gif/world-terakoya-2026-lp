@@ -3,9 +3,9 @@
    幕 → 地の映像 → スクロール進捗 → 章の色 → 各UI
    ============================================================================= */
 
-import { mountRigs, attachFace, attachWalker, attachBow, attachPointing, attachJump } from './mascot.js?v=2026100192';
-import { Spring, safeDt } from './lib/spring.js?v=2026100192';
-import { reduceMotion, finePointer, track, splitChars, initFaq, initGates, initReveal, initCounters, initClips, initMagnets, initTilt, initCursor, initShare, initCtas, initTicketTouch, initProgramAutoOpen, initProgramFolds, initVoiceFolds, initTypewriter, initShow, initSays, initHandoff } from './ui.js?v=2026100192';
+import { mountRigs, attachFace, attachWalker, attachBow, attachPointing, attachJump } from './mascot.js?v=2026100193';
+import { Spring, safeDt } from './lib/spring.js?v=2026100193';
+import { reduceMotion, finePointer, track, splitChars, initFaq, initGates, initReveal, initCounters, initClips, initMagnets, initTilt, initCursor, initShare, initCtas, initTicketTouch, initProgramAutoOpen, initProgramFolds, initVoiceFolds, initTypewriter, initShow, initSays, initHandoff } from './ui.js?v=2026100193';
 
 const root = document.documentElement;
 const $ = (s, r = document) => r.querySelector(s);
@@ -84,7 +84,6 @@ function openVeil() {
       go(); setTimeout(go, 600);
       if (document.fonts && document.fonts.ready) document.fonts.ready.then(go);
     }
-    warmPosters();
     track('lp_open', {});
   }, wait);
 }
@@ -103,17 +102,20 @@ setTimeout(openVeil, V.MAX);
    幕の下限（V.MIN）と上限（V.MAX）のタイマーはそのままなので、幕の見え方は変わらない */
 window.addEventListener('load', openVeil, { once: true });
 
-/* ★映像の読み込みは初期表示の後。濃さ（--va）が上がり始めるのは p=0.02 からで、
-   それまではポスター（preload 済み・映像の1コマ目）が見えている＝絵は同じ。
-   暇ができた時点と、最初のスクロールの早いほうで取りに行く */
+/* ★映像（3.6MB）は「動かす意思が見えてから」取りに行く。
+   濃さ（--va）が上がり始めるのは p=0.02 からで、それまではポスター
+   （preload 済み・映像の1コマ目）が見えている＝絵は同じ。
+   ★時間で取りに行かせない。実測で、2.5秒の上限タイマーだと LCP が確定する前に
+     3.6MB が回線を占有し、本番のモバイルで LCP が 4.3秒→5.8秒 に悪化した。
+     スクロールしない人には1バイトも配らないのが、数値の上でも通信料の上でも正しい */
 if (video) {
+  const EVENTS = ['scroll', 'wheel', 'touchstart', 'pointerdown', 'keydown'];
   const kick = () => {
-    window.removeEventListener('scroll', kick);
+    EVENTS.forEach((e) => window.removeEventListener(e, kick));
     loadVideo();
+    warmPosters();
   };
-  window.addEventListener('scroll', kick, { passive: true });
-  if ('requestIdleCallback' in window) requestIdleCallback(kick, { timeout: 2500 });
-  else setTimeout(kick, 1200);
+  EVENTS.forEach((e) => window.addEventListener(e, kick, { passive: true, once: false }));
 } else openVeil();
 
 /* ---------------------------- スクロール: 進捗・章の色・レール ---------------------------- */
