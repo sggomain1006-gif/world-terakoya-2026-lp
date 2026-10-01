@@ -146,6 +146,22 @@ main{position:relative;z-index:2}
 .ticket::after{content:'';position:absolute;right:-8px;top:50%;width:16px;height:16px;border-radius:50%;background:var(--wine);transform:translateY(-50%)}
 /* 3枚で縦横比が0.5%だけ違う。段を揃えたいので 2:1 に切り詰める */
 .ticket img{display:block;width:100%;height:auto;aspect-ratio:2/1;object-fit:cover;border-radius:2px}
+/* 受付の終わった回。支給画像は一切触らず、台紙の上に赤字を重ねるだけ。
+   .ticket は preserve-3d なので、傾けたときカードと一緒に傾いて紙に乗って見える。
+   ★font-size は vw でなく var(--vw) で出す。--vw は sp-force が 390px 桁の
+     1/100 に差し替えるので、PC幅でも SP と同じ大きさになる */
+.ticket__closed{
+  position:absolute;z-index:2;left:10px;right:10px;top:37%;
+  transform:translateY(-50%);
+  font-family:var(--ff-mono);font-weight:700;
+  font-size:clamp(30px,calc(10.5 * var(--vw)),46px);
+  letter-spacing:.16em;text-indent:.16em;   /* 末尾の送りを字面から外す */
+  line-height:1;text-align:center;
+  color:var(--red);
+  /* 写真の上にも白い半券の上にも乗るので、白い光で地から浮かせる */
+  text-shadow:0 1px 10px rgba(255,255,255,.95),0 0 28px rgba(255,255,255,.82);
+  pointer-events:none;   /* カードの傾けやタップを奪わない */
+}
 .reasons{display:grid;gap:22px;margin-top:44px}
 .reasons > div{border-top:1px solid var(--line-cream);padding-top:16px}
 .reasons .h4{margin-top:0;color:var(--cream)}
