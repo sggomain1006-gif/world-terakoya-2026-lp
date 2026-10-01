@@ -1,14 +1,24 @@
-/* ★一時措置：パソコンでもスマホ版を表示する。
-   .sp-force は js/sp-force.js が幅 400px 以上のときだけ付ける。実機のスマホには一切かからない。
-   戻すときはこのファイルと js/sp-force.js、index.html の2行を消し、
-   css/*.css の min-width:100000px を 768/1024 に戻す（--vw はそのままでよい）。 */
-.sp-force{--sp-w:390px;background:#120306}
+/* ==========================================================================
+   パソコン・タブレットの枠（2026-10-01 に「一時措置」から本採用へ）
+   SP版をそのまま中央の柱として置き、左右は固定の飾りにする。
+   参考: aobazaka46.com（全画面の地 ＋ 中央の柱 ＋ 左右に固定した飾り）。
+   ★PC専用のレイアウトは持たない。中身は実機のSPと1pxも違わないのが前提で、
+     css/*.css に PC用メディアクエリは1つも無い（2026-10-01 に41ブロック撤去）。
+   ★.sp-force を付けるのは js/sp-force.js（窓幅 768px 以上のときだけ）。
+     実機のスマホには一切かからない。
+   ========================================================================== */
+.sp-force{
+  --sp-w:390px;                                   /* 中央の柱の幅＝実機の基準幅 */
+  --gutter:calc((100vw - var(--sp-w)) / 2);       /* 左右の帯の幅 */
+  background:#120306;
+}
 /* ★vw は窓の幅を指すので、桁の幅の1%に読み替える。これをしないと
    clamp(25px, 6.9vw, 32px) などが上限に張り付き、見出しだけ実機より大きくなる */
 .sp-force{--vw:calc(var(--sp-w) / 100)}
 .sp-force body{
   width:var(--sp-w);margin-left:auto;margin-right:auto;
-  box-shadow:0 0 0 1px rgba(245,239,230,.14);
+  /* 地から柱を浮かせる。1pxの線だけだと帯に埋もれて境目が読めない */
+  box-shadow:0 0 0 1px rgba(245,239,230,.10),0 0 70px -10px rgba(0,0,0,.72);
 }
 /* position:fixed の要素は窓が基準なので、桁と同じ幅・同じ位置へ寄せ直す。
    ★FV の地・2人・映像もここに入れる（入れ忘れると窓の中央に取り残される） */
@@ -22,29 +32,158 @@
 /* ★2人は fixed で、left/right の % が「窓幅」に対して効いてしまう。
    fv6 の left:-8.18% は桁幅の -8.18% でなければならないので、桁幅で計算し直す。
    fv7 は right:0 なので桁の右端へ寄せるだけでよい */
-.sp-force .fv-person--l{left:calc((100vw - var(--sp-w)) / 2 - 0.0818 * var(--sp-w));margin-left:0}
-.sp-force .fv-person--r{right:calc((100vw - var(--sp-w)) / 2);margin-right:0}
-/* 右端に貼り付く縦書きCTAは、桁の右端に合わせる */
-.sp-force .side-cta{left:auto;right:calc(50% - var(--sp-w) / 2);margin-left:0}
+.sp-force .fv-person--l{left:calc(var(--gutter) - 0.0818 * var(--sp-w));margin-left:0}
+.sp-force .fv-person--r{right:var(--gutter);margin-right:0}
 /* 左端に立つスクロールの合図も、桁の左端＋本文の左余白（--px）に合わせる。
-   ★入れ忘れると窓の左端（x=20）に取り残され、下の ::before の幕（z-index 80）の
+   ★入れ忘れると窓の左端（x=20）に取り残され、下の ::before の帯（z-index 80）の
      裏に完全に隠れて1pxも見えなくなる */
-.sp-force .scroll-cue{left:calc(50% - var(--sp-w) / 2 + var(--px));right:auto;margin-left:0}
-/* ★桁の外へはみ出す分を隠す幕。position:fixed の要素は親の overflow では切れないので、
-   桁の左右を同じ地色の帯で覆う。fv6 は left:-8.18% で桁の外へ出ており、
-   実機なら画面外で切れる部分がパソコンでは見えてしまう。
-   スクロール中は 2人が 1.20 倍に拡大して左右へも動くので、両側に置く */
-.sp-force::before,
-.sp-force::after{
-  content:'';position:fixed;top:0;bottom:0;z-index:80;pointer-events:none;
-  width:calc((100vw - var(--sp-w)) / 2 + 1px);background:#120306;
-}
-.sp-force::before{left:0}
-.sp-force::after{right:0}
+.sp-force .scroll-cue{left:calc(var(--gutter) + var(--px));right:auto;margin-left:0}
 
-/* パソコン専用の飾り（追従する丸いカーソル）はスマホには無いので消す。
+/* ---------- 左右の地（ぼかした映像） ----------
+   ★桁の外へはみ出す fixed 要素を隠す役目も兼ねる。position:fixed は親の overflow で
+     切れないので、不透明な板で覆うのが唯一の手。fv6 は left:-8.18% で桁の外へ出ており、
+     実機なら画面外で切れる部分がパソコンでは見えてしまう。
+   ★映像を 100vw に伸ばし、左の帯は映像の左端、右の帯は右端を出す。
+     真ん中（柱に隠れる部分）だけが見えないので、左右がつながった1枚に見える。
+   ★ぼけは ffmpeg で焼き込み済み。ここで filter:blur を掛けると、
+     全画面のぼかしが毎フレーム・帯2枚ぶん走る */
+.pcbg{display:none}
+.sp-force .pcbg{
+  display:block;position:fixed;top:0;bottom:0;z-index:80;pointer-events:none;
+  width:calc(var(--gutter) + 1px);
+  overflow:hidden;background:#E8E4DD;        /* 映像が出るまでの地 */
+}
+.sp-force .pcbg--l{left:0}
+.sp-force .pcbg--r{right:0}
+.sp-force .pcbg__v{
+  position:absolute;top:0;display:block;
+  /* ★max-width の解除が要る。base.css の img,svg,video{max-width:100%} が効いて
+     映像が帯の幅（562px）で止まり、左右の帯が同じ中央を映して鏡像に見えていた */
+  width:100vw;max-width:none;height:100%;object-fit:cover;
+}
+/* ごく薄い膜。地を落ち着かせるだけで、白く飛ばさない。
+   ★以前は .50/.38 まで掛けていたが「白すぎる」ので撤回した。
+     文字の読みやすさは帯全体でなく、飾りの背後だけに置く光（.pcside::before）で担保する */
+.sp-force .pcbg::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(rgba(245,239,230,.14),rgba(245,239,230,.08));
+}
+.sp-force .pcbg--l .pcbg__v{left:0}
+.sp-force .pcbg--r .pcbg__v{right:0}
+
+/* 追従CTA（右端）は実機のスマホ専用。パソコン・タブレットの枠では
+   左の飾りの「説明会に申し込む」が同じ役目を持つので出さない */
+.sp-force .side-cta{display:none}
+
+/* ---------- 左右の飾り ---------- */
+/* ★SP では存在ごと消す（読み上げ木からも外れる）。出るのは .sp-force のときだけ */
+.pcside{display:none}
+.sp-force .pcside{
+  display:flex;flex-direction:column;align-items:center;
+  position:fixed;z-index:81;                 /* 帯(80)より前 */
+  /* ★柱の縁から外へ伸ばし、幅は帯いっぱい（ただし 560px で頭打ち）。
+     単に width:var(--gutter) だと、2560px のような広い画面で飾りが画面の端へ
+     流れて柱から離れてしまう。柱に貼り付けておけば視線が中央に残る */
+  width:min(var(--gutter), 560px);
+  /* ★地が明るいので文字はワイン。クリームのままだと地に埋もれる */
+  color:var(--wine-2);
+  text-shadow:0 1px 2px rgba(255,255,255,.85),0 0 10px rgba(255,255,255,.6);
+}
+/* ★文字の背後だけをぼかして持ち上げる。帯全体を白くすると映像が死ぬので、
+   必要な場所にだけ光を置く。縁が出ないよう端を 0 まで落としきる */
+.sp-force .pcside::before{
+  content:'';position:absolute;z-index:-1;
+  inset:-14% -18%;
+  background:radial-gradient(58% 52% at 50% 50%,
+    rgba(248,244,238,.86) 0%, rgba(248,244,238,.66) 42%,
+    rgba(248,244,238,.28) 70%, rgba(248,244,238,0) 86%);
+}
+/* 左は柱の左縁に貼り付け、縦は画面の中央 */
+.sp-force .pcside--l{right:calc(50% + var(--sp-w) / 2);left:auto;top:50%;transform:translateY(-50%);gap:26px}
+/* 右は柱の右縁に貼り付け、下寄せ。参考サイトと同じくロゴを低い位置に置いて視線を中央へ残す */
+.sp-force .pcside--r{left:calc(50% + var(--sp-w) / 2);right:auto;bottom:7vh;gap:12px}
+
+.sp-force .pcside__eyebrow{
+  margin:0;font-family:var(--ff-mono);font-size:18px;font-weight:500;
+  letter-spacing:.42em;text-indent:.42em;opacity:.85;
+}
+/* 縦書きの案内。vertical-rl では列が右から左へ並ぶので、
+   HTML の並び（上から順）がそのまま右→左の読み順になる。
+   ★flex-direction は column。縦書きでは column が「block 方向＝右→左」を指す。
+     row にすると主軸が inline 方向（上→下）になり、項目が縦に積まれたうえ
+     1項目ずつが2列に折り返す（実測で「ワールド寺子屋とは」が2列に割れた） */
+.sp-force .pcside__nav{
+  writing-mode:vertical-rl;
+  display:flex;flex-direction:column;gap:20px;
+}
+.sp-force .pcside__nav a{
+  font-family:var(--ff-serif);font-size:17px;font-weight:500;
+  letter-spacing:.14em;line-height:1;white-space:nowrap;
+  color:var(--wine-2);text-decoration:none;
+  opacity:.82;transition:opacity .25s var(--ease-out),color .25s var(--ease-out);
+}
+@media (hover:hover){
+  .sp-force .pcside__nav a:hover{opacity:1;color:var(--wine)}
+}
+.sp-force .pcside__nav a:focus-visible{outline:2px solid var(--wine);outline-offset:4px;border-radius:2px}
+
+.sp-force .pcside__cta{
+  display:inline-flex;align-items:center;justify-content:center;
+  min-height:60px;padding:16px 40px;border-radius:999px;
+  background:var(--yellow);color:var(--wine-2);
+  /* 明るい地に黄色を置くと縁が溶けるので、細い白枠で輪郭を立てる */
+  border:1px solid rgba(255,255,255,.92);
+  /* ★書体は FV のボタン（.btn）と同じ明朝。既定のゴシックのままだと別物に見える */
+  font-family:var(--ff-serif);
+  font-size:18px;font-weight:700;letter-spacing:.04em;
+  text-decoration:none;text-shadow:none;
+  box-shadow:0 12px 30px -14px rgba(26,5,8,.55);
+  transition:transform .3s var(--ease-out),box-shadow .3s var(--ease-out);
+}
+@media (hover:hover){
+  .sp-force .pcside__cta:hover{transform:translateY(-3px);box-shadow:0 18px 36px -14px rgba(0,0,0,.85)}
+}
+.sp-force .pcside__cta:active{transform:translateY(-1px)}
+/* 参考サイトと同じ「中央寄せの文字＋その下に細い線」。CTAの次に置く控えめな導線 */
+.sp-force .pcside__pv{
+  display:inline-block;min-width:150px;padding:0 14px 9px;
+  font-family:var(--ff-serif);font-size:16px;font-weight:500;
+  letter-spacing:.2em;text-indent:.2em;line-height:1.2;text-align:center;
+  color:var(--wine-2);text-decoration:none;opacity:.86;
+  border-bottom:1px solid rgba(58,15,21,.4);
+  transition:opacity .25s var(--ease-out),border-color .25s var(--ease-out);
+}
+@media (hover:hover){
+  .sp-force .pcside__pv:hover{opacity:1;border-bottom-color:var(--wine)}
+}
+.sp-force .pcside__pv:focus-visible{outline:2px solid var(--wine);outline-offset:4px}
+
+.sp-force .pcside__logo{display:block;width:var(--pcside-logo-w,120px);height:auto;color:var(--wine);opacity:.9}
+/* ロゴの真下に置く社名。書体・太さ・字間は上部バーの .bar__brand と同じ。
+   ★大きさはロゴ幅からの比で出す。実測で 23.76px のとき字面がちょうど 120px に
+     なったので、係数は 23.76/120 = .198。ロゴを縮めても幅が揃ったままになる */
+.sp-force .pcside__word{
+  margin:0;
+  font-family:var(--ff-serif);font-weight:700;letter-spacing:.04em;
+  font-size:calc(var(--pcside-logo-w,120px) * .198);line-height:1;
+  color:var(--wine);opacity:.9;
+}
+
+/* ---------- パソコン専用の飾りの打ち消し ---------- */
+/* 追従する丸いカーソルはスマホには無いので消す。
    ★ただし .has-cursor が cursor:none を当てているので、素のカーソルを戻す。
      消すだけだと矢印まで見えなくなる */
 .sp-force .cursor{display:none}
 .sp-force{cursor:auto}
 .sp-force a,.sp-force button,.sp-force summary,.sp-force [role="tab"]{cursor:pointer}
+
+/* 帯が狭すぎる幅（768〜900px あたり）では飾りを畳む。
+   ★判定は窓幅。--gutter が 190px を切ると縦書きの案内が柱に重なる */
+@media (max-width:980px){
+  .sp-force .pcside--l .pcside__nav,
+  .sp-force .pcside--l .pcside__eyebrow{display:none}
+  .sp-force{--pcside-logo-w:84px}
+  /* 帯が 189px まで痩せるので、ボタンと導線を縮めて両側に余白を残す */
+  .sp-force .pcside__cta{min-height:48px;padding:11px 16px;font-size:14px}
+  .sp-force .pcside__pv{min-width:120px;font-size:14px;padding-bottom:7px}
+}

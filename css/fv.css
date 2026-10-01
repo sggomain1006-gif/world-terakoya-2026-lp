@@ -167,8 +167,6 @@
 .fv-person{transform-origin:50% 100%;will-change:transform,opacity}
 .fv-person--r{transform:translate3d(calc(var(--dz,0) * calc(9 * var(--vw))),calc(var(--dz,0) * calc(6 * var(--vw))),0) scale(calc(1 + var(--dz,0) * .20))}
 .fv-person--l{transform:translate3d(calc(var(--dz,0) * -9vw),calc(var(--dz,0) * calc(6 * var(--vw))),0) scale(calc(1 + var(--dz,0) * .20))}
-@media (min-width:100000px){ .fv-person{display:none} }
-@media (min-width:100000px){ .fv-bg{display:none} }
 /* ============================================================
    FV の映像。
    ★2026-09-13: 水晶玉をやめた。FV には何も置かない。スクロールに合わせて
@@ -200,9 +198,41 @@
 .no-js .fv-film{display:none}
 .no-js .fv{height:auto}
 .no-js .fv__sticky{position:relative}
+.no-js .side-cta{display:none}
 .no-js .fv__sticky::before{content:'';position:absolute;inset:0;z-index:0;
   background:linear-gradient(rgba(26,5,8,.6),rgba(26,5,8,.3) 40%,rgba(26,5,8,.75)),url(../img/poster-underfv.webp) center/cover no-repeat}
-.no-js .side-cta{display:none}
+
+/* ---------- 追従CTA（右端・現行版と同一意匠） ----------
+   FV を出てから最終CTA が画面を占めるまでの区間だけ出す。
+   .is-on は JS が付ける。JS 無効時は出さない（消せない板が残らないように）。
+   縦書き。vertical-rl では column が「右→左の横並び」になるので、
+   HTML の並び（無料・60分 → 説明会に申し込む）がそのまま読み順になる。 */
+.side-cta{
+  position:fixed;
+  right:0;
+  top:62%;              /* 画面中央より少し下。親指の届く帯 */
+  z-index:60;
+  writing-mode:vertical-rl;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;
+  padding:18px 10px;
+  background:var(--yellow);
+  color:var(--wine-2);
+  text-decoration:none;
+  text-align:center;
+  border-radius:12px 0 0 12px;
+  box-shadow:-5px 5px 18px rgba(26,5,8,.3);
+  /* 隠している間は画面の外へ逃がす。visibility でタブ順からも外す */
+  transform:translate(100%,-50%);
+  opacity:0;visibility:hidden;pointer-events:none;
+  transition:transform 420ms var(--ease-out),opacity 300ms var(--ease-out);
+}
+.side-cta.is-on{transform:translate(0,-50%);opacity:1;visibility:visible;pointer-events:auto}
+.side-cta:active{transform:translate(2px,-50%)}
+.side-cta__sub{font-size:10px;font-weight:700;line-height:1.2;opacity:.75;white-space:nowrap}
+.side-cta__main{font-size:15px;font-weight:700;line-height:1.25;letter-spacing:.02em;white-space:nowrap}
+@media (prefers-reduced-motion:reduce){
+  .side-cta{transition:opacity 200ms linear}
+}
 
 /* ---------- 上部バー ---------- */
 .bar{
@@ -221,30 +251,6 @@
 .bar__meta{margin-left:auto;display:none;font-size:11px;letter-spacing:.14em;opacity:.7;align-items:center;gap:10px}
 .bar__meta .mono{letter-spacing:.2em}
 .bar__sep{opacity:.5}
-@media (min-width:100000px){.bar__meta{margin-left:auto;display:flex}}
-
-/* ---------- 章レール（PC） ---------- */
-.rail{display:none}
-@media (min-width:100000px){
-  .rail{
-    position:fixed;left:26px;top:50%;transform:translateY(-50%);z-index:55;
-    display:flex;flex-direction:column;gap:12px;
-    transition:opacity .5s;
-  }
-  .rail a{
-    display:flex;align-items:center;gap:10px;text-decoration:none;
-    font-size:11px;letter-spacing:.14em;color:var(--cream);opacity:.42;
-    transition:opacity .35s,color .5s;
-  }
-  .rail.is-light a{color:var(--wine)}
-  .rail a i{width:14px;height:1px;background:currentColor;transition:width .45s var(--ease-out)}
-  .rail a span{opacity:0;transform:translateX(-4px);transition:opacity .35s,transform .45s var(--ease-out)}
-  .rail a:hover,.rail a.is-active{opacity:1}
-  .rail a.is-active i{width:30px}
-  .rail a.is-active span,.rail:hover a span{opacity:1;transform:none}
-  .rail.is-hidden{opacity:0;pointer-events:none}
-}
-
 /* ---------- FV ---------- */
 .fv{
   position:relative;z-index:1;
@@ -270,12 +276,6 @@
 /* ★PC では出さない。PC の .fv__copy にはリード文と CTA が入っていて、縦書きの見出しを
    同じ列に積むと本文が水晶玉の上まで押し出されて読めなくなる（実測で確認）。
    h1 は DOM に残したいので display:none でなく読み上げ専用にする */
-@media (min-width:100000px){
-  .fv__vtitle{
-    position:absolute;width:1px;height:1px;margin:-1px;padding:0;
-    overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0;
-  }
-}
 /* SP は画面のちょうど真ん中に置く。中央寄せに transform を使うと、下の
    「スクロールで消える」ルールの transform に上書きされるので grid で寄せる。
    inset:0 は sticky の padding box に対して効くので、下の余白の影響も受けない */
@@ -317,12 +317,6 @@
 /* ★PC では出さない。PC の .fv__copy にはリード文と CTA が入っていて、縦書きの見出しを
    同じ列に積むと本文が水晶玉の上まで押し出されて読めなくなる（実測で確認）。
    h1 は DOM に残したいので display:none でなく読み上げ専用にする */
-@media (min-width:100000px){
-  .fv__vtitle{
-    position:absolute;width:1px;height:1px;margin:-1px;padding:0;
-    overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0;
-  }
-}
 .fv__title{
   font-family:var(--ff-serif);font-weight:700;
   font-size:clamp(32px,calc(9.6 * var(--vw)),48px);line-height:1.32;letter-spacing:.02em;
@@ -345,8 +339,6 @@
 .fv__cta .btn{min-height:68px;padding:16px 62px;font-size:18px}
 /* 吹き出しはボタンより前に出す */
 .fv__mascot{z-index:3}
-@media (min-width:100000px){ .fv__cta{display:none} }
-
 .fv__mascot{
   grid-area:foot;position:relative;z-index:2;justify-self:end;align-self:end;
   display:flex;align-items:flex-end;gap:8px;
@@ -443,7 +435,6 @@
 }
 .fv__places span{display:block}
 /* ★SP だけ。PC の FV はリード文と CTA が主役で、この大きさの名札は入らない */
-@media (min-width:100000px){ .fv__lockup{display:none} }
 /* 背の低い機種は バー + 塊 で縦書きの見出しに届いてしまう。一回り小さくして場所を作る
    （高さの条件だけだと横長のPCにも当たるので幅の条件を併記する）*/
 @media (max-width:767px) and (max-height:720px){
@@ -453,34 +444,6 @@
 .fv.is-through .fv__mascot,.fv.is-through .fv__cta{visibility:hidden}
 /* 透明になっても要素は残るのでリンクは押せてしまう。消えたら当たり判定も外す */
 .fv.is-dim .fv__cta,.fv.is-dim .fv__copy{pointer-events:none}
-
-@media (min-width:100000px){
-  .fv{height:260vh;height:260svh}
-  .fv__sticky{
-    grid-template-columns:minmax(0,46%) 1fr;
-    grid-template-rows:var(--bar-h) 1fr auto;
-    grid-template-areas:'bar bar' 'copy door' 'foot foot';
-    padding-bottom:40px;
-    align-items:center;
-  }
-  .fv__copy{text-align:left;padding-top:0;align-self:center}
-  .fv__eyebrow{font-size:22px}
-  .fv__title{font-size:clamp(40px,calc(4.2 * var(--vw)),64px);line-height:1.28}
-  .fv__lead,.fv__ctas{display:flex}
-  .fv__lead{display:block}
-  .fv__meta{
-    grid-area:foot;display:flex;gap:28px;align-self:end;
-    font-size:10.5px;letter-spacing:.18em;padding-bottom:2px;
-    color:rgba(245,239,230,.72);
-  }
-  .fv__mascot{position:absolute;right:var(--px);bottom:36px;grid-area:auto}
-  .fv__mascot .rig{width:104px}
-  .fv__eye{width:210px;height:210px}
-}
-@media (min-width:100000px){
-  .fv__sticky{grid-template-columns:minmax(0,48%) 1fr;padding-left:calc(var(--px) + 80px)}
-}
-
 
 /* ---------- カーソル（PC・fine pointer） ---------- */
 .cursor{display:none}
@@ -543,43 +506,6 @@
   display:block;width:1px;height:46px;
   background:currentColor;
   box-shadow:0 1px 3px rgba(26,5,8,.6);
-}
-
-/* ---------- 追従CTA（右端・現行版と同一意匠） ----------
-   FV を出てから最終CTA が画面を占めるまでの区間だけ出す。
-   .is-on は JS が付ける。JS 無効時は出さない（消せない板が残らないように）。
-   縦書き。vertical-rl では column が「右→左の横並び」になるので、
-   HTML の並び（無料・60分 → 説明会に申し込む）がそのまま読み順になる。 */
-.side-cta{
-  position:fixed;
-  right:0;
-  top:62%;              /* 画面中央より少し下。親指の届く帯 */
-  z-index:60;
-  writing-mode:vertical-rl;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;
-  padding:18px 10px;
-  background:var(--yellow);
-  color:var(--wine-2);
-  text-decoration:none;
-  text-align:center;
-  border-radius:12px 0 0 12px;
-  box-shadow:-5px 5px 18px rgba(26,5,8,.3);
-  /* 隠している間は画面の外へ逃がす。visibility でタブ順からも外す */
-  transform:translate(100%,-50%);
-  opacity:0;visibility:hidden;pointer-events:none;
-  transition:transform 420ms var(--ease-out),opacity 300ms var(--ease-out);
-}
-.side-cta.is-on{transform:translate(0,-50%);opacity:1;visibility:visible;pointer-events:auto}
-.side-cta:active{transform:translate(2px,-50%)}
-.side-cta__sub{font-size:10px;font-weight:700;line-height:1.2;opacity:.75;white-space:nowrap}
-.side-cta__main{font-size:15px;font-weight:700;line-height:1.25;letter-spacing:.02em;white-space:nowrap}
-@media (min-width:100000px){
-  .side-cta{padding:30px 16px;border-radius:16px 0 0 16px;gap:8px}
-  .side-cta__sub{font-size:13px}
-  .side-cta__main{font-size:21px}
-}
-@media (prefers-reduced-motion:reduce){
-  .side-cta{transition:opacity 200ms linear}
 }
 
 @media (prefers-reduced-motion:reduce){

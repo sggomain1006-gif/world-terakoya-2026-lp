@@ -55,11 +55,6 @@
 .scard__body{margin:0;font-size:15.5px;line-height:1.95}
 .scard__body + .scard__body{margin-top:.8em}
 
-/* 研修日程のプレート。地の色に関わらず読めるよう currentColor で組む */
-  display:flex;align-items:baseline;gap:6px;padding:5px 9px;
-  border:1px solid currentColor;border-radius:3px;opacity:.88;
-}
-
 /* HUD・足あと・読み物は螺旋のときだけ出す */
 .spiral__ground,.spiral__read{display:none}
 .spiral__big{display:none}
@@ -274,83 +269,8 @@
   .is-3d .spiral__ground{height:50px}
 }
 
-@media (min-width:100000px){
-  .spiral__cards{gap:80px}
-  .is-3d .spiral__cards{perspective-origin:70% 46%}
-
-  .spiral__read .scard__body{font-size:15px;line-height:1.95}
-  .is-3d .spiral__read{
-    --gut-r:max(var(--px),calc((calc(100 * var(--vw)) - var(--wrap)) / 2));
-    padding-left:max(var(--px),calc((calc(100 * var(--vw)) - var(--wrap)) / 2));
-  }
-  .spiral__read .scard__detail,
-  .spiral__read .spiral__speaker{left:max(var(--px),calc((calc(100 * var(--vw)) - var(--wrap)) / 2))}
-
-  /* --- PC: 語り手を説明文のとなりに固定し、しっぽを左へ倒す -------------------
-     縦は JS が --sp-b（読み物欄の下端から吹き出しの下端までの距離）を書くので、
-     本文の長さが変わっても語り手の頭が吹き出しの高さに揃う */
-  .spiral__read .scard__detail{padding-bottom:0}
-  .spiral__read .scard__body{
-    margin-left:calc(var(--sp-w,124px) + 12px);
-    transform-origin:0 64%;
-  }
-  .spiral__read .scard__body::after{
-    left:calc(var(--tail) * -0.71);
-    bottom:30%;margin-left:0;
-  }
-  .spiral__speaker{
-    display:block;position:absolute;
-    bottom:var(--sp-b,0px);width:var(--sp-w,124px);
-    pointer-events:none;
-  }
-  .is-3d .spiral__ground{
-    height:70px;margin:0 max(var(--px),calc((calc(100 * var(--vw)) - var(--wrap)) / 2)) 26px;
-  }
-}
-
 /* 1024px 以上は2カラム。左に本文を置き、右の区画で螺旋を回す。
    左の縦ナビ（.rail）に本文がかからないよう、左は 120px 以上空ける */
-@media (min-width:100000px){
-  .spiral__read .scard__title{font-size:24px;margin-bottom:14px}
-  .is-3d .spiral__stage{
-    grid-template-columns:minmax(280px,34%) 1fr;
-    grid-template-rows:auto minmax(0,1fr) auto;
-    grid-template-areas:'head head' 'read view' 'ground ground';
-  }
-  .is-3d .spiral__read{
-    --gut-r:28px;align-self:center;
-    padding:0 28px 0 max(120px,calc((calc(100 * var(--vw)) - var(--wrap)) / 2));
-  }
-  .spiral__read .scard__detail,
-  .spiral__read .spiral__speaker{left:max(120px,calc((calc(100 * var(--vw)) - var(--wrap)) / 2))}
-  .spiral__read .scard__body{font-size:15.5px}
-  /* ★左カラムでは語り手を横に並べる余地が無い。実測で 1024px のとき吹き出しが
-     84px まで潰れて22行になった（768/900px では 572/704px あるので横並びのままでよい）。
-     ここだけ語り手を吹き出しの下へ回し、しっぽを下向きに戻す。
-     読み物欄は縦中央なので、語り手が下へはみ出してもぶつかる相手がいない */
-  .spiral__read{--tail-x:34px}
-  .spiral__read .scard__body{margin-left:0;transform-origin:var(--tail-x) 100%}
-  .spiral__read .scard__body::after{
-    left:var(--tail-x);top:auto;bottom:calc(var(--tail) * -0.71);
-    margin-left:calc(var(--tail) * -0.71);
-  }
-  .spiral__read .scard__detail{padding-bottom:var(--tail)}
-  .spiral__speaker{
-    --sp-w:112px;
-    bottom:calc(var(--sp-b,0px) - var(--sp-w) - 6px);
-    transform:translateX(calc(var(--tail-x) - var(--sp-w) / 2));
-  }
-  /* 左の余白に段数を大きく置く。カードの番号と同じものを飾りとして重ねる */
-  .is-3d .spiral__big{
-    display:block;position:absolute;margin:0;
-    left:max(120px,calc((calc(100 * var(--vw)) - var(--wrap)) / 2));
-    bottom:calc(100% + 20px);
-    font-family:var(--ff-serif);font-weight:700;
-    font-size:clamp(56px,calc(6 * var(--vw)),88px);line-height:1;letter-spacing:.02em;
-    opacity:.24;pointer-events:none;text-shadow:0 2px 10px rgba(4,1,2,.85);
-  }
-}
-
 /* ==========================================================================
    目的（グローバル探究）— 螺旋の映像の上に、白い地がせり上がって覆う
    映像は position:fixed なので、この章に不透明な地を敷くだけで
@@ -399,14 +319,6 @@
   font-size:16px;line-height:2.05;color:var(--text);
 }
 
-@media (min-width:100000px){
-  .ch--purpose{padding:128px 0 136px}
-  .purpose__h{gap:9px}
-  .purpose__line{font-size:clamp(34px,calc(4.2 * var(--vw)),50px);letter-spacing:.045em}
-  .purpose__line--tag{font-size:clamp(23px,calc(2.4 * var(--vw)),30px);margin-top:14px}
-  .purpose__lead{margin-top:44px;font-size:17px;max-width:640px}
-}
-
 /* 章の終わりに置く2つ目の見出し。上の見出しと同じ形で、次の章へ渡す */
 .purpose__h--next{margin-top:52px}
 .purpose__note{
@@ -421,14 +333,6 @@
 }
 .purpose__guide .say{margin:0 0 24px;max-width:none;font-size:12.5px}
 .purpose__mascot{flex:0 0 auto;display:block;width:88px;height:auto}
-
-@media (min-width:100000px){
-  .purpose__h--next{margin-top:76px}
-  .purpose__note{margin-top:26px;font-size:16px;max-width:640px}
-  .purpose__guide{margin-top:30px;gap:12px}
-  .purpose__guide .say{font-size:14px;margin-bottom:30px}
-  .purpose__mascot{width:112px}
-}
 
 /* ==========================================================================
    3つのプログラムの一覧（参考: プログラム部分参考.png）
@@ -559,44 +463,6 @@
   .plist__pm-figure{width:104px}
 }
 
-@media (min-width:100000px){
-  .plist{margin-top:44px;max-width:720px}
-  .plist__head{
-    display:grid;grid-template-columns:1fr 290px 88px 16px;column-gap:16px;
-    margin:0 0 10px;padding:0 14px 0 24px;
-  }
-  .plist__h{
-    justify-self:center;
-    background:var(--deep);color:var(--cream);border-radius:3px;
-    padding:5px 12px;font-size:12px;font-weight:700;letter-spacing:.1em;
-  }
-  .plist__rows{gap:12px}
-  .plist__row{
-    grid-template-columns:1fr 290px 88px 16px;
-    grid-template-areas:'when where days mark';
-    column-gap:16px;padding:12px 14px 12px 24px;
-    min-height:111px;
-  }
-  .plist__when{font-size:17px}
-  .plist__where{margin-bottom:0;justify-self:center;font-size:28px}
-  .plist__days{padding:12px 14px;justify-content:center}
-  .plist__days b{font-size:30px}
-  .plist__days small{font-size:12px}
-  .plist__body{padding:28px 0}
-  .plist__scene{margin:0 28px}
-  .plist__lead{margin:24px 28px 0;font-size:15px}
-  .plist__facts{margin:18px 28px 0;gap:10px}
-  .plist__facts > div{grid-template-columns:84px 1fr;gap:14px}
-  .plist__facts dd{font-size:14px}
-  .plist__pm{margin:24px 28px 0;padding:22px 0;gap:22px}
-  .plist__pm-figure{width:170px}
-  .plist__guide{margin:32px 28px 0;gap:12px}
-  .plist__guide .say{font-size:14px;margin-bottom:26px}
-  .plist__mascot{width:104px}
-  .plist__pm-name{font-size:23px}
-  .plist__pm-text{font-size:14.5px}
-}
-
 /* ==========================================================================
    日程表（sf.png / bn1.png / bn2.png を表に起こしたもの）
    元は日付が列の横長の表。画面が狭いと必ず横に溢れるので、
@@ -627,19 +493,3 @@
 }
 .sched td[data-l="宿泊"]{color:var(--text-2);font-size:12px}
 
-@media (min-width:100000px){
-  /* 幅があるので、元の表と同じ 4 列に戻す */
-  .sched{width:calc(100% - 56px);margin:22px 28px 0;font-size:13.5px}
-  .sched thead{position:static;width:auto;height:auto;clip:auto}
-  .sched thead th{
-    text-align:left;font-size:10.5px;letter-spacing:.14em;color:var(--wine);opacity:.7;
-    font-weight:700;padding:0 12px 8px 0;border-bottom:1px solid var(--line);
-  }
-  .sched tr{display:table-row;border-top:none}
-  .sched tbody tr{border-top:1px solid var(--line)}
-  .sched th[scope="row"]{display:table-cell;width:74px;padding:9px 12px 9px 0;vertical-align:top}
-  .sched td{padding:9px 12px 9px 0;vertical-align:top}
-  .sched td:last-child{padding-right:0;width:26%}
-  .sched td::before{content:none}
-  .sched .sched__all{color:var(--wine)}
-}

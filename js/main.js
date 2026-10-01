@@ -3,9 +3,9 @@
    幕 → 地の映像 → スクロール進捗 → 章の色 → 各UI
    ============================================================================= */
 
-import { mountRigs, attachFace, attachWalker, attachBow, attachPointing, attachJump } from './mascot.js?v=2026100152';
-import { Spring, safeDt } from './lib/spring.js?v=2026100152';
-import { reduceMotion, finePointer, track, splitChars, initFaq, initGates, initReveal, initCounters, initClips, initMagnets, initTilt, initCursor, initShare, initCtas, initTicketTouch, initProgramAutoOpen, initProgramFolds, initVoiceFolds, initTypewriter, initShow, initSays, initHandoff } from './ui.js?v=2026100152';
+import { mountRigs, attachFace, attachWalker, attachBow, attachPointing, attachJump } from './mascot.js?v=2026100180';
+import { Spring, safeDt } from './lib/spring.js?v=2026100180';
+import { reduceMotion, finePointer, track, splitChars, initFaq, initGates, initReveal, initCounters, initClips, initMagnets, initTilt, initCursor, initShare, initCtas, initTicketTouch, initProgramAutoOpen, initProgramFolds, initVoiceFolds, initTypewriter, initShow, initSays, initHandoff } from './ui.js?v=2026100180';
 
 const root = document.documentElement;
 const $ = (s, r = document) => r.querySelector(s);
@@ -14,16 +14,14 @@ const veil = $('#veil');
 const video = $('#fvVideo');
 const fv = $('#top');
 const fvSticky = $('.fv__sticky');
-const final = $('#cta-final');
 const bar = $('#bar');
-const rail = $('#rail');
-const sideCta = $('#sideCta');
 const foot = $('#foot');
 const introHeroEl = $('#introHero');
+/* スクロールの合図（左端）。「ワールド寺子屋とは？」の節が見え始めたら引っ込める */
+const sideCta = $('#sideCta');
 /* 追従CTA の表示区間の境目。節の上端で切り替える */
 const voicesEl  = $('#voices');
 const briefEl   = $('#briefing');
-/* スクロールの合図（左端）。「ワールド寺子屋とは？」の節が見え始めたら引っ込める */
 const scrollCue = $('#scrollCue');
 const aboutEl   = $('#about');
 
@@ -80,7 +78,6 @@ function openVeil() {
        （updateFixed の videoLit）。幕の合図のために読み込みだけは先に済ませてある */
     videoWanted = true;
     setTimeout(() => fv && fv.classList.add('is-in'), 120);
-    if (sideCta) setTimeout(requestFrame, 900);
     requestFrame();
     if (V.deepLink) {
       const go = () => { const t = $(location.hash); if (t) t.scrollIntoView({ behavior: 'auto', block: 'start' }); };
@@ -99,28 +96,25 @@ if (video) {
 
 /* ---------------------------- スクロール: 進捗・章の色・レール ---------------------------- */
 const THEMES = [
-  ['#top', 'dark', 'top'],
+  ['#top', 'dark'],
   // 導入の章。ほぼ白地だが、最初の問いかけだけ映像の上に置くので暗い扱いにする。
   // ★後にある方が勝つので、内側の #introHero を #intro の後ろに置くこと
-  ['#intro', 'light', 'flow'],
-  ['#introHero', 'dark', 'flow'],
-  ['#about', 'light', 'flow'],
-  // 3つのプログラムの一覧は白い章の中にある。レールの「3つの派遣」はここで光る
-  ['#dispatch', 'light', 'dispatch'],
-  ['#who', 'light', 'who'],
-  ['#voices', 'dark', 'who'],
+  ['#intro', 'light'],
+  ['#introHero', 'dark'],
+  ['#about', 'light'],
+  ['#dispatch', 'light'],
+  ['#who', 'light'],
+  ['#voices', 'dark'],
   // 代表メッセージは白地。ここを入れておかないと、どの章にも当たらず既定の dark に落ちる
-  ['#founder', 'light', 'who'],
-  ['#trust', 'light', 'fee'],
-  ['#briefing', 'dark', 'briefing'],
-  ['#faq', 'light', 'faq'],
-  ['#cta-final', 'dark', 'faq'],
-  ['#foot', 'dark', 'faq'],
-].map(([sel, theme, railId]) => ({ el: $(sel), theme, railId })).filter((t) => t.el);
-const railLinks = rail ? Array.from(rail.querySelectorAll('[data-rail]')) : [];
+  ['#founder', 'light'],
+  ['#trust', 'light'],
+  ['#briefing', 'dark'],
+  ['#faq', 'light'],
+  ['#cta-final', 'dark'],
+  ['#foot', 'dark'],
+].map(([sel, theme]) => ({ el: $(sel), theme })).filter((t) => t.el);
 
 let lastTheme = '';
-let lastRail = '';
 let videoOn = false;
 let videoLitOn = false;   /* 映像が実際に画面に出ているか（--va > 0） */
 let videoVA = 0;          /* writeScope が書く濃さ。0 のあいだは見えていない */
@@ -183,33 +177,24 @@ function updateFixed(now = performance.now()) {
     p = span > 2 ? Math.min(1, Math.max(0, -r.top / span)) : 0;
     fvVisible = r.bottom > 0;
   }
-  let finalVisible = false;
-  if (final) { const r = final.getBoundingClientRect(); finalVisible = r.top < vh && r.bottom > 0; }
   // 導入の問いかけは地を敷かず映像の上に出すので、その間も舞台を回したままにする
   let heroVisible = false;
   if (introHeroEl) {
     const hr = introHeroEl.getBoundingClientRect();
     heroVisible = hr.top < vh && hr.bottom > 0;
   }
-  // 章の色（上部バーの真下に何があるか）と、レール（画面の 40% 位置にある章）
+  // 章の色（上部バーの真下に何があるか）
   const probeY = (bar ? bar.offsetHeight : 64) * 0.5;
-  const probe2 = vh * 0.4;
-  let theme = 'dark', railId = 'top', railId2 = '';
+  let theme = 'dark';
   for (const t of THEMES) {
     const r = t.el.getBoundingClientRect();
-    if (r.top <= probeY && r.bottom > probeY) { theme = t.theme; railId = t.railId; }
-    if (r.top <= probe2 && r.bottom > probe2) railId2 = t.railId;
+    if (r.top <= probeY && r.bottom > probeY) theme = t.theme;
   }
-  if (railId2) railId = railId2;
-  // 通り抜けの間はバーとレールを引っ込める
+  // 通り抜けの間はバーを引っ込める
   const through = fvVisible && p > 0.3 && p < 0.97;
-  /* 追従CTA（右端）の出し入れ。★2026-09-11 に「重なりそうな要素を列挙して避ける」方式をやめた。
-     要素が増えるたびに当たり判定が変わり、出たり消えたりが読めなくなっていた
-     （実際 .faq__q i というセレクタが実物と違っていて、FAQ では一度も避けていなかった）。
-     いまは節の上端だけで区間を決め打ちする。判定の線は画面の 62%（ボタンの中心の高さ）。
-     ★2026-10-01: 3つのプログラムの節にかかっていた区間を廃止した。
-       錠剤と日程表を読んでいる最中に右端から追従CTAが出てくるのをやめる判断。
-       いまは1区間だけ: 数字と参加者の声の節 〜 まずはオンライン説明会への節 */
+  /* 追従CTA（右端）の出し入れ。節の上端だけで区間を決め打ちする。
+     判定の線は画面の 62%（ボタンの中心の高さ）。区間は1つだけ:
+     数字と参加者の声の節 〜 まずはオンライン説明会への節 */
   const refY = vh * 0.62;
   const entered = (el) => (el ? el.getBoundingClientRect().top <= refY : false);
   const sideOn = !!sideCta && opened && !through
@@ -279,33 +264,15 @@ function updateFixed(now = performance.now()) {
   }
   scopeLast = now;
 
-  // ---- 章の色・レール ----
+  // ---- 章の色 ----
   if (theme !== lastTheme) {
     lastTheme = theme;
     if (bar) bar.classList.toggle('is-light', theme === 'light');
-    if (rail) rail.classList.toggle('is-light', theme === 'light');
-  }
-  if (railId !== lastRail) {
-    lastRail = railId;
-    railLinks.forEach((a) => a.classList.toggle('is-active', a.getAttribute('data-rail') === railId));
   }
   if (bar) bar.classList.toggle('is-hidden', through);
-  if (rail) rail.classList.toggle('is-hidden', through || finalVisible);
   if (sideCta) sideCta.classList.toggle('is-on', sideOn);
   if (scrollCue) scrollCue.classList.toggle('is-on', cueOn);
 }
-/* 右端で追従CTAに隠されると困るもの。CTA の縦の帯にかかる間だけ引っ込める。
-     .tbl      … 隠れると金額が読めなくなる
-     .ticket__date … 説明会の日付。右端に大きく出るので CTA の真下に入る
-     .faq__q i … 開閉の記号。右端にあるので CTA の真下に入る
-     .endorsements__names / .endorsement-logo / .media-logo
-               … 後援とメディアのロゴと団体名。右端まで並ぶので CTA に隠れる
-     .purpose__lead / .purpose__note / .purpose__h--next / .purpose__guide / .plist
-     .founder-card__meta / .founder-card__message … 代表メッセージ。SP は全幅に流れる
-               … 白い章の本文・袋文字・案内のキャラクター。画面の端まで届くので CTA に食われる
-     .scr__detail … 3つのプログラムの読み物（日程・宿泊・行程・発着・担当者）。舞台では
-               右の柱／下の欄に出るので、画面の端まで届く */
-
 /* 1フレームに updateFixed を1回だけ。scroll/resize も、バネの続きも、同じ入口を通す。
    （scroll の rAF とバネの rAF を別々に持つと、書いた直後に測る形になって
      スタイル再計算が毎フレーム2回走る） */

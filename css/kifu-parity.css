@@ -184,55 +184,6 @@
   opacity: 0.55;
 }
 
-@media (min-width:100000px){
-/* FAQ（寄付 desktop.css と同じ値） */
-.faq{width:min(960px,calc(100% - 64px));margin:0 auto;padding:0}
-.faq__q{font-size:20px;padding:28px 0}
-.faq__ico{font-size:26px}
-.faq__a > p{font-size:17px}
-.faq__item.is-open .faq__a > p{padding-bottom:28px}
-
-.endorsements,.media-section,.s-foot{--px:max(32px,calc((calc(100 * var(--vw)) - 720px) / 2))}
-.endorsements { margin-bottom: 48px; }
-.endorsements__title,
-.media-section__title {
-  font-size: 22px;
-  margin-bottom: 22px;
-}
-.endorsements__grid { gap: 30px; }
-.endorsements__row { gap: 24px; }
-.endorsement-logo { height: 68px; }
-.endorsement-logo--jt { height: 86px; }
-.endorsements__names {
-  height: 86px;
-  font-size: 15px;
-}
-.media-grid {
-  grid-template-columns: repeat(4, 1fr);
-  gap: 34px 24px;
-}
-.sponsors{margin-bottom:56px}
-.sponsor-grid{grid-template-columns:repeat(3,1fr);gap:36px 26px}
-.sponsor-logo{height:48px}
-.media-logo { height: 54px; }
-
-.s-foot { padding-top: 72px; }
-.foot-brandzone { gap: 16px; margin-bottom: 32px; }
-.foot-logo { width: 64px; height: 64px; }
-.foot-brand { font-size: 1.6rem; }
-.foot-tagline { font-size: 1rem; }
-.foot-social { gap: 32px; padding-bottom: 40px; margin-bottom: 40px; }
-.foot-social__link svg { width: 32px; height: 32px; }
-.foot-about { max-width: 560px; }
-.foot-about__label { font-size: 0.9rem; margin-bottom: 24px; }
-.foot-about__list { font-size: 0.9rem; line-height: 1.75; }
-.foot-about__row { padding: 13px 0 13px 60px; }
-.foot-about dt { flex-basis: 90px; }
-.foot-about__ext { width: 13px; height: 13px; }
-.foot-bottom { margin-top: 48px; padding: 24px var(--px); }
-.foot-copy { font-size: 0.8rem; }
-}
-
 /* ==========================================================================
    代表メッセージ（寄付LP #founder の移植）
    組みは寄付のまま。地をクリームにしたので、色だけ反転させている
@@ -291,31 +242,3 @@
 .founder-card--coo{margin-top:44px}
 .founder-card--coo .founder-card__photo{object-position:center 20%}
 
-@media (min-width:100000px){
-  .voices-head{padding-top:104px;padding-bottom:8px}
-  .founder-card{
-    display:flex;align-items:center;min-height:0;width:100%;
-    max-width:1160px;margin-left:auto;margin-right:auto;
-  }
-  .founder-card__photo-wrap{
-    order:2;flex:1 1 0;position:relative;aspect-ratio:auto;height:400px;
-    margin:56px 48px 56px 0;border-radius:20px;overflow:hidden;
-  }
-  .founder-card__photo{
-    position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
-    object-position:35% center;
-  }
-  .founder-card__content{
-    order:1;position:static;flex:1 1 0;padding:56px 56px 56px 48px;
-    display:flex;flex-direction:column;justify-content:center;
-  }
-  .founder-card__meta{margin:0 0 24px}
-  .founder-card__role{font-size:15px}
-  .founder-card__name{font-size:35px}
-  .founder-card__career li{font-size:16px}
-  .founder-card__message{padding:26px;margin-top:26px;border-radius:14px}
-  .ch--founder{padding-bottom:24px}
-  .founder-card__message p{font-size:16px}
-  .founder-card--coo{margin-top:0;padding-top:26px}
-  .founder-card--coo .founder-card__photo{object-position:58% center}
-}
