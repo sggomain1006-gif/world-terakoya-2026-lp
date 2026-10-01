@@ -3,9 +3,9 @@
    幕 → 地の映像 → スクロール進捗 → 章の色 → 各UI
    ============================================================================= */
 
-import { mountRigs, attachFace, attachWalker, attachBow, attachPointing, attachJump } from './mascot.js?v=20261001100';
-import { Spring, safeDt } from './lib/spring.js?v=20261001100';
-import { reduceMotion, finePointer, track, splitChars, initFaq, initGates, initReveal, initCounters, initClips, initMagnets, initTilt, initCursor, initShare, initCtas, initTicketTouch, initProgramAutoOpen, initProgramFolds, initVoiceFolds, initTypewriter, initShow, initSays, initHandoff } from './ui.js?v=20261001100';
+import { mountRigs, attachFace, attachWalker, attachBow, attachPointing, attachJump } from './mascot.js?v=20261001103';
+import { Spring, safeDt } from './lib/spring.js?v=20261001103';
+import { reduceMotion, finePointer, track, splitChars, initFaq, initGates, initReveal, initCounters, initClips, initMagnets, initTilt, initCursor, initShare, initCtas, initTicketTouch, initProgramAutoOpen, initProgramFolds, initVoiceFolds, initTypewriter, initShow, initSays, initHandoff } from './ui.js?v=20261001103';
 
 const root = document.documentElement;
 const $ = (s, r = document) => r.querySelector(s);

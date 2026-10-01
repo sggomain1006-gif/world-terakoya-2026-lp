@@ -152,8 +152,11 @@ main{position:relative;z-index:2}
      1/100 に差し替えるので、PC幅でも SP と同じ大きさになる */
 .ticket__closed{
   position:absolute;z-index:2;left:10px;right:10px;top:50%;
-  /* 高さはカードの中央。押印らしく左へ少し倒す（原点は字面の中心） */
-  transform:translateY(-50%) rotate(-6deg);
+  /* 高さはカードの中央。押印らしく左へ倒す（原点は字面の中心）。
+     ★+0.037em は字面を光学的に中央へ落とす分。line-height:1 の箱は下端に
+       ディセンダ分の余白を持つが CLOSED は全部大文字でそこを使わないため、
+       箱を中央に置くと文字だけが 1.53px（カード高の0.83%）上に浮く */
+  transform:translateY(calc(-50% + 0.037em)) rotate(-10deg);
   font-family:var(--ff-mono);font-weight:700;
   font-size:clamp(30px,calc(10.5 * var(--vw)),46px);
   letter-spacing:.16em;text-indent:.16em;   /* 末尾の送りを字面から外す */

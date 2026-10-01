@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- 1ページのLP。canonical と同じ値を1件だけ載せる。
-     ★robots.txt はオリジン直下しか読まれず、GitHub Pages のプロジェクトサイト
-       （/world-terakoya-2026-lp/ 配下）には置けないので、Search Console へ直接送信する前提。
+     ★robots.txt はオリジン直下にしか置けない。本番 edfuture.jp では
+       https://edfuture.jp/robots.txt に Sitemap: 行を足せる（サイト全体の設定なので要調整）。
      ★lastmod は公開日に手で合わせること（自動更新の仕組みは入れていない） -->
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://sggomain1006-gif.github.io/world-terakoya-2026-lp/</loc>
+    <loc>https://edfuture.jp/world-terakoya-2026/</loc>
     <lastmod>2026-10-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
