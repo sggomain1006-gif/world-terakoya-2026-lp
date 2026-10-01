@@ -112,8 +112,11 @@ def collect():
         browser = pw.chromium.launch()
         for vp in ((390, 844), (1280, 800)):
             page = browser.new_page(viewport={"width": vp[0], "height": vp[1]})
-            page.goto(URL, wait_until="networkidle")
-            page.wait_for_timeout(2500)
+            # ★networkidle で待たない。2026-09-30 に FV の映像を「見えてから再生」に
+            #   変えてから、動画の取得が終わらず networkidle に到達しなくなった。
+            #   採取に要るのは描画済みの DOM と computed style なので load で足りる
+            page.goto(URL, wait_until="load", timeout=60000)
+            page.wait_for_timeout(3500)
             page.evaluate(REVEAL_JS)
             page.wait_for_timeout(300)
             got = page.evaluate(COLLECT_JS)

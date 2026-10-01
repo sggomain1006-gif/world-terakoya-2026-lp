@@ -18,8 +18,29 @@ main{position:relative;z-index:2}
 /* 扉のカード（.gate）は廃止。黒い舞台の上で板を回す作りに変えた。css/screens.css へ */
 
 /* ========== 03 あなたへ ========== */
-.ch--who{background:var(--cream);color:var(--text)}
-.ch--who::before{content:'';position:absolute;inset:0;background-image:var(--paper);opacity:.05;pointer-events:none;mix-blend-mode:multiply}
+/* ★2026-09-30: 地をクリームからバーガンディへ。中の要素は明るい地を前提に
+   組まれているので、ここで字・罫・面をまとめて反転させる */
+.ch--who{background:var(--wine);color:var(--on-dark)}
+/* 紙目は multiply だと暗い地で沈むので screen に替える */
+.ch--who::before{content:'';position:absolute;inset:0;background-image:var(--paper);opacity:.04;pointer-events:none;mix-blend-mode:screen}
+.ch--who .h3,.ch--who .h4{color:var(--cream)}
+.ch--who .lead,.ch--who .cta-lead,.ch--who .panel p{color:var(--on-dark)}
+/* 表。見出し列は黄、本文はクリーム、罫はクリーム側 */
+.ch--who .table-scroll{border-top-color:var(--line-cream-strong);border-bottom-color:var(--line-cream-strong)}
+.ch--who .tbl th,.ch--who .tbl td{border-bottom-color:var(--line-cream)}
+.ch--who .tbl th[scope=row]{color:var(--yellow)}
+.ch--who .tbl td{color:var(--on-dark)}
+/* 写真・映像の枠。地が暗いのでプレースホルダもクリーム側の薄い面に */
+.ch--who .ph{background:rgba(245,239,230,.10)}
+.ch--who :focus-visible{outline-color:var(--yellow)}
+/* 点リストも明るい地を前提に組まれている。罫と強調をクリーム側へ寄せる */
+.ch--who .conds li{border-top-color:var(--line-cream);color:var(--on-dark)}
+.ch--who .conds li:last-child{border-bottom-color:var(--line-cream)}
+.ch--who .conds li::before{box-shadow:0 0 0 1.5px rgba(26,5,8,.55)}
+.ch--who .conds b{color:var(--yellow)}
+.ch--who .panel strong{color:var(--yellow);font-weight:700}
+/* 注記の既定色（--text-2）はワイン地では沈む */
+.ch--who .note{color:rgba(245,239,230,.66)}
 .tabs{position:relative}
 /* 下線のタブからボタンに変えた。選んだ方をワインで塗り、もう一方は線だけにする */
 /* ボタンの上の案内。吹き出しの尻尾が右向きなので、札は吹き出しの右に置く。
@@ -95,12 +116,6 @@ main{position:relative;z-index:2}
 .quote{margin-top:16px;padding:22px 24px;border-left:2px solid var(--wine);background:rgba(85,22,31,.04);font-size:14.5px;line-height:1.9}
 .voice{margin-top:28px;font-family:var(--ff-serif);font-size:17px;line-height:1.9;color:var(--wine);letter-spacing:.02em}
 .voice footer{margin-top:10px;font-size:11px;color:var(--text-2);text-transform:none;letter-spacing:.14em}
-.vs{margin-top:22px;display:grid;gap:10px}
-.vs > div{display:grid;grid-template-columns:118px 1fr;gap:10px;padding:10px 0;border-bottom:1px solid var(--line);font-size:14.5px;align-items:baseline}
-.vs dt{font-weight:700;color:var(--text-2);font-size:13px}
-.vs .vs__self{border-bottom:2px solid var(--wine);padding:14px 0}
-.vs .vs__self dt{color:var(--wine)}
-.vs .vs__self dd{color:var(--wine);font-weight:500}
 
 @media (min-width:100000px){
   .tabs__guide{gap:12px;margin-bottom:16px}
@@ -213,19 +228,34 @@ main{position:relative;z-index:2}
   /* ★見出しと CTA を縦の中ほどへ。上寄せ＋下に 46vh の空きだと、写真の中で
      文字とボタンだけが上に固まって見えた */
   align-items:center;
-  padding:calc(var(--bar-h) + 40px) 0 22vh;
-  /* ★幕は寄付LD（edfuture.jp/kifu/）の .final-cta__overlay と同じ2枚重ね。
-     上の楕円で中央上部を抜き、下の縦グラデで足元を沈める。値はあちらの実物に合わせた */
+  /* ★上側に 26vh 足して、中央揃えの中心を 13vh ぶん下へずらす。
+     地の映像は人物の顔が画面の中ほどに来るので、見出しとボタンがそこに重なっていた。
+     固定pxで下げると機種ごとに下のマスコットとぶつかるので、画面高さに比例させる */
+  padding:calc(var(--bar-h) + 40px + 26vh) 0 22vh;
+  /* ★2026-09-30: 地を静止画から元の映像に戻した。地には色だけ置き、
+     映像は .final__bg、幕は .final__veil が持つ（背景に直接書くと映像を敷けない） */
+  background:var(--deep);
+  overflow:hidden;
+}
+/* 地の映像。poster が読み込み前と再生不可のときの絵になる */
+.final__bg{
+  position:absolute;inset:0;z-index:0;
+  width:100%;height:100%;object-fit:cover;object-position:center 32%;
+  pointer-events:none;
+}
+/* 幕。寄付LP（edfuture.jp/kifu/）の .final-cta__overlay と同値の2枚重ね。
+   上の楕円で中央上部を抜き、下の縦グラデで足元を沈める */
+.final__veil{
+  position:absolute;inset:0;z-index:1;pointer-events:none;
   background:
     radial-gradient(ellipse 130% 75% at 50% 8%,rgba(85,22,31,0) 35%,rgba(26,5,8,.7) 100%),
-    linear-gradient(to bottom,rgba(26,5,8,.12) 0%,rgba(85,22,31,.42) 42%,rgba(26,5,8,.97) 100%),
-    url(../img/poster-clip-group.webp) center 32%/cover no-repeat;
+    linear-gradient(to bottom,rgba(26,5,8,.12) 0%,rgba(85,22,31,.42) 42%,rgba(26,5,8,.97) 100%);
 }
 /* ---- 黄の枠線（寄付LPの .final-cta__frame と同値）----
    細い線を一周させ、左上と右下にだけ太い鉤を重ねる。
    ★pointer-events:none。通すと CTA の上に透明な板が乗ってボタンが押せなくなる */
 .final__frame{
-  position:absolute;inset:16px;z-index:1;
+  position:absolute;inset:16px;z-index:2;
   border:1px solid rgba(255,216,62,.32);
   pointer-events:none;
 }
@@ -234,7 +264,12 @@ main{position:relative;z-index:2}
 }
 .final__frame::before{top:-1px;left:-1px;border-right:none;border-bottom:none}
 .final__frame::after{bottom:-1px;right:-1px;border-left:none;border-top:none}
-.final__inner{width:100%;text-align:center;display:flex;flex-direction:column;align-items:center}
+/* ★position は付けない。.final__mascot は position:absolute で節（.final）を基準に
+   左下へ置いているので、ここに position を足すと基準がこの箱に移り、
+   マスコットが見出しとボタンの上に乗る（2026-09-30 に実際に起きた）。
+   .final は display:flex なのでこの箱は flex item。flex item は position 無しでも
+   z-index が効くので、幕より前に出すだけならこれで足りる */
+.final__inner{z-index:2;width:100%;text-align:center;display:flex;flex-direction:column;align-items:center}
 .final__h{max-width:720px;text-shadow:0 2px 30px rgba(26,5,8,.6);font-size:clamp(24px,calc(6.6 * var(--vw)),30px)}
 .final__ctas{margin-top:28px}
 .final__mascot{position:absolute;left:var(--px);bottom:22px;display:flex;flex-direction:column;align-items:flex-start;gap:6px;pointer-events:none}
@@ -422,8 +457,9 @@ main{position:relative;z-index:2}
 .vcards__track{
   list-style:none;margin:18px calc(-1 * var(--px)) 0;
   padding:0 var(--px) 6px;
-  /* ★stretch にしない。長い声が1枚あると他の札まで同じ高さに伸びて空白だらけになる */
-  display:flex;align-items:flex-start;gap:16px;
+  /* ★札の高さは揃える。以前 flex-start にしていたのは、畳む前の1枚目が 1097px あって
+     他の札まで引き伸ばしていたため。16行で畳むようにして最大が 736px に収まったので戻した */
+  display:flex;align-items:stretch;gap:16px;
   overflow-x:auto;overscroll-behavior-x:contain;
   scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;
   scrollbar-width:none;
@@ -448,9 +484,11 @@ main{position:relative;z-index:2}
   background:var(--cream);border-radius:14px;overflow:hidden;
   box-shadow:0 24px 50px -30px rgba(0,0,0,.7);
 }
-.vcard__photo{width:100%;height:220px;object-fit:cover;flex:none;display:block;background:var(--cream-3);border-radius:14px 14px 0 0}
+/* ★2026-09-30: 220→168。札の高さは「写真＋本文17行」で決まっており、本文を削らずに
+   縮められるのは写真と内側の余白だけ。環境カットなので縦を詰めても意図は残る */
+.vcard__photo{width:100%;height:168px;object-fit:cover;flex:none;display:block;background:var(--cream-3);border-radius:14px 14px 0 0}
 /* 本文はクリームの地。地が反転するので、文字と罫もワイン側に寄せる */
-.vcard__body{padding:20px;display:flex;flex-direction:column;gap:9px;flex:1;background:var(--cream);border-radius:0 0 14px 14px}
+.vcard__body{padding:17px 18px 18px;display:flex;flex-direction:column;gap:7px;flex:1;background:var(--cream);border-radius:0 0 14px 14px}
 .vcard__prog{margin:0;font-size:10px;font-weight:700;letter-spacing:.1em;color:var(--wine)}
 .vcard__quote{margin:0;flex:1;padding-left:14px;border-left:2px solid rgba(85,22,31,.28)}
 .vcard__quote p{margin:0;font-size:13px;line-height:1.85;color:var(--text)}
@@ -661,6 +699,14 @@ main{position:relative;z-index:2}
 .has-side-cta .dial__label{padding-inline:10px}
 .has-side-cta .h2,
 .has-side-cta .h3{padding-right:44px;white-space:normal;text-wrap:balance}
+/* ★中央揃えの節見出しはここから外す。片側だけ余白を足すと、追従CTAの出入りに合わせて
+   見出しが横に跳ねる（2026-09-30 実測で22pxずれていた）。
+   しかもこの2つは字面の右端がCTAに届いていないので、そもそも逃がす必要がない
+   （実測: 「数字と参加者の声」の右端305 / CTAの左端333） */
+.has-side-cta .ch--voices .ch__head .h2,
+.has-side-cta .ch--faq .ch__head .h2,
+.has-side-cta .ch--schol .ch__head .h2,
+.has-side-cta .ch--programs .ch__head .h2{padding-right:0}
 
 /* 375px で「サンフランシスコ／ボストン・ニューヨーク」の末尾1字だけが
    2行目に落ちていた。字を一段小さくして1行に収める */
@@ -707,3 +753,144 @@ main{position:relative;z-index:2}
   .fv__buddy-say .tw{visibility:visible}
   .fv__buddy-say.is-typing::before{display:none;animation:none}
 }
+
+/* ==========================================================================
+   説明会の章: 注記を吹き出しにし、CTA に案内役を付ける（2026-09-30）
+   ★文字のデザインは変えない。.sched-note li（明朝・大きさの式・✓・行間）には
+     一切触れず、外側の器に角丸としっぽを足すだけ
+   ========================================================================== */
+.sched-note{border-radius:18px;position:relative}
+/* しっぽ。右下から下へ出して、真下にいる案内役を向く */
+.sched-note::after{
+  content:'';position:absolute;right:38px;bottom:-8px;
+  width:18px;height:18px;background:var(--cream);
+  transform:rotate(45deg);border-radius:3px;
+  /* 台紙の影と同じ落ち方にして、切り貼りに見せない */
+  box-shadow:0 24px 50px -30px rgba(0,0,0,.7);
+}
+
+/* 案内役。ボタンは min-width:min(100%,360px) で中央に置かれるので、
+   器の幅との差の半分がボタンの左右の余白になる。そこから逆算して右端に付ける */
+.brief__cta{position:relative}
+.brief__buddy{
+  position:absolute;
+  right:calc((100% - min(100%,360px)) / 2 - 6px);
+  bottom:12px;
+  width:76px;display:block;
+  pointer-events:none;z-index:2;
+}
+.brief__buddy .rig{display:block;width:100%}
+.brief__buddy .rig img,.brief__buddy .rig svg{display:block;width:100%;height:auto}
+/* 背が低い機種はボタンも縮むので一回り小さく */
+@media (max-width:767px) and (max-height:700px){
+  .brief__buddy{width:66px;bottom:10px}
+}
+
+
+/* 札の高さを揃えたぶんの余りは引用が吸う。名前は下端に残す
+   （.vcard__quote は既に flex:1 を持っているので、畳んでいる札では
+     max-height が勝ち、畳んでいない札だけが伸びる） */
+.vcard.is-foldable .vcard__quote{flex:0 0 auto}
+
+/* ==========================================================================
+   3つのプログラムの章（2026-09-30 に「グローバル探究」から独立させた）
+   ★地は白のまま。錠剤（.plist__fold）は「この章は白地なので反転させる」前提で
+     組んであるので、地を変えるとコントラストの設計が崩れる。
+     節の切れ目は見出し（.ch__head + .h2／他の節と同じ型）で作る
+   ========================================================================== */
+.ch--programs{position:relative;z-index:1;background:#fff;color:var(--text)}
+/* 同居していた頃の「章の末尾」用の余白はもう要らない。
+   節の padding（.ch）が上下を持つので、中の先頭要素は margin を持たない */
+.ch--programs .purpose__note{margin-top:0}
+
+/* ==========================================================================
+   奨学金の章（2026-09-30 に高校生タブ／大学生タブの中から独立させた）
+   地はワイン。前後（3つのプログラム＝白／数字と参加者の声＝ワイン）に対して、
+   ここから暗い帯が始まる切れ目になる
+   ========================================================================== */
+/* ★地はクリーム。上の「大学生・社会人の方へ」がバーガンディ、下の「数字と参加者の声」も
+   バーガンディなので、ここを明るくして暗い帯のあいだに挟む */
+.ch--schol{background:var(--cream);color:var(--text)}
+.ch--schol::before{content:'';position:absolute;inset:0;background-image:var(--paper);
+  opacity:.05;pointer-events:none;mix-blend-mode:multiply}
+.schol__lead{margin:0;font-size:15px;line-height:1.95;max-width:var(--col);color:var(--text)}
+.schol__lead strong,.schol__note strong{color:var(--wine);font-weight:700}
+
+.schol__slots{list-style:none;margin:26px 0 0;padding:0;
+  display:flex;flex-direction:column;gap:12px;max-width:var(--col)}
+.schol__slot{
+  display:grid;grid-template-columns:1fr auto;grid-template-rows:auto auto;
+  column-gap:14px;row-gap:4px;align-items:center;
+  /* ★地がクリームになったので札は白。縁を足して面の境を出す */
+  background:#fff;color:var(--text);
+  border:1px solid var(--line);
+  border-radius:16px;padding:16px 18px;
+  box-shadow:0 20px 44px -34px rgba(26,5,8,.55);
+}
+.schol__who{
+  grid-column:1;margin:0;font-family:var(--ff-serif);font-weight:700;
+  font-size:17px;line-height:1.3;color:var(--wine);
+}
+.schol__what{grid-column:1;margin:0;font-size:13.5px;line-height:1.8;color:var(--text)}
+.schol__what strong{font-weight:700;color:var(--wine);
+  background:linear-gradient(transparent 62%,rgba(255,216,62,.55) 62%)}
+/* 枠数。数字だけ大きく、単位は小さく添える */
+.schol__n{
+  grid-column:2;grid-row:1 / span 2;margin:0;
+  display:flex;align-items:baseline;gap:2px;
+  background:var(--wine);color:var(--yellow);
+  border-radius:12px;padding:8px 12px;
+}
+.schol__n b{font-family:var(--ff-serif);font-size:24px;line-height:1;font-variant-numeric:tabular-nums}
+.schol__n i{font-style:normal;font-size:11px;color:var(--cream);opacity:.85}
+
+.schol__note{margin:22px 0 0;font-size:13.5px;line-height:1.9;max-width:var(--col);color:var(--text-2)}
+.schol__guide{margin:24px 0 0;display:flex;align-items:flex-end;justify-content:center;gap:8px}
+.schol__guide .say{margin:0 0 24px;max-width:none;font-size:12.5px}
+.schol__mascot{flex:0 0 auto;display:block;width:88px;height:auto}
+.schol__mascot img,.schol__mascot svg{display:block;width:100%;height:auto}
+
+/* ★媒体クエリは基底の後ろ。このLPは PC 用を 100000px で無効化している */
+@media (min-width:100000px){
+  .schol__slots{flex-direction:row;gap:18px;margin-top:32px}
+  .schol__slot{flex:1 1 0;min-width:0}
+}
+
+/* タブをやめ1本になった大学生・社会人の塊。
+   タブパネルだった頃の hidden 制御とタブ枠の余白はもう要らない */
+.panel--solo{display:block}
+
+/* 最終CTAのボタン。カーソルに引っ張られる動き（data-magnet の translate）はやめ、
+   近づいたときに少し浮き上がるだけにする。光りは --mx/--my で従来どおり追従する */
+.final__ctas .btn{transition:transform .32s var(--ease-out),box-shadow .32s var(--ease-out)}
+@media (hover:hover) and (pointer:fine){
+  .final__ctas .btn:hover,.final__ctas .btn:focus-visible{
+    transform:translateY(-4px);
+    box-shadow:0 14px 28px -12px rgba(26,5,8,.55);
+  }
+}
+@media (prefers-reduced-motion:reduce){
+  .final__ctas .btn{transition:none}
+  .final__ctas .btn:hover,.final__ctas .btn:focus-visible{transform:none}
+}
+
+/* ★背の低い機種は下げ幅を半分に。SE(667px) では 13vh 下げるとマスコットとの間隔が
+   18px しか残らなかった（実測）。高さの条件だけだと横長のPCにも当たるので幅を併記する */
+@media (max-width:767px) and (max-height:750px){
+  .final{padding-top:calc(var(--bar-h) + 40px + 13vh)}
+}
+
+
+/* ==========================================================================
+   節見出しの上の余白（2026-09-30）
+   .ch の既定は padding:96px 0 104px。見出しを持つ節はその上にさらに
+   .ch__head の下余白が乗るので、見出しのまわりだけで 150px 以上あった。
+   ★見出しを持つ6節だけに絞る。見出しのない節（代表メッセージなど）は
+     既定の呼吸のままにしておきたいため
+   ========================================================================== */
+.ch--programs,
+.ch--who,
+.ch--schol,
+.ch--voices,
+.ch--brief,
+.ch--faq{padding-top:58px}

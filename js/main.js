@@ -3,9 +3,9 @@
    幕 → 地の映像 → スクロール進捗 → 章の色 → 各UI
    ============================================================================= */
 
-import { mountRigs, attachFace, attachWalker, attachBow, attachPointing } from './mascot.js?v=2026093015';
-import { Spring, safeDt } from './lib/spring.js?v=2026093015';
-import { reduceMotion, finePointer, track, splitChars, initTabs, initFaq, initGates, initReveal, initCounters, initClips, initMagnets, initTilt, initCursor, initShare, initCtas, initTicketTouch, initProgramAutoOpen, initProgramFolds, initVoiceFolds, initTypewriter } from './ui.js?v=2026093015';
+import { mountRigs, attachFace, attachWalker, attachBow, attachPointing } from './mascot.js?v=2026093046';
+import { Spring, safeDt } from './lib/spring.js?v=2026093046';
+import { reduceMotion, finePointer, track, splitChars, initFaq, initGates, initReveal, initCounters, initClips, initMagnets, initTilt, initCursor, initShare, initCtas, initTicketTouch, initProgramAutoOpen, initProgramFolds, initVoiceFolds, initTypewriter } from './ui.js?v=2026093046';
 
 const root = document.documentElement;
 const $ = (s, r = document) => r.querySelector(s);
@@ -20,7 +20,9 @@ const rail = $('#rail');
 const sideCta = $('#sideCta');
 const foot = $('#foot');
 const introHeroEl = $('#introHero');
-const purposeEl = $('#purpose');
+/* ★区間Aの起点。2026-09-30 に「グローバル探究」の節を削除したので、
+   その直後にあった3つのプログラムの節を起点にした */
+const progSecEl = $('#dispatch');
 /* 追従CTA の表示区間の境目。節の上端で切り替える */
 const progSfEl  = $('#prog-sf');
 const voicesEl  = $('#voices');
@@ -57,6 +59,12 @@ function playVideo() {
   if (video.paused) { const p = video.play(); if (p && p.catch) p.catch(() => {}); }
 }
 function pauseVideo() { if (video && !video.paused) video.pause(); }
+/* 出てくるたびに頭から見せる。出る前から回しておくと、現れたときには
+   既に何秒も進んだ（あるいは一周した）画になる */
+function rewindVideo() {
+  if (!video) return;
+  try { if (video.currentTime > 0.08) video.currentTime = 0; } catch (e) { /* 読み込み前は無視 */ }
+}
 
 /* --------------------------------------- 幕 --------------------------------------- */
 const V = window.__veil || { t0: Date.now(), MIN: 500, MAX: 1900, release() {} };
@@ -69,8 +77,9 @@ function openVeil() {
     if (veil) veil.classList.add('is-out');
     root.classList.remove('is-veiled');
     V.release();
+    /* ★ここでは「再生してよい」印を立てるだけ。実際に回すのは映像が画面に出てから
+       （updateFixed の videoLit）。幕の合図のために読み込みだけは先に済ませてある */
     videoWanted = true;
-    playVideo();
     setTimeout(() => fv && fv.classList.add('is-in'), 120);
     if (sideCta) setTimeout(requestFrame, 900);
     requestFrame();
@@ -96,7 +105,6 @@ const THEMES = [
   // ★後にある方が勝つので、内側の #introHero を #intro の後ろに置くこと
   ['#intro', 'light', 'flow'],
   ['#introHero', 'dark', 'flow'],
-  ['#purpose', 'light', 'flow'],
   // 3つのプログラムの一覧は白い章の中にある。レールの「3つの派遣」はここで光る
   ['#dispatch', 'light', 'dispatch'],
   ['#who', 'light', 'who'],
@@ -114,6 +122,8 @@ const railLinks = rail ? Array.from(rail.querySelectorAll('[data-rail]')) : [];
 let lastTheme = '';
 let lastRail = '';
 let videoOn = false;
+let videoLitOn = false;   /* 映像が実際に画面に出ているか（--va > 0） */
+let videoVA = 0;          /* writeScope が書く濃さ。0 のあいだは見えていない */
 
 const clamp01 = (v) => (v < 0 ? 0 : v > 1 ? 1 : v);
 const ez = (v) => { const k = clamp01(v); return k * k * (3 - 2 * k); };
@@ -145,7 +155,8 @@ function writeScope(s) {
   /* 濃さ。0.08 から立ち上がり 0.56 で出し切る。
      ★2人と地の写真の引きより少し遅らせてある。同時に動かすと、橋と2人と映像が
        3枚とも半透明で重なる帯が長く、二重写しに見えた */
-  band.style.setProperty('--va', ez(clamp01((s - 0.08) / 0.48)).toFixed(3));
+  videoVA = ez(clamp01((s - 0.08) / 0.48));
+  band.style.setProperty('--va', videoVA.toFixed(3));
   /* 寄り。1.08 から等倍へ。0.78（全画面）でちょうど変形なしに着く */
   band.style.setProperty('--vz', (VZ_FROM - (VZ_FROM - 1) * q).toFixed(4));
   const peopleA = (1 - ez(clamp01((s - 0.05) / 0.35))).toFixed(3);
@@ -196,12 +207,12 @@ function updateFixed(now = performance.now()) {
      要素が増えるたびに当たり判定が変わり、出たり消えたりが読めなくなっていた
      （実際 .faq__q i というセレクタが実物と違っていて、FAQ では一度も避けていなかった）。
      いまは節の上端だけで2区間を決め打ちする。判定の線は画面の 62%（ボタンの中心の高さ）。
-       区間A: グローバル探究の節 〜 サンフランシスコの折りたたみ
+       区間A: 3つのプログラムの節 〜 サンフランシスコの折りたたみ
        区間B: 数字と参加者の声の節 〜 まずはオンライン説明会への節 */
   const refY = vh * 0.62;
   const entered = (el) => (el ? el.getBoundingClientRect().top <= refY : false);
   const sideOn = !!sideCta && opened && !through
-    && ((entered(purposeEl) && !entered(progSfEl)) || (entered(voicesEl) && !entered(briefEl)));
+    && ((entered(progSecEl) && !entered(progSfEl)) || (entered(voicesEl) && !entered(briefEl)));
 
   /* ===== 書く ===== */
   if (fv) {
@@ -218,7 +229,13 @@ function updateFixed(now = performance.now()) {
     videoOn = videoShow;
     if (band) band.classList.toggle('is-on', videoShow);
   }
-  if (videoShow || finalVisible) playVideo(); else pauseVideo();
+  /* ★再生は「層が生きているか」ではなく「実際に見えているか」で決める。
+     濃さ（--va）は FV のスクロールで 0.08 から立ち上がるので、それまでは回さない */
+  const videoLit = videoShow && videoVA > 0.001;
+  if (videoLit !== videoLitOn) {
+    videoLitOn = videoLit;
+    if (videoLit) { rewindVideo(); playVideo(); } else pauseVideo();
+  }
 
   /* ---- 地の映像の明るさ ----
      最初は少し暗く。スクロールが始まるとすぐ明るくなり、螺旋で1枚目のカードが
@@ -327,12 +344,11 @@ if (scopeAnimating) requestFrame();
 // タブが隠れたら止める（WebGL の有無に関わらず映像は止める）
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) { pauseVideo(); }
-  else { videoOn = false; scopeLast = performance.now(); requestFrame(); }
+  else { videoOn = false; videoLitOn = false; scopeLast = performance.now(); requestFrame(); }
 });
 
 /* ------------------------------------- UI ------------------------------------- */
 const cursor = initCursor();
-initTabs();
 initFaq();
 initGates(cursor);
 initReveal();

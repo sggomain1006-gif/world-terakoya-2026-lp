@@ -89,7 +89,7 @@ html.is-veiled body{overflow:hidden;height:100vh}
 /* ---------- 版面 ---------- */
 .wrap{padding-left:var(--px);padding-right:var(--px);max-width:var(--wrap);margin-left:auto;margin-right:auto}
 .ch{position:relative;padding:96px 0 104px}
-.ch__head{margin-bottom:56px;max-width:var(--col)}
+.ch__head{margin-bottom:30px;max-width:var(--col)}  /* 2026-09-30: 56→30。見出しの前後が上97+下55で計152pxあり、6節ぶんで900px超を占めていた */
 .ch__num{display:flex;align-items:baseline;gap:14px;margin-bottom:22px;color:var(--wine)}
 .ch__num span{font-size:12px;font-weight:500;letter-spacing:.2em}
 .ch__num em{font-style:normal;font-size:11px;color:var(--text-2);letter-spacing:.24em;position:relative;padding-left:26px}
@@ -103,7 +103,9 @@ html.is-veiled body{overflow:hidden;height:100vh}
 /* よくあるご質問だけ見出しを中央に置く。
    .ch__head は max-width:var(--col) で左に寄っているので、幅の制限も外す */
 .ch--faq .ch__head,
-.ch--voices .ch__head{max-width:none;text-align:center}
+.ch--voices .ch__head,
+.ch--schol .ch__head,
+.ch--programs .ch__head{max-width:none;text-align:center}
 .h3{font-family:var(--ff-serif);font-size:clamp(21px,calc(5.4 * var(--vw)),26px);line-height:1.45;letter-spacing:.02em;color:var(--wine);text-wrap:balance}
 .h4{font-family:var(--ff-serif);font-size:18px;line-height:1.5;letter-spacing:.02em;color:var(--wine);margin-top:44px}
 .h4.mono{font-family:var(--ff-mono);font-size:11px;letter-spacing:.2em;color:var(--wine);display:flex;align-items:baseline;gap:12px;font-weight:500}

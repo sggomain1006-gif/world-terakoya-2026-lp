@@ -11,7 +11,7 @@
    - #trail は隠す（動的に置く足あとと二重になる）
    ============================================================================= */
 
-import { Spring, expSmooth, safeDt } from './lib/spring.js?v=2026093015';
+import { Spring, expSmooth, safeDt } from './lib/spring.js?v=2026093046';
 
 const rigCache = new Map();
 
@@ -75,6 +75,31 @@ export function attachFace(host, { reduceMotion = false } = {}) {
   const F = q(svg, 'face'), M = q(svg, 'mouth');
   if (!EL || !ER || !PL || !PR || !F || !M) return () => {};
 
+  /* ★変形の軸を必ず自分の中心に置く。
+     rig.svg は6つの可動部に transform-box:view-box と transform-origin を持っているが、
+     pose-*.svg は持っていない。原点が無いまま scaleY / rotate を掛けると、
+     SVG の既定どおり viewBox の原点（-99,-54）を軸に掛かってしまい、
+     口が数百ユニット上へ滑って目に重なる。何度も起きていた「目や口が重なる」の正体。
+     ファイル側が自分で原点を書いているときは尊重し、無いときだけ fill-box で補う */
+  [F, EL, ER, PL, PR, M].forEach((el) => {
+    if (!el.style.transformOrigin && !el.getAttribute('transform-origin')) {
+      el.style.transformBox = 'fill-box';
+      el.style.transformOrigin = '50% 50%';
+    }
+  });
+
+  /* ★瞳の可動域は決め打ちでなく、目と瞳の実寸から出す。
+     固定値（旧 16 / 12 ユニット）はポーズによって目からはみ出す。
+     目の内側に収まる範囲の 72% までしか動かさない */
+  let MAXX = 16, MAXY = 12;
+  try {
+    const eb = EL.getBBox(), pb = PL.getBBox();
+    if (eb.width && pb.width) {
+      MAXX = Math.max(0, (eb.width - pb.width) / 2) * 0.72;
+      MAXY = Math.max(0, (eb.height - pb.height) / 2) * 0.72;
+    }
+  } catch (e) { /* 描画前などで bbox が取れないときは既定値のまま */ }
+
   let px = 0, py = 0, near = 0, alive = true;
   const onMove = (e) => {
     const r = host.getBoundingClientRect();
@@ -97,8 +122,8 @@ export function attachFace(host, { reduceMotion = false } = {}) {
   function tick(now) {
     if (!alive) return;
     const h = Math.min((now - last) / 1000, 0.05); last = now;
-    ex = halfLife(ex, px * 16, 0.09, h);
-    ey = halfLife(ey, py * 12, 0.09, h);
+    ex = halfLife(ex, px * MAXX, 0.09, h);
+    ey = halfLife(ey, py * MAXY, 0.09, h);
     tilt = halfLife(tilt, px * 4.5, 0.22, h);
     if (near > 0.25) {
       if (now > nextTalk) { mTarget = 0.55 + Math.random() * 0.8; nextTalk = now + 90 + Math.random() * 130; }

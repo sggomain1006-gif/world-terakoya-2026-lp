@@ -4,7 +4,7 @@
    マグネットボタン / チケットの傾き / カーソル / 共有 / 計測
    ============================================================================= */
 
-import { Spring, expSmooth, safeDt } from './lib/spring.js?v=2026093015';
+import { Spring, expSmooth, safeDt } from './lib/spring.js?v=2026093046';
 
 export const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 export const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)');
@@ -40,83 +40,9 @@ export function splitChars(root = document) {
 }
 
 /* ------------------------------------- タブ ------------------------------------ */
-/* ★保護者タブは無い。data-tab は student と university の2つだけ。
-   'parent' を残すと #parent 直リンクで全タブ非選択・全パネル hidden になる */
-const PERSONAS = ['student', 'university'];
-export function initTabs() {
-  const tabs = Array.from(document.querySelectorAll('[role="tab"]'));
-  if (!tabs.length) return { open() {} };
-  const ink = document.querySelector('.tabs__ink');
-  const list = document.querySelector('[role="tablist"]');
-  const panels = {};
-  const byPersona = {};
-  tabs.forEach((t) => {
-    const p = t.getAttribute('data-tab');
-    byPersona[p] = t;
-    panels[p] = document.getElementById(t.getAttribute('aria-controls'));
-  });
-  let hashLock = false;
+/* ★initTabs（高校生／大学生のタブ）は 2026-09-30 に廃止。
+   残るのが大学生・社会人の1本になり、選ばせる仕掛けが要らなくなった */
 
-  function moveInk(tab) {
-    if (!ink || !list) return;
-    const lr = list.getBoundingClientRect();
-    const tr = tab.getBoundingClientRect();
-    ink.style.width = tr.width + 'px';
-    ink.style.transform = `translateX(${tr.left - lr.left}px)`;
-  }
-
-  function open(persona, src, opts = {}) {
-    if (!PERSONAS.includes(persona)) return;
-    const changed = persona !== currentPersona;
-    currentPersona = persona;
-    PERSONAS.forEach((p) => {
-      const t = byPersona[p], pane = panels[p];
-      if (!t || !pane) return;
-      const on = p === persona;
-      t.setAttribute('aria-selected', on ? 'true' : 'false');
-      t.setAttribute('tabindex', on ? '0' : '-1');
-      if (on && pane.hidden) {
-        pane.hidden = false;
-        // 出現アニメを毎回走らせる
-        pane.style.animation = 'none';
-        void pane.offsetWidth;
-        pane.style.animation = '';
-      } else if (!on) pane.hidden = true;
-    });
-    moveInk(byPersona[persona]);
-    if (opts.updateHash !== false && (location.hash || '').replace('#', '') !== persona) {
-      hashLock = true;
-      try { history.replaceState(null, '', '#' + persona); } catch (e) { location.hash = persona; }
-      setTimeout(() => { hashLock = false; }, 0);
-    }
-    if (changed) track('persona_tab_open', { persona, source: src || 'tab' });
-    // 新しく見えた要素の出現・動画を拾う
-    document.dispatchEvent(new CustomEvent('lp:panelchange'));
-  }
-
-  tabs.forEach((t) => t.addEventListener('click', () => open(t.getAttribute('data-tab'), 'tab')));
-  if (list) {
-    list.addEventListener('keydown', (e) => {
-      const idx = tabs.indexOf(document.activeElement);
-      if (idx === -1) return;
-      let next = -1;
-      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') next = (idx + 1) % tabs.length;
-      else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') next = (idx - 1 + tabs.length) % tabs.length;
-      else if (e.key === 'Home') next = 0;
-      else if (e.key === 'End') next = tabs.length - 1;
-      if (next === -1) return;
-      e.preventDefault();
-      tabs[next].focus();
-      open(tabs[next].getAttribute('data-tab'), 'tab');
-    });
-  }
-  const fromHash = () => { const h = (location.hash || '').replace('#', ''); return PERSONAS.includes(h) ? h : null; };
-  window.addEventListener('hashchange', () => { if (!hashLock) { const p = fromHash(); if (p) open(p, 'hash', { updateHash: false }); } });
-  window.addEventListener('resize', () => moveInk(byPersona[currentPersona]));
-  if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => moveInk(byPersona[currentPersona]));
-  open(fromHash() || 'student', 'default', { updateHash: false });
-  return { open };
-}
 
 /* ------------------------------ 開閉（FAQ・扉カード） ------------------------------ */
 function setOpen(container, body, button, on, cls = 'is-open') {
@@ -285,6 +211,21 @@ export function initClips({ skip = null } = {}) {
 export function initMagnets() {
   if (!finePointer.matches || reduceMotion.matches) return;
   document.querySelectorAll('[data-magnet]').forEach((el) => {
+    /* ★data-magnet="glow" は「動かさず、カーソル位置の光りだけ」。
+       --mx/--my は base.css の .btn の光り（radial-gradient）が読むので、
+       位置だけ書いて transform には触れない */
+    const glowOnly = el.getAttribute('data-magnet') === 'glow';
+    if (glowOnly) {
+      el.addEventListener('pointermove', (e) => {
+        const r = el.getBoundingClientRect();
+        el.style.setProperty('--mx', ((e.clientX - r.left) / r.width * 100) + '%');
+        el.style.setProperty('--my', ((e.clientY - r.top) / r.height * 100) + '%');
+      });
+      el.addEventListener('pointerleave', () => {
+        el.style.removeProperty('--mx'); el.style.removeProperty('--my');
+      });
+      return;
+    }
     const sx = Spring.fromFeel({ settle: 0.5, overshoot: 0.12 });
     const sy = Spring.fromFeel({ settle: 0.5, overshoot: 0.12 });
     let raf = 0, last = 0;

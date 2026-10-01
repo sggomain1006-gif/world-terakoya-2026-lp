@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="build" content="2026093015">
+<meta name="build" content="2026093046">
 <script src="js/fresh.js"></script>
 <script>
 /* 起動の最小限。JS が動く印と、幕（veil）の制御だけをここに置く。
@@ -33,29 +33,29 @@
   root.classList.add('is-veiled');
 }());
 </script>
-<link rel="stylesheet" href="fonts/fonts.css?v=2026093015">
-<link rel="stylesheet" href="css/base.css?v=2026093015">
-<link rel="stylesheet" href="css/fv.css?v=2026093015">
-<link rel="stylesheet" href="css/sections.css?v=2026093015">
-<link rel="stylesheet" href="css/spiral.css?v=2026093015">
-<link rel="stylesheet" href="css/kifu-parity.css?v=2026093015">
+<link rel="stylesheet" href="fonts/fonts.css?v=2026093046">
+<link rel="stylesheet" href="css/base.css?v=2026093046">
+<link rel="stylesheet" href="css/fv.css?v=2026093046">
+<link rel="stylesheet" href="css/sections.css?v=2026093046">
+<link rel="stylesheet" href="css/spiral.css?v=2026093046">
+<link rel="stylesheet" href="css/kifu-parity.css?v=2026093046">
 <!-- ★一時措置：パソコンでもスマホ版を表示する。戻すときはこの2行を消す -->
-<link rel="stylesheet" href="css/sp-force.css?v=2026093015">
+<link rel="stylesheet" href="css/sp-force.css?v=2026093046">
 <link rel="preload" as="image" href="img/poster-underfv.webp" fetchpriority="high">
-<link rel="modulepreload" href="js/main.js?v=2026093015">
-<link rel="modulepreload" href="js/ui.js?v=2026093015">
-<link rel="modulepreload" href="js/mascot.js?v=2026093015">
-<link rel="modulepreload" href="js/lib/gl.js?v=2026093015">
-<link rel="modulepreload" href="js/lib/mat4.js?v=2026093015">
-<link rel="modulepreload" href="js/lib/spring.js?v=2026093015">
-<link rel="modulepreload" href="js/lib/geom.js?v=2026093015">
+<link rel="modulepreload" href="js/main.js?v=2026093046">
+<link rel="modulepreload" href="js/ui.js?v=2026093046">
+<link rel="modulepreload" href="js/mascot.js?v=2026093046">
+<link rel="modulepreload" href="js/lib/gl.js?v=2026093046">
+<link rel="modulepreload" href="js/lib/mat4.js?v=2026093046">
+<link rel="modulepreload" href="js/lib/spring.js?v=2026093046">
+<link rel="modulepreload" href="js/lib/geom.js?v=2026093046">
 <title>ワールド寺子屋プログラム2026（第5回）｜NPO法人EdFuture</title>
 <meta name="description" content="高校生が自分の探究テーマを持って渡米し、現地校で学び、自分でアポを取って大学や企業を訪ね、探究発表を行う海外探究プログラム。2027年3月派遣・3便。説明会は無料・オンライン・全3回。">
 <!-- ★寄付LP（edfuture.jp/kifu/）と同じアイコン一式。実ファイルをそのまま持ってきている -->
-<link rel="icon" href="favicon.ico?v=2026093015" sizes="48x48">
-<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png?v=2026093015">
-<link rel="icon" type="image/png" sizes="192x192" href="favicon-192x192.png?v=2026093015">
-<link rel="apple-touch-icon" href="apple-touch-icon.png?v=2026093015">
+<link rel="icon" href="favicon.ico?v=2026093046" sizes="48x48">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png?v=2026093046">
+<link rel="icon" type="image/png" sizes="192x192" href="favicon-192x192.png?v=2026093046">
+<link rel="apple-touch-icon" href="apple-touch-icon.png?v=2026093046">
 <link rel="canonical" href="https://edfuture.jp/world-terakoya-2026/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="NPO法人EdFuture">
@@ -77,7 +77,7 @@
          ここは素の画像1枚を CSS だけで歩かせる（跳ねる・傾く・しゃがむ） -->
     <div class="veil__toon">
       <span class="veil__shadow"></span>
-      <img class="veil__walker" src="assets/mascot/pose-walk-a.svg?v=2026093015" width="104" height="104" alt="" decoding="async">
+      <img class="veil__walker" src="assets/mascot/pose-walk-a.svg?v=2026093046" width="104" height="104" alt="" decoding="async">
     </div>
     <span class="veil__dots" aria-hidden="true"><i></i><i></i><i></i></span>
   </div>
@@ -89,13 +89,13 @@
      電話の縦横比へ切り出し済みなので、object-position で寄せる必要はない。
      柱は切り出しの時点で右寄りに置いてある。
      曲線の帯（映像）はこの上に乗り、スクロールで広がって覆い隠す -->
-<img class="fv-bg" src="img/fv-bg.webp?v=2026093015" width="1290" height="2796" decoding="async" alt="" aria-hidden="true">
+<img class="fv-bg" src="img/fv-bg.webp?v=2026093046" width="1290" height="2796" decoding="async" alt="" aria-hidden="true">
 <!-- 画面の下、左右に立つ参加者（支給の fv7.png / fv6.png。どちらも支給時点で背景が抜いてある）。
      ★前面は DOM の後ろ。fv7（右・男子）を後ろに書いて前に出している。
        fv7 は右端を画面の右端に合わせ、fv6 より 1.08 倍だけ大きい（手前にいる分）。
        横位置と高さは「顔を狙った vw に置く」逆算値（式は css/fv.css） -->
-<img class="fv-person fv-person--l" src="img/fv-left.webp?v=2026093015" width="880" height="1173" decoding="async" alt="" aria-hidden="true">
-<img class="fv-person fv-person--r" src="img/fv-right.webp?v=2026093015" width="880" height="1173" decoding="async" alt="" aria-hidden="true">
+<img class="fv-person fv-person--l" src="img/fv-left.webp?v=2026093046" width="880" height="1173" decoding="async" alt="" aria-hidden="true">
+<img class="fv-person fv-person--r" src="img/fv-right.webp?v=2026093046" width="880" height="1173" decoding="async" alt="" aria-hidden="true">
 
 <!-- ★2026-09-13: 水晶玉をやめた。FV には何も置かず、スクロールに合わせて
      この映像が全画面へ立ち上がる（背景と2人は奥へ引いて薄れる）。
@@ -176,8 +176,8 @@
              太いクリームの複製を下に敷いた版。写真の上でも輪郭が沈まない。
              ★data-rig は残す。<img> のままだと外部CSSが中に届かず、
              #trail（虹の足あと）が消えずに出てしまう -->
-        <div class="rig" data-rig="assets/mascot/pose-l-point-rev.svg?v=2026093015">
-          <img src="assets/mascot/pose-l-point-rev.svg?v=2026093015" width="104" height="104" alt="" aria-hidden="true" decoding="async">
+        <div class="rig" data-rig="assets/mascot/pose-l-point-rev.svg?v=2026093046">
+          <img src="assets/mascot/pose-l-point-rev.svg?v=2026093046" width="104" height="104" alt="" aria-hidden="true" decoding="async">
         </div>
       </div>
     </div>
@@ -286,243 +286,208 @@
 
       <div class="intro__guide" data-reveal>
         <p class="say say--wine">応募のときに探究テーマが決まっていなくても大丈夫だよ！</p>
-        <div class="intro__mascot rig" data-rig="assets/mascot/pose-l-point-rev.svg?v=2026093015">
-          <img src="assets/mascot/pose-l-point-rev.svg?v=2026093015" width="104" height="104" alt="" aria-hidden="true" decoding="async">
+        <div class="intro__mascot rig" data-rig="assets/mascot/pose-l-point-rev.svg?v=2026093046">
+          <img src="assets/mascot/pose-l-point-rev.svg?v=2026093046" width="104" height="104" alt="" aria-hidden="true" decoding="async">
         </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- ===================== 目的（白い地が映像の上にせり上がる） ===================== -->
-<section class="ch ch--purpose" id="purpose" aria-labelledby="purpose-h">
+<!-- ===================== 3つのプログラム（2026-09-30 に独立させた） =====================
+     もとは「グローバル探究」の章の末尾（.purpose__tail）に同居していたが、
+     内容として独立しているので節を分け、見出しも他の節と同じ型（.ch__head + .h2）に揃えた。
+     ★地は白のまま。錠剤（.plist__fold）の配色は「この章は白地なので反転させる」前提で
+       組まれているので、地を変えるとコントラストの設計が崩れる。
+     ★id="dispatch" は節へ移した。レールの「3つの派遣」と main.js の章の色判定が
+       これを見ており、節に付いているほうが節全体で光る -->
+<section class="ch ch--programs" id="dispatch" aria-labelledby="programs-h">
+  <div class="ch__head wrap">
+    <h2 class="h2" id="programs-h" data-reveal><span class="nb">日程や特徴から選べる</span><span class="nb">3つのプログラム</span></h2>
+  </div>
   <div class="wrap">
-    <h2 class="purpose__h" id="purpose-h" data-reveal>
-      <span class="purpose__line">世界をフィールドに、</span>
-      <span class="purpose__line">自分だけの問いを深める</span>
-      <span class="purpose__line purpose__line--tag">グローバル探究</span>
-    </h2>
-    <p class="purpose__lead" data-reveal>用意された見学先を回るのではありません。参加者は、自分の関心テーマを持って現場に立ち、そこにいる専門家や大学生との対話・リサーチ・インタビューを通して、自分の問いに答えを出しにいきます。舞台になるのは、こんな場所です。</p>
+    <p class="purpose__note" data-reveal>各プログラムにはそれぞれ特色があり、行き先や日程、日数、宿泊形態などに違いがあります。志望する順番に複数のプログラムにお申し込みいただくことが可能です。</p>
 
-    <!-- 派遣先を「観光地」でなく「探究のフィールド」として見せる。
-         写真は3つの折りたたみの中にあるものと同じ。ここでは開かなくても目に入る -->
-    <ul class="fields" data-reveal>
-      <li class="field">
-        <figure class="field__media"><img src="img/prog-sf.webp" width="1200" height="799" loading="lazy" decoding="async" alt="ゴールデンゲートブリッジの全景。2本の主塔と海、対岸の丘"></figure>
-        <div class="field__text">
-          <p class="field__place mono">San Francisco</p>
-          <h3 class="field__t">つくっている人に会える街</h3>
-          <p class="field__b">スタンフォード大学のキャンパスを訪ね、GoogleやApple Parkを見学。技術が生まれる現場そのものが、聞きにいく相手になります。</p>
-        </div>
-      </li>
-      <li class="field">
-        <figure class="field__media"><img src="img/prog-bn2.webp" width="1200" height="800" loading="lazy" decoding="async" alt="マサチューセッツ工科大学のグレートドームと、手前の芝生の広場"></figure>
-        <div class="field__text">
-          <p class="field__place mono">Boston</p>
-          <h3 class="field__t">学びを突き詰める街</h3>
-          <p class="field__b">ハーバード大学とMITを訪問。世界中から集まった研究者と学生が、何をどこまで考えているのかを、自分の目で確かめます。</p>
-        </div>
-      </li>
-      <li class="field">
-        <figure class="field__media"><img src="img/prog-bn1.webp" width="1200" height="900" loading="lazy" decoding="async" alt="青空の下に立つ自由の女神像"></figure>
-        <div class="field__text">
-          <p class="field__place mono">New York</p>
-          <h3 class="field__t">世界が集まる街</h3>
-          <p class="field__b">国際機関と世界経済が動く都市でフィールドワーク。ひとつの問題に、国や立場でまったく違う答えがあることに出会います。</p>
-        </div>
-      </li>
-    </ul>
-    <!-- 章の末尾。ここで白い章が終わり、次の黒い章がそのまま続く -->
-    <div class="purpose__tail" id="purposeTail">
-      <h3 class="purpose__h purpose__h--next" data-reveal>
-        <span class="purpose__line">日程や特徴から選べる</span>
-        <span class="purpose__line">3つのプログラム</span>
-      </h3>
-      <p class="purpose__note" data-reveal>やることは3プログラムとも同じです。現地渡航はいずれも2027年3月。志望順に複数のプログラムへお申し込みいただけます。<b>違うのは、次の3つだけです。</b></p>
-
-      <!-- 「何が違うのか」を3語で先に見せる。表を開く前に選ぶ軸が分かる -->
-      <ul class="diffs" data-reveal>
-        <li class="diff"><span class="diff__no" aria-hidden="true">01</span><span class="diff__t">行き先</span><span class="diff__b">サンフランシスコ／ボストン・ニューヨーク</span></li>
-        <li class="diff"><span class="diff__no" aria-hidden="true">02</span><span class="diff__t">日数</span><span class="diff__b">10日間か、14日間か</span></li>
-        <li class="diff"><span class="diff__no" aria-hidden="true">03</span><span class="diff__t">宿泊</span><span class="diff__b">団体宿泊か、ホームステイか</span></li>
+    <div class="plist" data-reveal>
+      <p class="plist__head" aria-hidden="true">
+        <span class="plist__h">日程</span>
+        <span class="plist__h">派遣地</span>
+        <span class="plist__h">日数</span>
+      </p>
+      <ul class="plist__rows">
+        <li class="plist__item">
+          <details class="plist__fold" id="prog-sf">
+            <summary class="plist__row">
+              <span class="plist__where">San Francisco</span>
+              <span class="plist__when"><b>3/6</b><small>(SAT)</small><i aria-hidden="true"></i><b>3/15</b><small>(MON)</small></span>
+              <span class="plist__days"><b>10</b><small>Days</small></span>
+              <span class="plist__mark" aria-hidden="true"></span>
+            </summary>
+            <div class="plist__body">
+              <figure class="plist__scene">
+                <img src="img/prog-sf.webp?v=2026093046" width="1200" height="799" loading="lazy" decoding="async" alt="ゴールデンゲートブリッジの全景。2本の主塔と海、対岸の丘">
+              </figure>
+              <p class="plist__lead">西海岸の大学と企業を、自分の問いを持って回る10日間。</p>
+              <dl class="plist__facts">
+                <div><dt>募集</dt><dd>10名</dd></div>
+          <div><dt>宿泊</dt><dd>団体宿泊（Airbnb ※予定）。ホームステイではありません</dd></div>
+          <div><dt>行程の軸</dt><dd>Stanford大学の訪問とセッション、Google訪問、Apple Park訪問、Unity Assembly Day（登校日）</dd></div>
+              </dl>
+              <div class="plist__pm">
+                <span class="plist__pm-figure"><img class="plist__pm-photo" src="img/pm-kazuki.webp" width="800" height="1000" loading="lazy" decoding="async" alt="サンフランシスコ派遣のプログラムマネージャー、Kazuki"></span>
+                <div class="plist__pm-body">
+                  <p class="plist__pm-role mono">PROGRAM MANAGER</p>
+                  <p class="plist__pm-name">Kazuki</p>
+                  <p class="plist__pm-text">事前研修で現地での計画を立てるところから、一人ひとりの「やってみたい」をサポートします。一緒に挑戦する仲間や現地の方との出会いから学び、自分なりの問いを深め、ワクワクする10日間を一緒につくりましょう！</p>
+                </div>
+              </div>
+              <table class="sched">
+                <caption class="sr-only">サンフランシスコ派遣の日程</caption>
+                <thead><tr><th scope="col">日程</th><th scope="col">午前</th><th scope="col">午後</th><th scope="col">宿泊</th></tr></thead>
+                <tbody>
+                  <tr><th scope="row"><b>Day1</b></th><td data-l="午前">SF着 ※現地時間</td><td data-l="午後">成田発／バディと合流</td><td data-l="宿泊">団体宿泊（Airbnb ※予定）</td></tr>
+                  <tr><th scope="row"><b>Day2</b></th><td class="sched__all" colspan="2" data-l="終日">サンフランシスコ フィールドワーク</td><td data-l="宿泊">団体宿泊（Airbnb ※予定）</td></tr>
+                  <tr><th scope="row"><b>Day3</b></th><td data-l="午前">授業</td><td data-l="午後">バディと活動</td><td data-l="宿泊">団体宿泊（Airbnb ※予定）</td></tr>
+                  <tr><th scope="row"><b>Day4</b></th><td data-l="午前">授業</td><td data-l="午後">バディと活動</td><td data-l="宿泊">団体宿泊（Airbnb ※予定）</td></tr>
+                  <tr><th scope="row"><b>Day5</b></th><td data-l="午前">Stanford大学訪問</td><td data-l="午後">Stanfordセッション</td><td data-l="宿泊">団体宿泊（Airbnb ※予定）</td></tr>
+                  <tr><th scope="row"><b>Day6</b></th><td data-l="午前">Google訪問</td><td data-l="午後">Apple Park訪問</td><td data-l="宿泊">団体宿泊（Airbnb ※予定）</td></tr>
+                  <tr><th scope="row"><b>Day7</b></th><td class="sched__all" colspan="2" data-l="終日">Unity Assembly Day（登校日）／授業＆バディと活動</td><td data-l="宿泊">団体宿泊（Airbnb ※予定）</td></tr>
+                  <tr><th scope="row"><b>Day8</b></th><td data-l="午前">振り返り</td><td data-l="午後">フェアウェルパーティー</td><td data-l="宿泊">団体宿泊（Airbnb ※予定）</td></tr>
+                  <tr><th scope="row"><b>Day9</b></th><td data-l="午前">現地出発</td><td data-l="午後">飛行機</td><td data-l="宿泊">飛行機</td></tr>
+                  <tr><th scope="row"><b>Day10</b></th><td data-l="午前">成田着</td><td data-l="午後">&mdash;</td><td data-l="宿泊">&mdash;</td></tr>
+                </tbody>
+              </table>
+              <div class="plist__guide" data-reveal>
+                <p class="say say--wine">スタンフォードもGoogleも、自分の足で回るよ！</p>
+                <!-- 左向きの完成ポーズ。吹き出しは左に置くので向きが合う -->
+                <div class="plist__mascot rig rig--face rig--point" data-rig="assets/mascot/pose-l-point.svg?v=2026093046">
+                  <img src="assets/mascot/pose-l-point.svg?v=2026093046" width="104" height="104" alt="" aria-hidden="true" decoding="async">
+                </div>
+              </div>
+            </div>
+          </details>
+        </li>
+        <li class="plist__item">
+          <details class="plist__fold" id="prog-bn1">
+            <summary class="plist__row">
+              <span class="plist__where">Boston &amp; New York ①</span>
+              <span class="plist__when"><b>3/6</b><small>(SAT)</small><i aria-hidden="true"></i><b>3/15</b><small>(MON)</small></span>
+              <span class="plist__days"><b>10</b><small>Days</small></span>
+              <span class="plist__mark" aria-hidden="true"></span>
+            </summary>
+            <div class="plist__body">
+              <figure class="plist__scene">
+                <img class="plist__scene--liberty" src="img/prog-bn1.webp?v=2026093046" width="1200" height="900" loading="lazy" decoding="async" alt="青空の下に立つ自由の女神像">
+              </figure>
+              <p class="plist__lead">ニューヨークで3日、ボストンで6日。都市を移りながら現地校に入る。</p>
+              <dl class="plist__facts">
+                <div><dt>募集</dt><dd>13名</dd></div>
+          <div><dt>宿泊</dt><dd>ホテルとホームステイ</dd></div>
+          <div><dt>行程の軸</dt><dd>ニューヨーク（3月6日〜8日）からボストン（3月9日〜14日）へ移動します</dd></div>
+              </dl>
+              <div class="plist__pm">
+                <span class="plist__pm-figure"><img class="plist__pm-photo" src="img/pm-misako.webp" width="800" height="1000" loading="lazy" decoding="async" alt="ボストン・ニューヨーク①派遣のプログラムマネージャー、Misako"></span>
+                <div class="plist__pm-body">
+                  <p class="plist__pm-role mono">PROGRAM MANAGER</p>
+                  <p class="plist__pm-name">Misako</p>
+                  <p class="plist__pm-text">みなさんの一歩が、次の挑戦へと繋がるように全力でサポートします。アメリカでたくさんの「はじめて」を一緒に経験して、学びに変えていきましょう！</p>
+                </div>
+              </div>
+              <table class="sched">
+                <caption class="sr-only">ボストン・ニューヨーク①派遣の日程</caption>
+                <thead><tr><th scope="col">日程</th><th scope="col">午前</th><th scope="col">午後</th><th scope="col">宿泊</th></tr></thead>
+                <tbody>
+                  <tr><th scope="row"><b>Day1</b></th><td data-l="午前">&mdash;</td><td data-l="午後">羽田空港発 NY到着</td><td data-l="宿泊">ホテル</td></tr>
+                  <tr><th scope="row"><b>Day2</b></th><td class="sched__all" colspan="2" data-l="終日">NY フィールドワーク</td><td data-l="宿泊">ホテル</td></tr>
+                  <tr><th scope="row"><b>Day3</b></th><td class="sched__all" colspan="2" data-l="終日">NY フィールドワーク</td><td data-l="宿泊">ホテル</td></tr>
+                  <tr><th scope="row"><b>Day4</b></th><td data-l="午前">ボストンへ移動</td><td data-l="午後">バディと活動</td><td data-l="宿泊">ホームステイ</td></tr>
+                  <tr><th scope="row"><b>Day5</b></th><td data-l="午前">学校</td><td data-l="午後">バディと活動</td><td data-l="宿泊">ホームステイ</td></tr>
+                  <tr><th scope="row"><b>Day6</b></th><td data-l="午前">学校</td><td data-l="午後">ハーバード大学ツアー</td><td data-l="宿泊">ホームステイ</td></tr>
+                  <tr><th scope="row"><b>Day7</b></th><td data-l="午前">学校</td><td data-l="午後">MIT大学ツアー／フェアウェルパーティー</td><td data-l="宿泊">ホームステイ</td></tr>
+                  <tr><th scope="row"><b>Day8</b></th><td data-l="午前">バディと活動</td><td data-l="午後">振り返り</td><td data-l="宿泊">ホテル</td></tr>
+                  <tr><th scope="row"><b>Day9</b></th><td data-l="午前">現地出発</td><td data-l="午後">飛行機</td><td data-l="宿泊">飛行機</td></tr>
+                  <tr><th scope="row"><b>Day10</b></th><td data-l="午前">飛行機</td><td data-l="午後">羽田到着</td><td data-l="宿泊">&mdash;</td></tr>
+                </tbody>
+              </table>
+              <div class="plist__guide plist__guide--left" data-reveal>
+                <p class="say say--wine">ニューヨークとボストン、2つの街で学ぶよ！</p>
+                <!-- 左に立って右を指すポーズ。完成ポーズなので rig--face は付けない
+                     （付けると瞳と口がずれて重なり、目や口が二重に見える） -->
+                <div class="plist__mascot rig" data-rig="assets/mascot/pose-point.svg?v=2026093046">
+                  <img src="assets/mascot/pose-point.svg?v=2026093046" width="104" height="104" alt="" aria-hidden="true" decoding="async">
+                </div>
+              </div>
+            </div>
+          </details>
+        </li>
+        <li class="plist__item">
+          <details class="plist__fold" id="prog-bn2">
+            <summary class="plist__row">
+              <span class="plist__where">Boston &amp; New York ②</span>
+              <span class="plist__when"><b>3/16</b><small>(TUE)</small><i aria-hidden="true"></i><b>3/29</b><small>(MON)</small></span>
+              <span class="plist__days"><b>14</b><small>Days</small></span>
+              <span class="plist__mark" aria-hidden="true"></span>
+            </summary>
+            <div class="plist__body">
+              <figure class="plist__scene">
+                <img src="img/prog-bn2.webp?v=2026093046" width="1200" height="800" loading="lazy" decoding="async" alt="マサチューセッツ工科大学のグレートドームと、手前の芝生の広場">
+              </figure>
+              <p class="plist__lead">3派遣でいちばん長い14日間。都市のあとに、バーモントの生活が入る。</p>
+              <dl class="plist__facts">
+                <div><dt>募集</dt><dd>13名</dd></div>
+          <div><dt>宿泊</dt><dd>ホテルとホームステイ（ボストンとバーモント）</dd></div>
+          <div><dt>行程の軸</dt><dd>ニューヨーク（3月16日〜19日）、ボストン（3月19日〜23日）、バーモント（3月23日〜28日）</dd></div>
+              </dl>
+              <div class="plist__pm">
+                <span class="plist__pm-figure"><img class="plist__pm-photo" src="img/pm-nanako.webp" width="800" height="1000" loading="lazy" decoding="async" alt="ボストン・ニューヨーク②派遣のプログラムマネージャー、Nanako"></span>
+                <div class="plist__pm-body">
+                  <p class="plist__pm-role mono">PROGRAM MANAGER</p>
+                  <p class="plist__pm-name">Nanako</p>
+                  <p class="plist__pm-text">ボストン・ニューヨーク②派遣を担当します。アメリカを舞台に、みんなの探究テーマも絆も深まるように全力で伴走します。一緒に最高の14日間にしましょう。</p>
+                </div>
+              </div>
+              <table class="sched">
+                <caption class="sr-only">ボストン・ニューヨーク②派遣の日程</caption>
+                <thead><tr><th scope="col">日程</th><th scope="col">午前</th><th scope="col">午後</th><th scope="col">宿泊</th></tr></thead>
+                <tbody>
+                  <tr><th scope="row"><b>Day1</b></th><td data-l="午前">&mdash;</td><td data-l="午後">羽田発 NY到着</td><td data-l="宿泊">ホテルに宿泊</td></tr>
+                  <tr><th scope="row"><b>Day2</b></th><td class="sched__all" colspan="2" data-l="終日">NY フィールドワーク</td><td data-l="宿泊">ホテルに宿泊</td></tr>
+                  <tr><th scope="row"><b>Day3</b></th><td class="sched__all" colspan="2" data-l="終日">NY フィールドワーク</td><td data-l="宿泊">ホテルに宿泊</td></tr>
+                  <tr><th scope="row"><b>Day4</b></th><td data-l="午前">ボストンへ移動</td><td data-l="午後">ホストファミリーと活動</td><td data-l="宿泊">ホテルに宿泊</td></tr>
+                  <tr><th scope="row"><b>Day5</b></th><td class="sched__all" colspan="2" data-l="終日">ホストファミリーと活動</td><td data-l="宿泊">ホームステイ in Boston</td></tr>
+                  <tr><th scope="row"><b>Day6</b></th><td class="sched__all" colspan="2" data-l="終日">ホストファミリーと活動</td><td data-l="宿泊">ホームステイ in Boston</td></tr>
+                  <tr><th scope="row"><b>Day7</b></th><td data-l="午前">ハーバード大学訪問</td><td data-l="午後">MIT大学訪問</td><td data-l="宿泊">ホテル</td></tr>
+                  <tr><th scope="row"><b>Day8</b></th><td data-l="午前">バーモントへ移動</td><td data-l="午後">バディと合流</td><td data-l="宿泊">ホームステイ in Vermont</td></tr>
+                  <tr><th scope="row"><b>Day9</b></th><td class="sched__all" colspan="2" data-l="終日">学校</td><td data-l="宿泊">ホームステイ in Vermont</td></tr>
+                  <tr><th scope="row"><b>Day10</b></th><td class="sched__all" colspan="2" data-l="終日">学校</td><td data-l="宿泊">ホームステイ in Vermont</td></tr>
+                  <tr><th scope="row"><b>Day11</b></th><td data-l="午前">学校</td><td data-l="午後">フェアウェルパーティー</td><td data-l="宿泊">ホームステイ in Vermont</td></tr>
+                  <tr><th scope="row"><b>Day12</b></th><td data-l="午前">ボストンへ移動</td><td data-l="午後">フィールドワーク</td><td data-l="宿泊">ホテル</td></tr>
+                  <tr><th scope="row"><b>Day13</b></th><td class="sched__all" colspan="2" data-l="終日">飛行機</td><td data-l="宿泊">飛行機</td></tr>
+                  <tr><th scope="row"><b>Day14</b></th><td data-l="午前">羽田到着</td><td data-l="午後">&mdash;</td><td data-l="宿泊">&mdash;</td></tr>
+                </tbody>
+              </table>
+              <div class="plist__guide plist__guide--right" data-reveal>
+                <p class="say say--wine">いちばん長い14日間。バーモントの生活も入るよ！</p>
+                <!-- 腕を上げたポーズ。これも完成ポーズなので rig--face は付けない -->
+                <div class="plist__mascot rig" data-rig="assets/mascot/pose-cheer.svg?v=2026093046">
+                  <img src="assets/mascot/pose-cheer.svg?v=2026093046" width="104" height="104" alt="" aria-hidden="true" decoding="async">
+                </div>
+              </div>
+            </div>
+          </details>
+        </li>
       </ul>
-      <div class="purpose__guide" data-reveal>
-        <p class="say say--wine">3つのコースから選べるよ！</p>
-        <!-- 左向きの完成ポーズをリグとして読み込む（rig.svg では体の向きを変えられない）。
-             ポーズはファイルの通りなので data-pose は付けない。JS が瞳・まぶた・口・腕を動かす -->
-        <div class="purpose__mascot rig rig--face rig--point" data-rig="assets/mascot/pose-l-point.svg?v=2026093015">
-          <img src="assets/mascot/pose-l-point.svg?v=2026093015" width="104" height="104" alt="" aria-hidden="true" decoding="async">
-        </div>
-      </div>
-      <div class="plist" id="dispatch" data-reveal>
-        <p class="plist__head" aria-hidden="true">
-          <span class="plist__h">日程</span>
-          <span class="plist__h">派遣地</span>
-          <span class="plist__h">日数</span>
-        </p>
-        <ul class="plist__rows">
-          <li class="plist__item">
-            <details class="plist__fold" id="prog-sf">
-              <summary class="plist__row">
-                <span class="plist__where">San Francisco</span>
-                <span class="plist__when"><b>3/6</b><small>(SAT)</small><i aria-hidden="true"></i><b>3/15</b><small>(MON)</small></span>
-                <span class="plist__days"><b>10</b><small>Days</small></span>
-                <span class="plist__mark" aria-hidden="true"></span>
-              </summary>
-              <div class="plist__body">
-                <figure class="plist__scene">
-                  <img src="img/prog-sf.webp?v=2026093015" width="1200" height="799" loading="lazy" decoding="async" alt="ゴールデンゲートブリッジの全景。2本の主塔と海、対岸の丘">
-                </figure>
-                <p class="plist__lead">西海岸の大学と企業を、自分の問いを持って回る10日間。</p>
-                <dl class="plist__facts">
-                  <div><dt>募集</dt><dd>10名</dd></div>
-            <div><dt>宿泊</dt><dd>団体宿泊（Airbnb ※予定）。ホームステイではありません</dd></div>
-            <div><dt>行程の軸</dt><dd>Stanford大学の訪問とセッション、Google訪問、Apple Park訪問、Unity Assembly Day（登校日）</dd></div>
-                </dl>
-                <div class="plist__pm">
-                  <span class="plist__pm-figure"><img class="plist__pm-photo" src="img/pm-kazuki.webp" width="800" height="1000" loading="lazy" decoding="async" alt="サンフランシスコ派遣のプログラムマネージャー、Kazuki"></span>
-                  <div class="plist__pm-body">
-                    <p class="plist__pm-role mono">PROGRAM MANAGER</p>
-                    <p class="plist__pm-name">Kazuki</p>
-                    <p class="plist__pm-text">事前研修で現地での計画を立てるところから、一人ひとりの「やってみたい」をサポートします。一緒に挑戦する仲間や現地の方との出会いから学び、自分なりの問いを深め、ワクワクする10日間を一緒につくりましょう！</p>
-                  </div>
-                </div>
-                <table class="sched">
-                  <caption class="sr-only">サンフランシスコ派遣の日程</caption>
-                  <thead><tr><th scope="col">日程</th><th scope="col">午前</th><th scope="col">午後</th><th scope="col">宿泊</th></tr></thead>
-                  <tbody>
-                    <tr><th scope="row"><b>Day1</b></th><td data-l="午前">SF着 ※現地時間</td><td data-l="午後">成田発／バディと合流</td><td data-l="宿泊">団体宿泊（Airbnb ※予定）</td></tr>
-                    <tr><th scope="row"><b>Day2</b></th><td class="sched__all" colspan="2" data-l="終日">サンフランシスコ フィールドワーク</td><td data-l="宿泊">団体宿泊（Airbnb ※予定）</td></tr>
-                    <tr><th scope="row"><b>Day3</b></th><td data-l="午前">授業</td><td data-l="午後">バディと活動</td><td data-l="宿泊">団体宿泊（Airbnb ※予定）</td></tr>
-                    <tr><th scope="row"><b>Day4</b></th><td data-l="午前">授業</td><td data-l="午後">バディと活動</td><td data-l="宿泊">団体宿泊（Airbnb ※予定）</td></tr>
-                    <tr><th scope="row"><b>Day5</b></th><td data-l="午前">Stanford大学訪問</td><td data-l="午後">Stanfordセッション</td><td data-l="宿泊">団体宿泊（Airbnb ※予定）</td></tr>
-                    <tr><th scope="row"><b>Day6</b></th><td data-l="午前">Google訪問</td><td data-l="午後">Apple Park訪問</td><td data-l="宿泊">団体宿泊（Airbnb ※予定）</td></tr>
-                    <tr><th scope="row"><b>Day7</b></th><td class="sched__all" colspan="2" data-l="終日">Unity Assembly Day（登校日）／授業＆バディと活動</td><td data-l="宿泊">団体宿泊（Airbnb ※予定）</td></tr>
-                    <tr><th scope="row"><b>Day8</b></th><td data-l="午前">振り返り</td><td data-l="午後">フェアウェルパーティー</td><td data-l="宿泊">団体宿泊（Airbnb ※予定）</td></tr>
-                    <tr><th scope="row"><b>Day9</b></th><td data-l="午前">現地出発</td><td data-l="午後">飛行機</td><td data-l="宿泊">飛行機</td></tr>
-                    <tr><th scope="row"><b>Day10</b></th><td data-l="午前">成田着</td><td data-l="午後">&mdash;</td><td data-l="宿泊">&mdash;</td></tr>
-                  </tbody>
-                </table>
-                <div class="plist__guide" data-reveal>
-                  <p class="say say--wine">スタンフォードもGoogleも、自分の足で回るよ！</p>
-                  <!-- 左向きの完成ポーズ。吹き出しは左に置くので向きが合う -->
-                  <div class="plist__mascot rig rig--face rig--point" data-rig="assets/mascot/pose-l-point.svg?v=2026093015">
-                    <img src="assets/mascot/pose-l-point.svg?v=2026093015" width="104" height="104" alt="" aria-hidden="true" decoding="async">
-                  </div>
-                </div>
-              </div>
-            </details>
-          </li>
-          <li class="plist__item">
-            <details class="plist__fold" id="prog-bn1">
-              <summary class="plist__row">
-                <span class="plist__where">Boston &amp; New York ①</span>
-                <span class="plist__when"><b>3/6</b><small>(SAT)</small><i aria-hidden="true"></i><b>3/15</b><small>(MON)</small></span>
-                <span class="plist__days"><b>10</b><small>Days</small></span>
-                <span class="plist__mark" aria-hidden="true"></span>
-              </summary>
-              <div class="plist__body">
-                <figure class="plist__scene">
-                  <img class="plist__scene--liberty" src="img/prog-bn1.webp?v=2026093015" width="1200" height="900" loading="lazy" decoding="async" alt="青空の下に立つ自由の女神像">
-                </figure>
-                <p class="plist__lead">ニューヨークで3日、ボストンで6日。都市を移りながら現地校に入る。</p>
-                <dl class="plist__facts">
-                  <div><dt>募集</dt><dd>13名</dd></div>
-            <div><dt>宿泊</dt><dd>ホテルとホームステイ</dd></div>
-            <div><dt>行程の軸</dt><dd>ニューヨーク（3月6日〜8日）からボストン（3月9日〜14日）へ移動します</dd></div>
-                </dl>
-                <div class="plist__pm">
-                  <span class="plist__pm-figure"><img class="plist__pm-photo" src="img/pm-misako.webp" width="800" height="1000" loading="lazy" decoding="async" alt="ボストン・ニューヨーク①派遣のプログラムマネージャー、Misako"></span>
-                  <div class="plist__pm-body">
-                    <p class="plist__pm-role mono">PROGRAM MANAGER</p>
-                    <p class="plist__pm-name">Misako</p>
-                    <p class="plist__pm-text">みなさんの一歩が、次の挑戦へと繋がるように全力でサポートします。アメリカでたくさんの「はじめて」を一緒に経験して、学びに変えていきましょう！</p>
-                  </div>
-                </div>
-                <table class="sched">
-                  <caption class="sr-only">ボストン・ニューヨーク①派遣の日程</caption>
-                  <thead><tr><th scope="col">日程</th><th scope="col">午前</th><th scope="col">午後</th><th scope="col">宿泊</th></tr></thead>
-                  <tbody>
-                    <tr><th scope="row"><b>Day1</b></th><td data-l="午前">&mdash;</td><td data-l="午後">羽田空港発 NY到着</td><td data-l="宿泊">ホテル</td></tr>
-                    <tr><th scope="row"><b>Day2</b></th><td class="sched__all" colspan="2" data-l="終日">NY フィールドワーク</td><td data-l="宿泊">ホテル</td></tr>
-                    <tr><th scope="row"><b>Day3</b></th><td class="sched__all" colspan="2" data-l="終日">NY フィールドワーク</td><td data-l="宿泊">ホテル</td></tr>
-                    <tr><th scope="row"><b>Day4</b></th><td data-l="午前">ボストンへ移動</td><td data-l="午後">バディと活動</td><td data-l="宿泊">ホームステイ</td></tr>
-                    <tr><th scope="row"><b>Day5</b></th><td data-l="午前">学校</td><td data-l="午後">バディと活動</td><td data-l="宿泊">ホームステイ</td></tr>
-                    <tr><th scope="row"><b>Day6</b></th><td data-l="午前">学校</td><td data-l="午後">ハーバード大学ツアー</td><td data-l="宿泊">ホームステイ</td></tr>
-                    <tr><th scope="row"><b>Day7</b></th><td data-l="午前">学校</td><td data-l="午後">MIT大学ツアー／フェアウェルパーティー</td><td data-l="宿泊">ホームステイ</td></tr>
-                    <tr><th scope="row"><b>Day8</b></th><td data-l="午前">バディと活動</td><td data-l="午後">振り返り</td><td data-l="宿泊">ホテル</td></tr>
-                    <tr><th scope="row"><b>Day9</b></th><td data-l="午前">現地出発</td><td data-l="午後">飛行機</td><td data-l="宿泊">飛行機</td></tr>
-                    <tr><th scope="row"><b>Day10</b></th><td data-l="午前">飛行機</td><td data-l="午後">羽田到着</td><td data-l="宿泊">&mdash;</td></tr>
-                  </tbody>
-                </table>
-                <div class="plist__guide plist__guide--left" data-reveal>
-                  <p class="say say--wine">ニューヨークとボストン、2つの街で学ぶよ！</p>
-                  <!-- 左に立って右を指すポーズ。完成ポーズなので rig--face は付けない
-                       （付けると瞳と口がずれて重なり、目や口が二重に見える） -->
-                  <div class="plist__mascot rig" data-rig="assets/mascot/pose-point.svg?v=2026093015">
-                    <img src="assets/mascot/pose-point.svg?v=2026093015" width="104" height="104" alt="" aria-hidden="true" decoding="async">
-                  </div>
-                </div>
-              </div>
-            </details>
-          </li>
-          <li class="plist__item">
-            <details class="plist__fold" id="prog-bn2">
-              <summary class="plist__row">
-                <span class="plist__where">Boston &amp; New York ②</span>
-                <span class="plist__when"><b>3/16</b><small>(TUE)</small><i aria-hidden="true"></i><b>3/29</b><small>(MON)</small></span>
-                <span class="plist__days"><b>14</b><small>Days</small></span>
-                <span class="plist__mark" aria-hidden="true"></span>
-              </summary>
-              <div class="plist__body">
-                <figure class="plist__scene">
-                  <img src="img/prog-bn2.webp?v=2026093015" width="1200" height="800" loading="lazy" decoding="async" alt="マサチューセッツ工科大学のグレートドームと、手前の芝生の広場">
-                </figure>
-                <p class="plist__lead">3派遣でいちばん長い14日間。都市のあとに、バーモントの生活が入る。</p>
-                <dl class="plist__facts">
-                  <div><dt>募集</dt><dd>13名</dd></div>
-            <div><dt>宿泊</dt><dd>ホテルとホームステイ（ボストンとバーモント）</dd></div>
-            <div><dt>行程の軸</dt><dd>ニューヨーク（3月16日〜19日）、ボストン（3月19日〜23日）、バーモント（3月23日〜28日）</dd></div>
-                </dl>
-                <div class="plist__pm">
-                  <span class="plist__pm-figure"><img class="plist__pm-photo" src="img/pm-nanako.webp" width="800" height="1000" loading="lazy" decoding="async" alt="ボストン・ニューヨーク②派遣のプログラムマネージャー、Nanako"></span>
-                  <div class="plist__pm-body">
-                    <p class="plist__pm-role mono">PROGRAM MANAGER</p>
-                    <p class="plist__pm-name">Nanako</p>
-                    <p class="plist__pm-text">ボストン・ニューヨーク②派遣を担当します。アメリカを舞台に、みんなの探究テーマも絆も深まるように全力で伴走します。一緒に最高の14日間にしましょう。</p>
-                  </div>
-                </div>
-                <table class="sched">
-                  <caption class="sr-only">ボストン・ニューヨーク②派遣の日程</caption>
-                  <thead><tr><th scope="col">日程</th><th scope="col">午前</th><th scope="col">午後</th><th scope="col">宿泊</th></tr></thead>
-                  <tbody>
-                    <tr><th scope="row"><b>Day1</b></th><td data-l="午前">&mdash;</td><td data-l="午後">羽田発 NY到着</td><td data-l="宿泊">ホテルに宿泊</td></tr>
-                    <tr><th scope="row"><b>Day2</b></th><td class="sched__all" colspan="2" data-l="終日">NY フィールドワーク</td><td data-l="宿泊">ホテルに宿泊</td></tr>
-                    <tr><th scope="row"><b>Day3</b></th><td class="sched__all" colspan="2" data-l="終日">NY フィールドワーク</td><td data-l="宿泊">ホテルに宿泊</td></tr>
-                    <tr><th scope="row"><b>Day4</b></th><td data-l="午前">ボストンへ移動</td><td data-l="午後">ホストファミリーと活動</td><td data-l="宿泊">ホテルに宿泊</td></tr>
-                    <tr><th scope="row"><b>Day5</b></th><td class="sched__all" colspan="2" data-l="終日">ホストファミリーと活動</td><td data-l="宿泊">ホームステイ in Boston</td></tr>
-                    <tr><th scope="row"><b>Day6</b></th><td class="sched__all" colspan="2" data-l="終日">ホストファミリーと活動</td><td data-l="宿泊">ホームステイ in Boston</td></tr>
-                    <tr><th scope="row"><b>Day7</b></th><td data-l="午前">ハーバード大学訪問</td><td data-l="午後">MIT大学訪問</td><td data-l="宿泊">ホテル</td></tr>
-                    <tr><th scope="row"><b>Day8</b></th><td data-l="午前">バーモントへ移動</td><td data-l="午後">バディと合流</td><td data-l="宿泊">ホームステイ in Vermont</td></tr>
-                    <tr><th scope="row"><b>Day9</b></th><td class="sched__all" colspan="2" data-l="終日">学校</td><td data-l="宿泊">ホームステイ in Vermont</td></tr>
-                    <tr><th scope="row"><b>Day10</b></th><td class="sched__all" colspan="2" data-l="終日">学校</td><td data-l="宿泊">ホームステイ in Vermont</td></tr>
-                    <tr><th scope="row"><b>Day11</b></th><td data-l="午前">学校</td><td data-l="午後">フェアウェルパーティー</td><td data-l="宿泊">ホームステイ in Vermont</td></tr>
-                    <tr><th scope="row"><b>Day12</b></th><td data-l="午前">ボストンへ移動</td><td data-l="午後">フィールドワーク</td><td data-l="宿泊">ホテル</td></tr>
-                    <tr><th scope="row"><b>Day13</b></th><td class="sched__all" colspan="2" data-l="終日">飛行機</td><td data-l="宿泊">飛行機</td></tr>
-                    <tr><th scope="row"><b>Day14</b></th><td data-l="午前">羽田到着</td><td data-l="午後">&mdash;</td><td data-l="宿泊">&mdash;</td></tr>
-                  </tbody>
-                </table>
-                <div class="plist__guide plist__guide--right" data-reveal>
-                  <p class="say say--wine">いちばん長い14日間。バーモントの生活も入るよ！</p>
-                  <!-- 腕を上げたポーズ。これも完成ポーズなので rig--face は付けない -->
-                  <div class="plist__mascot rig" data-rig="assets/mascot/pose-cheer.svg?v=2026093015">
-                    <img src="assets/mascot/pose-cheer.svg?v=2026093015" width="104" height="104" alt="" aria-hidden="true" decoding="async">
-                  </div>
-                </div>
-              </div>
-            </details>
-          </li>
-        </ul>
+    </div>
+    <!-- ★2026-09-30: 一覧の「前」から「後」へ移した。3つ並べて見せてから声を掛ける順にする。
+         ★動きは付けない。rig--face / rig--point を外してあるので、
+           mountRigs が SVG を差し込むだけで以降は完全に静止する。
+           （pose-*.svg は rig.svg と違い transform-origin を持たないため、
+             scaleY が viewBox 原点を軸に掛かり、口や目が所定の位置から飛ぶ。
+             js/mascot.js 側でも原点を補うようにしたが、ここは静止で確実にする） -->
+    <div class="purpose__guide" data-reveal>
+      <p class="say say--wine">3つのコースから選べるよ！</p>
+      <div class="purpose__mascot rig" data-rig="assets/mascot/pose-l-point-rev.svg?v=2026093046">
+        <img src="assets/mascot/pose-l-point-rev.svg?v=2026093046" width="104" height="104" alt="" aria-hidden="true" decoding="async">
       </div>
     </div>
   </div>
@@ -530,78 +495,29 @@
 
 <!-- ===================== 03 あなたへ（読み手別） ===================== -->
 <section class="ch ch--who" id="who" aria-labelledby="who-h">
-  <h2 class="h2 sr-only" id="who-h">あなたは、どの立場で読みますか</h2>
+  <!-- ★2026-09-30: 高校生／大学生のタブをやめ、大学生向けの1本にした。
+       残るのが1つになった時点でタブUI（選ばせる仕掛け）は役目を終えるので、
+       見出しを読み上げ専用から可視に戻し、他の節と同じ型に揃えた -->
+  <div class="ch__head wrap">
+    <h2 class="h2 h2--cream" id="who-h" data-reveal>大学生の方へ</h2>
+  </div>
 
   <div class="wrap">
     <div class="tabs" id="tabs">
-      <!-- 吹き出しの尻尾は右向きなので、札は吹き出しの右に置く。
-           pose-present（両手で差し出す）はこのLPで未使用のポーズ -->
-      <div class="tabs__guide" data-reveal>
-        <p class="say say--wine">自分に当てはまる方を選んでね！</p>
-        <div class="tabs__mascot rig" data-rig="assets/mascot/pose-present.svg?v=2026093015">
-          <img src="assets/mascot/pose-present.svg?v=2026093015" width="104" height="104" alt="" aria-hidden="true" decoding="async">
-        </div>
-      </div>
-      <div class="tabs__list" role="tablist" aria-label="読み手別の情報">
-        <button class="tab" role="tab" id="tab-student" aria-selected="true" aria-controls="panel-student" tabindex="0" data-tab="student">高校生</button>
-        <button class="tab" role="tab" id="tab-university" aria-selected="false" aria-controls="panel-university" tabindex="-1" data-tab="university">大学生</button>
-        </div>
-
-      <!-- ---------- 高校生 ---------- -->
-      <section class="panel" role="tabpanel" id="panel-student" aria-labelledby="tab-student" tabindex="0">
-        <div class="panel__head">
-          <h3 class="h3"><span class="nb">選ぶ基準は</span><span class="nb">英語でも成績でも</span><span class="nb">ありません</span></h3>
-          <figure class="ph ph--43 panel__portrait" data-ph>
-            <img src="img/student-02.webp" width="1200" height="900" loading="lazy" decoding="async" alt="校内のホールで現地の生徒と話す参加者">
-          </figure>
-        </div>
-        <ul class="conds">
-          <li><b>英語力は選考基準に入りません。</b> 選考は志望理由と人間性などで総合的に判断され、語学力は問われません。</li>
-          <li><b>初めての海外でも参加しています。</b> パスポートを持っていない状態から出発した参加者がいます。</li>
-          <li><b>地方から出ています。</b> 4年間で36都道府県から参加者が集まっています。北海道・高知・鹿児島から出発した参加者がいます。</li>
-          <li><b>テーマが未完成でも始められます。</b> 出発前に5回の事前研修があり、その期間で問いの形にしていきます。</li>
-          <li><b>応募できるのは、2026年10月の応募時点で高校1〜3年生。</b> 日本の高校または高等専門学校に在籍し、保護者と学校の同意が必要です。</li>
-        </ul>
-
-
-        <figure class="ph ph--169" data-ph>
-          <video class="clip" playsinline muted loop preload="none" poster="img/poster-clip-group.webp" data-src="video/clip-group.mp4" width="960" height="540" aria-label="街で集まって手を振る参加者たち"></video>
-        </figure>
-
-        <h4 class="h4">なぜ今か</h4>
-        <p>派遣は2027年3月です。高校2年生なら、高校3年生になる前に自分の問いを一度外へ持ち出せる最後の時期にあたります。高校1年生なら、ここで持った問いを2年生からの探究と進路選択にそのまま接続できます。高校3年生なら、進路が決まったあとに視野を広げる時間として使えます。</p>
-        <p class="cta-lead">自分の違和感がテーマになるのかどうかは、説明会で過去の参加者のテーマを見ると判断できます。</p>
-        <a target="_blank" rel="noopener" class="btn btn--lg btn--fv" href="https://forms.gle/aiwPwzEzKZAgK7mAA" data-cta="form" data-cta-pos="panel-student" data-magnet>説明会に申し込む</a>
-
-        <div class="schol">
-          <div class="schol__guide">
-            <p class="say say--wine">奨学金制度があるよ！</p>
-            <!-- 左向きの完成ポーズをリグとして読み込む（rig.svg では体の向きを変えられない） -->
-            <div class="schol__mascot rig rig--face rig--point" data-rig="assets/mascot/pose-l-point.svg?v=2026093015">
-              <img src="assets/mascot/pose-l-point.svg?v=2026093015" width="104" height="104" alt="" aria-hidden="true" decoding="async">
-            </div>
-          </div>
-          <!-- ★マスコットは札の外に置く。ワインの札の上に載せると、赤い体が地に溶ける -->
-          <div class="schol__card">
-            <h4 class="h4 schol__h">奨学金について</h4>
-            <p>サンフランシスコ派遣には、<strong>参加費・渡航費・宿泊費が全額免除</strong>になる枠が<strong>1名分</strong>あります。<strong>給付型なので、返す必要はありません</strong>。</p>
-            <p>EdFutureは、すべての人が安心して挑戦できる環境を目指しています。条件等につきましては<strong>説明会で詳しくお話をさせていただきます</strong>。</p>
-          </div>
-        </div>
-      </section>
-
       <!-- ---------- 大学生 ---------- -->
-      <section class="panel" role="tabpanel" id="panel-university" aria-labelledby="tab-university" tabindex="0" hidden>
-        <h3 class="h3">大学生の参加枠があります</h3>
-        <p class="lead">各派遣3名程度。高校生に帯同し、その学びの過程を見届けながら、自分自身も探究を行う立場です。引率スタッフではありません。</p>
+      <div class="panel panel--solo">
+        <h3 class="h3"><span class="nb">高校生に帯同する、</span><span class="nb">大学生の参加枠があります</span></h3>
+        <p class="lead">ワールド寺子屋に挑戦する高校生に帯同し、サンフランシスコ、またはボストン・ニューヨークでの学びと成長を見届ける枠です。各派遣3名程度。引率スタッフではありません。高校生が多様な文化や人との出会いを通じて挑戦していく姿を支えながら、自分自身も教育・国際交流・キャリア形成について探究します。</p>
+        <p>ハーバード大学、スタンフォード大学、MITの学生や、教育大学院の学生との交流もあります。次世代の教育をどう考えるかという視野と、そこで築いた人脈を持ち帰ってください。</p>
+        <!-- 募集要項の定義をそのまま注記として置く（言い換えると条件が変わって読める） -->
+        <p class="note">※ 大学生とは、大学生、大学院生、専門学校生等高等教育機関に所属する者を指す。</p>
 
-        <dl class="vs">
-          <div><dt>交換留学</dt><dd>語学と単位</dd></div>
-          <div><dt>海外ボランティア</dt><dd>体験</dd></div>
-          <div><dt>インターン</dt><dd>職業理解</dd></div>
-          <div class="vs__self"><dt>ワールド寺子屋</dt><dd>自分の問いを持って会いたい相手を決め、自分でアポを取り、話を聞き、その日のうちに言語化して残す一連の手順</dd></div>
-        </dl>
-        <p>「誰に話を聞きに行けばいいか分からない」という状態のまま卒業しないための、10日前後の実地訓練だと考えてください。参加後にスタッフとして運営側に回る道もあります。</p>
+        <h4 class="h4">このプログラムの目的</h4>
+        <ul class="conds">
+          <li><b>海外文化と起業文化を学ぶ。</b> 現地の高校での活動に加えて、大学やスタートアップ企業を訪問します。</li>
+          <li><b>自分の考え方と価値観を広げる。</b> 文化も歴史も日本とまったく異なるアメリカを、見学するのではなく過ごします。</li>
+          <li><b>教育のあり方を学ぶ。</b> 高校生が海外で挑戦していく姿から、挑戦心・主体性・多様性の理解がどう育つのかを間近で見ます。</li>
+        </ul>
 
         <figure class="ph ph--169" data-ph>
           <video class="clip" playsinline muted loop preload="none" poster="img/poster-clip-street.webp" data-src="video/clip-street.mp4" width="960" height="540" aria-label="街角で現地の人と話す参加者"></video>
@@ -622,21 +538,7 @@
         <p class="cta-lead">参加条件・選考枠・高校生との関わり方は、説明会で確認できます。</p>
         <a target="_blank" rel="noopener" class="btn btn--lg btn--fv" href="https://forms.gle/aiwPwzEzKZAgK7mAA" data-cta="form" data-cta-pos="panel-university" data-magnet>説明会に申し込む</a>
 
-        <div class="schol">
-          <div class="schol__guide">
-            <p class="say say--wine">奨学金制度があるよ！</p>
-            <!-- ★マスコットは札の外。赤い体をワインの地に載せると溶ける -->
-            <div class="schol__mascot rig rig--face rig--point" data-rig="assets/mascot/pose-l-point.svg?v=2026093015">
-              <img src="assets/mascot/pose-l-point.svg?v=2026093015" width="104" height="104" alt="" aria-hidden="true" decoding="async">
-            </div>
-          </div>
-          <div class="schol__card">
-            <h4 class="h4 schol__h">奨学金について</h4>
-            <p>大学生の参加枠にも、<strong>プログラム費が全額免除</strong>になる枠が<strong>1名分</strong>あります。<strong>給付型なので、返す必要はありません</strong>。</p>
-            <p>EdFutureは、すべての人が安心して挑戦できる環境を目指しています。条件等につきましては<strong>説明会で詳しくお話をさせていただきます</strong>。</p>
-          </div>
-        </div>
-      </section>
+      </div>
     </div>
   </div>
 </section>
@@ -647,6 +549,43 @@
      見出しだけ「未来のために多様な選択肢を」に差し替えている。
      寸法・色は css/kifu-parity.css に、寄付の値のまま置いた -->
 <!-- ===================== 参加者の声 ===================== -->
+<!-- ===================== 奨学金（2026-09-30 に独立させた） =====================
+     もとは高校生タブと大学生タブの中に1つずつ置いていたが、違うのは真ん中の1文だけで
+     残り85%が重複していた。さらにタブの中にあると、高校生の読者は大学生枠があることを、
+     大学生の読者は高校生枠があることを知らないまま終わる。
+     両方に効く「申し込む理由」なのでタブの外へ出し、2枠を並べて見せる形にした。
+     ★動くマスコットもこれで2体減っている（残るは3つのプログラムの節の1体だけ） -->
+<section class="ch ch--schol" id="scholarship" aria-labelledby="schol-h">
+  <div class="ch__head wrap">
+    <h2 class="h2" id="schol-h" data-reveal>奨学金について</h2>
+  </div>
+  <div class="wrap">
+    <p class="schol__lead" data-reveal>高校生・大学生それぞれに、費用が全額免除になる枠を<strong>1名分ずつ</strong>用意しています。<strong>給付型なので、返す必要はありません</strong>。</p>
+
+    <ul class="schol__slots" data-reveal>
+      <li class="schol__slot">
+        <p class="schol__who">高校生</p>
+        <p class="schol__what">サンフランシスコ派遣の<strong>参加費・渡航費・宿泊費が全額免除</strong></p>
+        <p class="schol__n"><b>1</b><i>名</i></p>
+      </li>
+      <li class="schol__slot">
+        <p class="schol__who">大学生</p>
+        <p class="schol__what">大学生の参加枠の<strong>プログラム費が全額免除</strong></p>
+        <p class="schol__n"><b>1</b><i>名</i></p>
+      </li>
+    </ul>
+
+    <p class="schol__note" data-reveal>EdFutureは、すべての人が安心して挑戦できる環境を目指しています。条件等につきましては<strong>説明会で詳しくお話をさせていただきます</strong>。</p>
+
+    <div class="schol__guide" data-reveal>
+      <p class="say say--wine">費用が理由なら、まず相談してね！</p>
+      <div class="schol__mascot rig" data-rig="assets/mascot/pose-l-point-rev.svg?v=2026093046">
+        <img src="assets/mascot/pose-l-point-rev.svg?v=2026093046" width="104" height="104" alt="" aria-hidden="true" decoding="async">
+      </div>
+    </div>
+  </div>
+</section>
+
 <section class="ch ch--voices" id="voices" aria-labelledby="voices-h">
   <div class="ch__head wrap">
     <h2 class="h2 h2--cream" id="voices-h" data-reveal>数字と参加者の声</h2>
@@ -785,9 +724,9 @@
 
   <div class="wrap">
     <ul class="tickets" data-reveal>
-      <li class="ticket" data-tilt><img src="img/ticket-1.webp?v=2026093015" width="1200" height="602" loading="lazy" decoding="async" alt="第1回 オンライン説明会 2026年9月26日（土）19:00〜20:00"></li>
-      <li class="ticket" data-tilt><img src="img/ticket-2.webp?v=2026093015" width="1200" height="604" loading="lazy" decoding="async" alt="第2回 オンライン説明会 2026年10月5日（月）19:00〜20:00"></li>
-      <li class="ticket" data-tilt><img src="img/ticket-3.webp?v=2026093015" width="1200" height="601" loading="lazy" decoding="async" alt="第3回 オンライン説明会 2026年10月16日（金）19:00〜20:00"></li>
+      <li class="ticket" data-tilt><img src="img/ticket-1.webp?v=2026093046" width="1200" height="602" loading="lazy" decoding="async" alt="第1回 オンライン説明会 2026年9月26日（土）19:00〜20:00"></li>
+      <li class="ticket" data-tilt><img src="img/ticket-2.webp?v=2026093046" width="1200" height="604" loading="lazy" decoding="async" alt="第2回 オンライン説明会 2026年10月5日（月）19:00〜20:00"></li>
+      <li class="ticket" data-tilt><img src="img/ticket-3.webp?v=2026093046" width="1200" height="601" loading="lazy" decoding="async" alt="第3回 オンライン説明会 2026年10月16日（金）19:00〜20:00"></li>
     </ul>
 
     <!-- GP の LP（edfuture_gp_upload_server）の .sched-note を、この章の地に合わせて置き直した -->
@@ -799,7 +738,16 @@
 
     <!-- 章の締めの CTA。日程を見た直後に申し込めるよう、チケットと注記の下に置く -->
     <p class="brief__cta" data-reveal>
-      <a target="_blank" rel="noopener" class="btn btn--lg" href="https://forms.gle/aiwPwzEzKZAgK7mAA" data-cta="form" data-cta-pos="briefing" data-magnet>説明会に申し込む</a>
+      <a target="_blank" rel="noopener" class="btn btn--lg" href="https://forms.gle/aiwPwzEzKZAgK7mAA" data-cta="form" data-cta-pos="briefing" data-magnet="glow">説明会に申し込む</a>
+      <!-- ★FV と同じ案内役。ここのボタンは列いっぱい（min-width:min(100%,360px)）で
+           横に余白が無いので、右端に乗せる。位置はボタン自身の幅の式から逆算するので、
+           画面幅が変わっても常にボタンの右端に付く。ボタンの規則は触っていない。
+           ★pointer-events:none。通すと CTA のタップを奪う -->
+      <span class="brief__buddy" aria-hidden="true">
+        <span class="rig" data-rig="assets/mascot/pose-l-point-rev.svg?v=2026093046">
+          <img src="assets/mascot/pose-l-point-rev.svg?v=2026093046" width="104" height="104" alt="" decoding="async">
+        </span>
+      </span>
     </p>
 
   </div>
@@ -850,30 +798,36 @@
   <ul class="faq" data-reveal>
       <li class="faq__item is-open"><h3><button type="button" class="faq__q" aria-expanded="true" aria-controls="fa-1"><span>英語が苦手でも参加できますか。</span><span class="faq__ico" aria-hidden="true">＋</span></button></h3><div class="faq__a" id="fa-1"><p>選考で英語力は一切問いません。判断されるのは志望理由と人間性などです。過去にも英語力に不安を持っている学生が多く参加しています。</p></div></li>
       <li class="faq__item"><h3><button type="button" class="faq__q" aria-expanded="false" aria-controls="fa-2"><span>探究テーマが決まっていません。</span><span class="faq__ico" aria-hidden="true">＋</span></button></h3><div class="faq__a" id="fa-2" hidden><p>決まっていなくて構いません。出発前に5回の事前研修があり、その期間に自分の問いの形にしていきます。</p></div></li>
-      <li class="faq__item"><h3><button type="button" class="faq__q" aria-expanded="false" aria-controls="fa-3"><span>奨学金はありますか。</span><span class="faq__ico" aria-hidden="true">＋</span></button></h3><div class="faq__a" id="fa-3" hidden><p>サンフランシスコ派遣に全額免除の給付型が1名分あります。応募条件と提出書類は説明会で案内します。</p></div></li>
+      <li class="faq__item"><h3><button type="button" class="faq__q" aria-expanded="false" aria-controls="fa-3"><span>奨学金はありますか。</span><span class="faq__ico" aria-hidden="true">＋</span></button></h3><div class="faq__a" id="fa-3" hidden><p>高校生・大学生それぞれ1名ずつの枠を用意しています。詳細は説明会にてご確認ください。</p></div></li>
       <li class="faq__item"><h3><button type="button" class="faq__q" aria-expanded="false" aria-controls="fa-4"><span>説明会は画面オフやミュートでも参加できますか。</span><span class="faq__ico" aria-hidden="true">＋</span></button></h3><div class="faq__a" id="fa-4" hidden><p>画面オフでもミュートでも大丈夫です。顔出しをお願いすることはありません。ただ、チャットでのひとことやリアクションがあると場が和みます。できる範囲で参加していただけると嬉しいです。</p></div></li>
-      <li class="faq__item"><h3><button type="button" class="faq__q" aria-expanded="false" aria-controls="fa-5"><span>選考はありますか。</span><span class="faq__ico" aria-hidden="true">＋</span></button></h3><div class="faq__a" id="fa-5" hidden><p>あります。書類（志望理由800〜1000字）と、11月15日のWEB個人面接30分の二次選考です。派遣候補者の発表は11月24日です。</p></div></li>
+      <li class="faq__item"><h3><button type="button" class="faq__q" aria-expanded="false" aria-controls="fa-5"><span>選考はありますか。</span><span class="faq__ico" aria-hidden="true">＋</span></button></h3><div class="faq__a" id="fa-5" hidden><p>はい、あります。高校生は書類選考と二次選考のオンライン面接、大学生は書類選考と二次選考の動画選考です。</p></div></li>
       <li class="faq__item"><h3><button type="button" class="faq__q" aria-expanded="false" aria-controls="fa-6"><span>ホームステイですか。</span><span class="faq__ico" aria-hidden="true">＋</span></button></h3><div class="faq__a" id="fa-6" hidden><p>派遣先で違います。サンフランシスコは団体宿泊（Airbnb ※予定）でホームステイはありません。ボストン・NY①②はホテルとホームステイの併用です。</p></div></li>
-      <li class="faq__item"><h3><button type="button" class="faq__q" aria-expanded="false" aria-controls="fa-7"><span>説明会に参加できる日程がありません。</span><span class="faq__ico" aria-hidden="true">＋</span></button></h3><div class="faq__a" id="fa-7" hidden><p>どの日程も都合がつかない場合は、後日録画をお送りします。その場合も申し込みフォームからお申し込みください。日程が合わないことで諦める必要はありません。</p></div></li>
+      <li class="faq__item"><h3><button type="button" class="faq__q" aria-expanded="false" aria-controls="fa-7"><span>説明会に参加できる日程がありません。</span><span class="faq__ico" aria-hidden="true">＋</span></button></h3><div class="faq__a" id="fa-7" hidden><p>どの日程も都合がつかない場合は、後日説明会のアーカイブをお送りします。その場合も申し込みフォームからお申し込みください。</p></div></li>
   </ul>
 </section>
 
 <!-- ===================== 最終CTA（扉がもう一度） ===================== -->
 <section class="final" id="cta-final" aria-labelledby="final-h">
+  <!-- ★地は静止画でなく元の映像。poster に同じコマの静止画を置いてあるので、
+       読み込み前と再生できない環境では今までと同じ絵が出る -->
+  <video class="clip final__bg" playsinline muted loop preload="none" aria-hidden="true"
+         width="1280" height="720" poster="img/poster-clip-group.webp" data-src="video/clip-group.mp4"></video>
+  <!-- 幕は映像の上に重ねる。地に直接書くと映像を敷けない -->
+  <div class="final__veil" aria-hidden="true"></div>
   <!-- 黄の枠線。寄付LP（edfuture.jp/kifu/）の .final-cta__frame と同じ作りで、
        細い線＋左上と右下だけ太い鉤（かぎ）を出す -->
   <div class="final__frame" aria-hidden="true"></div>
   <div class="final__inner wrap">
     <h2 class="h2 h2--cream final__h" id="final-h" data-reveal>さぁ、一歩踏み出そう</h2>
     <div class="final__ctas" data-reveal>
-      <a target="_blank" rel="noopener" class="btn btn--lg" href="https://forms.gle/aiwPwzEzKZAgK7mAA" data-cta="form" data-cta-pos="final" data-magnet>説明会に申し込む</a>
+      <a target="_blank" rel="noopener" class="btn btn--lg" href="https://forms.gle/aiwPwzEzKZAgK7mAA" data-cta="form" data-cta-pos="final" data-magnet="glow">説明会に申し込む</a>
     </div>
     <div class="final__mascot" data-reveal>
       <!-- ★FV と同じ扱い。rig--bow（おじぎ）を外して静止させ、白フチ付きの完成ポーズを使う。
            rig-rev.svg のままだと、手足を回すおじぎに白フチ層だけが追従せず、
            本体から取り残された白い影が背後に残る（2026-09-30 に実物で確認） -->
-      <div class="rig" data-rig="assets/mascot/pose-bow-rev.svg?v=2026093015">
-        <img src="assets/mascot/pose-bow-rev.svg?v=2026093015" width="88" height="88" alt="" aria-hidden="true" decoding="async">
+      <div class="rig" data-rig="assets/mascot/pose-bow-rev.svg?v=2026093046">
+        <img src="assets/mascot/pose-bow-rev.svg?v=2026093046" width="88" height="88" alt="" aria-hidden="true" decoding="async">
       </div>
       <p class="say say--dark">まずは話を聞きに来てね</p>
     </div>
@@ -953,7 +907,7 @@
 <!-- カーソル（PC・fine pointer のときだけ JS が有効化） -->
 <div class="cursor" id="cursor" aria-hidden="true"><i></i><span></span></div>
 
-<script src="js/sp-force.js?v=2026093015"></script>
-<script type="module" src="js/main.js?v=2026093015"></script>
+<script src="js/sp-force.js?v=2026093046"></script>
+<script type="module" src="js/main.js?v=2026093046"></script>
 </body>
 </html>
