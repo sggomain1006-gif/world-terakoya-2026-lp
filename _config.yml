@@ -1,0 +1,13 @@
+# GitHub Pages（Jekyll）の公開対象から外すもの。
+# ★中身を消すのではなく、公開ディレクトリに出さないだけ。手元の場所は変えないので
+#   python3 bump.py / python3 fonts/build_fonts.py の手順はそのまま使える。
+# ★GitHub Pages はレスポンスヘッダを足せないため、公開したくないファイルは
+#   「配信しない」以外に手段が無い。
+exclude:
+  - README.md
+  - PROGRESS.md
+  - WHAT_I_DID.md
+  - ANIMATION_BRIEF.md
+  - bump.py
+  - fonts/build_fonts.py
+  - check1/
