@@ -11,7 +11,7 @@
    - #trail は隠す（動的に置く足あとと二重になる）
    ============================================================================= */
 
-import { Spring, expSmooth, safeDt } from './lib/spring.js?v=2026100180';
+import { Spring, expSmooth, safeDt } from './lib/spring.js?v=2026100188';
 
 const rigCache = new Map();
 
@@ -104,6 +104,27 @@ function applyPose(svg, pose) {
 // ---------------------------------------------------------------------------
 // 顔: 瞳がカーソルを追う・近いと喋る
 // ---------------------------------------------------------------------------
+/* ---------------------------------------------------------------------------
+   画面に入っている間だけ rAF を回す。
+   ★これが無いと、閉じた <details> の中など一生見えない場所の輪郭でも
+     毎フレーム SVG の style を書き続ける（実測で2本・計224回/秒）。
+   ★見え方は変わらない。見えていない間に進まないぶん、位相が変わるだけ
+   --------------------------------------------------------------------------- */
+function whileVisible(host, start, stop) {
+  if (!('IntersectionObserver' in window)) { start(); return () => stop(); }
+  let on = false;
+  const io = new IntersectionObserver((es) => {
+    const vis = es.some((e) => e.isIntersecting);
+    if (vis === on) return;
+    on = vis;
+    if (vis) start(); else stop();
+  }, { rootMargin: '120px 0px' });
+  io.observe(host);
+  const onHidden = () => { if (document.hidden) stop(); else if (on) start(); };
+  document.addEventListener('visibilitychange', onHidden);
+  return () => { io.disconnect(); document.removeEventListener('visibilitychange', onHidden); stop(); };
+}
+
 export function attachFace(host, { reduceMotion = false } = {}) {
   const svg = host.querySelector('svg');
   if (!svg || reduceMotion) return () => {};
@@ -176,11 +197,13 @@ export function attachFace(host, { reduceMotion = false } = {}) {
     F.style.transform = `rotate(${tilt}deg)`;
     raf = requestAnimationFrame(tick);
   }
-  raf = requestAnimationFrame(tick);
+  const stopLoop = () => { if (raf) cancelAnimationFrame(raf); raf = 0; };
+  const startLoop = () => { if (!raf && alive) raf = requestAnimationFrame(tick); };
+  const detach = whileVisible(host, startLoop, stopLoop);
 
   return () => {
     alive = false;
-    cancelAnimationFrame(raf);
+    detach();
     window.removeEventListener('pointermove', onMove);
     document.removeEventListener('pointerleave', onLeave);
   };
@@ -321,8 +344,10 @@ export function attachPointing(host, { reduceMotion = false } = {}) {
     if (T) T.style.transform = `rotate(${(Math.sin(t * 0.63) * 1.1).toFixed(2)}deg)`;
     raf = requestAnimationFrame(tick);
   }
-  raf = requestAnimationFrame(tick);
-  return () => { alive = false; if (raf) cancelAnimationFrame(raf); };
+  const stopLoop = () => { if (raf) cancelAnimationFrame(raf); raf = 0; };
+  const startLoop = () => { if (!raf && alive) raf = requestAnimationFrame(tick); };
+  const detach = whileVisible(host, startLoop, stopLoop);
+  return () => { alive = false; detach(); };
 }
 
 // ---------------------------------------------------------------------------

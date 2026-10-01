@@ -246,6 +246,10 @@
 .bar > *{pointer-events:auto}
 .bar.is-light{color:var(--wine)}
 .bar.is-hidden{transform:translateY(-100%);opacity:0}
+/* ★引っ込んだバーの中のリンクはタブ順に残る（opacity:0 だけでは外れない）。
+   キーボードで到達したときだけ出す。マウス・タッチの見え方は1pxも変わらない
+   （:focus-visible でなく :focus-within なのは、親に当てる必要があるため） */
+.bar:focus-within{transform:none;opacity:1}
 .bar__brand{display:flex;align-items:center;gap:10px;text-decoration:none;font-family:var(--ff-serif);font-weight:700;font-size:15px;letter-spacing:.04em}
 .bar__brand img{width:32px;height:32px;border-radius:50%}
 .bar__meta{margin-left:auto;display:none;font-size:11px;letter-spacing:.14em;opacity:.7;align-items:center;gap:10px}

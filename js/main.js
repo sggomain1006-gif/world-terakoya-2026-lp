@@ -3,9 +3,9 @@
    幕 → 地の映像 → スクロール進捗 → 章の色 → 各UI
    ============================================================================= */
 
-import { mountRigs, attachFace, attachWalker, attachBow, attachPointing, attachJump } from './mascot.js?v=2026100180';
-import { Spring, safeDt } from './lib/spring.js?v=2026100180';
-import { reduceMotion, finePointer, track, splitChars, initFaq, initGates, initReveal, initCounters, initClips, initMagnets, initTilt, initCursor, initShare, initCtas, initTicketTouch, initProgramAutoOpen, initProgramFolds, initVoiceFolds, initTypewriter, initShow, initSays, initHandoff } from './ui.js?v=2026100180';
+import { mountRigs, attachFace, attachWalker, attachBow, attachPointing, attachJump } from './mascot.js?v=2026100188';
+import { Spring, safeDt } from './lib/spring.js?v=2026100188';
+import { reduceMotion, finePointer, track, splitChars, initFaq, initGates, initReveal, initCounters, initClips, initMagnets, initTilt, initCursor, initShare, initCtas, initTicketTouch, initProgramAutoOpen, initProgramFolds, initVoiceFolds, initTypewriter, initShow, initSays, initHandoff } from './ui.js?v=2026100188';
 
 const root = document.documentElement;
 const $ = (s, r = document) => r.querySelector(s);
@@ -84,14 +84,36 @@ function openVeil() {
       go(); setTimeout(go, 600);
       if (document.fonts && document.fonts.ready) document.fonts.ready.then(go);
     }
+    warmPosters();
     track('lp_open', {});
   }, wait);
 }
+/* 画面外の映像のポスターは、幕が上がってから入れる。HTML の poster= に書くと
+   preload="none" でもブラウザが即座に取りに行き、実測で 322KB が初期表示の帯域を食っていた。
+   ★幕が上がる時点（実測 535ms）で入れるので、下までスクロールしたときには揃っている */
+function warmPosters() {
+  document.querySelectorAll('video[data-poster]').forEach((v) => {
+    if (!v.poster) v.poster = v.getAttribute('data-poster');
+  });
+}
 setTimeout(openVeil, V.MAX);
+/* ★幕を上げる合図を「映像が再生可能になったら」から「ページの読み込みが済んだら」に変えた。
+   前者だと 3MB の映像を初期表示の経路に載せることになり、実測で初期転送 4.9MB のうち
+   3.0MB をこれが占めて FCP/LCP を大きく遅らせていた。
+   幕の下限（V.MIN）と上限（V.MAX）のタイマーはそのままなので、幕の見え方は変わらない */
+window.addEventListener('load', openVeil, { once: true });
+
+/* ★映像の読み込みは初期表示の後。濃さ（--va）が上がり始めるのは p=0.02 からで、
+   それまではポスター（preload 済み・映像の1コマ目）が見えている＝絵は同じ。
+   暇ができた時点と、最初のスクロールの早いほうで取りに行く */
 if (video) {
-  video.addEventListener('canplay', openVeil, { once: true });
-  video.addEventListener('error', openVeil, { once: true });
-  loadVideo();
+  const kick = () => {
+    window.removeEventListener('scroll', kick);
+    loadVideo();
+  };
+  window.addEventListener('scroll', kick, { passive: true });
+  if ('requestIdleCallback' in window) requestIdleCallback(kick, { timeout: 2500 });
+  else setTimeout(kick, 1200);
 } else openVeil();
 
 /* ---------------------------- スクロール: 進捗・章の色・レール ---------------------------- */

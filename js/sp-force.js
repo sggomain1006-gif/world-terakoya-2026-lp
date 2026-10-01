@@ -26,17 +26,24 @@
      HTML に src を書くと、.pcbg が display:none の実機でもブラウザが取りに行く
      ことがある。パソコンのときだけ 94KB を読ませる。
      モーション低減のときは再生せず poster（静止画）のままにする */
-  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  var vs = document.querySelectorAll('.pcbg__v[data-src]');
-  for (var i = 0; i < vs.length; i++) {
-    var v = vs[i];
-    /* poster も data- から入れる。HTML に書くと display:none でもブラウザが取りに行く */
-    v.poster = v.getAttribute('data-poster');
-    v.src = v.getAttribute('data-src');
-    v.load();
-    if (!reduce) {
-      var pr = v.play();
-      if (pr && pr.catch) pr.catch(function () {});
+  /* ★このファイルは head で同期実行されるので、ここではまだ body が無い。
+     DOM を触る処理は読み終わりまで待つ */
+  function wireBackdrop() {
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var vs = document.querySelectorAll('.pcbg__v[data-src]');
+    for (var i = 0; i < vs.length; i++) {
+      var v = vs[i];
+      /* poster も data- から入れる。HTML に書くと display:none でもブラウザが取りに行く */
+      v.poster = v.getAttribute('data-poster');
+      v.src = v.getAttribute('data-src');
+      v.load();
+      if (!reduce) {
+        var pr = v.play();
+        if (pr && pr.catch) pr.catch(function () {});
+      }
     }
   }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', wireBackdrop, { once: true });
+  } else wireBackdrop();
 })();
