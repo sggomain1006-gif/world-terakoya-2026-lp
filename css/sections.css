@@ -970,10 +970,11 @@ main{position:relative;z-index:2}
    列の順番を入れ替えるだけで、.intro__buddy の規則はそのまま使う */
 .intro__buddy--r{
   grid-template-columns:1fr 76px;
-  /* ①と重ならない距離を空ける。ここが詰まっていると、①がまだ画面の真ん中に
-     居るうちに②が出てしまい、受け渡しに見えない */
-  margin:20vh 0 0;    /* svh 非対応ブラウザ向けのフォールバック */
-  margin:20svh 0 0;
+  /* ①と②の距離。ここが詰まっていると、①がまだ画面の真ん中に居るうちに②が出て
+     しまい、受け渡しに見えない。20svh では近すぎたので 32svh に広げた
+     （390px幅でキャラ①の足元→キャラ②の頭が 198px → 300px） */
+  margin:32vh 0 0;    /* svh 非対応ブラウザ向けのフォールバック */
+  margin:32svh 0 0;
 }
 /* 吹き出しは左の柱の外へ少し出す（①と左右対称） */
 .intro__buddy--r .intro__says{margin-right:0;margin-left:calc(-1 * var(--px) + 10px)}
@@ -1039,9 +1040,23 @@ main{position:relative;z-index:2}
      cover で左右が切れる。被写体が中央にある素材を選んである
    ========================================================================== */
 .show{
-  display:grid;grid-template-columns:84px 1fr;gap:10px;
+  /* 列幅と隙間は変数にしておく。縦書きの題の横位置をこの2つから出すため */
+  --show-col:84px;    /* 1列目（案内役と題の列） */
+  --show-gap:10px;
+  display:grid;
+  grid-template-columns:var(--show-col) 1fr;
+  grid-template-rows:auto auto;        /* 1行目＝映像 / 2行目＝セリフ */
+  column-gap:var(--show-gap);
   align-items:end;margin-top:28px;
 }
+/* ★.show__stage を透過させ、映像とセリフを .show の格子へ直接並べる。
+   こうすると1行目の高さが映像そのものになるので、縦書きの題は align-self:center
+   だけで映像の中央に揃う。vw からの逆算だと、スクロールバーの分だけ
+   端末ごとにずれる（375px幅で実測 9.9px ずれた） */
+.show__stage{display:contents}
+.show__media{grid-area:1 / 2;min-width:0}
+.show__cap{grid-area:2 / 2;min-width:0}
+.show__mascot{grid-area:2 / 1}
 .show__mascot{order:-1;width:84px;align-self:end;margin-bottom:6px}
 .show__mascot .rig{display:block;width:100%}
 .show__mascot .rig img,.show__mascot .rig svg{display:block;width:100%;height:auto}
@@ -1051,15 +1066,20 @@ main{position:relative;z-index:2}
 /* ★1列目のマスに案内役と重ねて置く。案内役は下寄せ・題は上寄せなので、
    列幅も映像の大きさも変わらない＝ほかの見た目は1pxも動かない。
    5枚ぶんを同じマスに重ねてあるので、箱の幅はいちばん長い題に揃う */
-.show{grid-template-rows:auto}
-.show__titles,.show__mascot{grid-area:1 / 1}
-.show__stage{grid-area:1 / 2}
-.show__titles{display:grid;justify-self:end;align-self:start;margin:0}
+.show__titles{
+  grid-area:1 / 1;
+  display:grid;justify-self:start;align-self:center;margin:0;
+  /* ★横は「画面の左端(0)」と「映像の左端(--px + 列幅 + 隙間)」のちょうど中間に中心を置く。
+     格子の1列目は --px から始まるので、その始点からの差を margin-left に出し、
+     自分の半分だけ戻して中心を合わせる */
+  margin-left:calc((var(--px) + var(--show-col) + var(--show-gap)) / 2 - var(--px));
+  transform:translateX(-50%);
+}
 .show__ttl{
   grid-area:1 / 1;
   writing-mode:vertical-rl;
   font-family:var(--ff-serif);font-weight:700;
-  font-size:14px;line-height:1;letter-spacing:.08em;
+  font-size:17px;line-height:1;letter-spacing:.08em;
   color:var(--wine);white-space:nowrap;
   opacity:0;transform:translateY(-8px);
   /* 映像の移り変わりと歩調を合わせる（.show__item は 1.0s / 1.25s） */

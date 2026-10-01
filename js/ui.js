@@ -4,7 +4,7 @@
    マグネットボタン / チケットの傾き / カーソル / 共有 / 計測
    ============================================================================= */
 
-import { Spring, expSmooth, safeDt } from './lib/spring.js?v=2026100146';
+import { Spring, expSmooth, safeDt } from './lib/spring.js?v=2026100152';
 
 export const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 export const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)');
@@ -624,9 +624,11 @@ export function initHandoff() {
 
 /* ------------------ 問いかけの上の吹き出しを LINE のように出す ------------------
    1つ目は「2つ目が出る位置」に現れ、2つ目が出た瞬間に押し上げられる。
+   ★間（gap）は 700ms では2つが同時に出たように見えたので 1500ms にした。
+     LINE で相手が打ち終えるまでの間に近く、1つ目を目で追う余裕ができる。
    ★上げ幅は2つ目の実寸＋隙間から出す。決め打ちだと文言を変えた瞬間にずれる
    ★モーション低減では何もしない（CSS 側で最初から見えている） */
-export function initSays({ gap = 700 } = {}) {
+export function initSays({ gap = 1500 } = {}) {
   const wrap = document.querySelector('.intro__says');
   if (!wrap || reduceMotion.matches) return;
   const bubbles = Array.from(wrap.children).filter((el) => el.classList.contains('say'));
