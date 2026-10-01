@@ -486,12 +486,15 @@ main{position:relative;z-index:2}
 }
 /* ★2026-09-30: 220→168。札の高さは「写真＋本文17行」で決まっており、本文を削らずに
    縮められるのは写真と内側の余白だけ。環境カットなので縦を詰めても意図は残る */
-.vcard__photo{width:100%;height:168px;object-fit:cover;flex:none;display:block;background:var(--cream-3);border-radius:14px 14px 0 0}
+.vcard__photo{width:100%;height:132px;object-fit:cover;flex:none;display:block;background:var(--cream-3);border-radius:14px 14px 0 0}
 /* 本文はクリームの地。地が反転するので、文字と罫もワイン側に寄せる */
-.vcard__body{padding:17px 18px 18px;display:flex;flex-direction:column;gap:7px;flex:1;background:var(--cream);border-radius:0 0 14px 14px}
+.vcard__body{padding:14px 18px 15px;display:flex;flex-direction:column;gap:6px;flex:1;background:var(--cream);border-radius:0 0 14px 14px}
 .vcard__prog{margin:0;font-size:10px;font-weight:700;letter-spacing:.1em;color:var(--wine)}
 .vcard__quote{margin:0;flex:1;padding-left:14px;border-left:2px solid rgba(85,22,31,.28)}
-.vcard__quote p{margin:0;font-size:13px;line-height:1.85;color:var(--text)}
+/* ★大きさは変数で持つ。畳む高さの式（.is-foldable）が同じ値を使うので、
+   ここだけ直すと折る位置がずれる */
+.vcard{--q-size:12.5px;--q-lh:1.66}
+.vcard__quote p{margin:0;font-size:var(--q-size);line-height:var(--q-lh);color:var(--text)}
 .vcard__quote p + p{margin-top:.9em}
 .vcard__name{margin:2px 0 0;font-size:11px;color:var(--text-2)}
 /* ★吊り下げの紐（.vcard::before）と留め具（.vcard::after）は 2026-09-30 に削除。
@@ -523,8 +526,11 @@ main{position:relative;z-index:2}
 /* --- ① 問いかけ（映像の上） --- */
 .intro__hero{
   position:relative;z-index:1;
-  min-height:72svh;display:flex;align-items:center;
-  padding:72px 0 84px;
+  /* ★2026-10-01: 72svh / 72-84px から詰めた。ここは映像だけが見えている区間で、
+     長いぶんだけ案内役が画面に入るまでのスクロールが増えていた（390px幅で実測1760px）。
+     映像そのものは .fv-film が全画面に固定で敷いているので、短くしても映像は痩せない */
+  min-height:54svh;display:flex;align-items:center;
+  padding:44px 0 56px;
   color:var(--cream);
   /* 映像の明るさは main.js が --vb で一段落とすが、字側でも保険を掛ける */
   text-shadow:0 1px 3px rgba(26,5,8,.72),0 0 18px rgba(26,5,8,.6);
@@ -687,26 +693,34 @@ main{position:relative;z-index:2}
    追従CTA（右端・幅57px）が出ている間の本文の退避
    2026-09-30 実測: 本文の右端は vw-20px、CTA の左端は vw-57px。差の 37px ぶん
    本文・見出し・グラフのラベルに食い込んでいた（3幅とも）。
-   js/main.js が区間に入ったとき html に .has-side-cta を付けるので、その間だけ逃がす
+   ★2026-10-01: .has-side-cta を使った条件付きの逃がし方は全廃した（下記）
    ========================================================================== */
-.has-side-cta .purpose__lead,
-.has-side-cta .purpose__note,
-.has-side-cta .intro__lead,
-.has-side-cta .field__b,
-.has-side-cta .ilist__b,
-.has-side-cta .voice p,
-.has-side-cta .founder-card__message p{padding-right:44px}
-.has-side-cta .dial__label{padding-inline:10px}
-.has-side-cta .h2,
-.has-side-cta .h3{padding-right:44px;white-space:normal;text-wrap:balance}
+/* ★2026-10-01: 条件付き（html に印が付いた間だけ）をやめ、常に空けるようにした。
+   出入りに合わせて padding が付いたり外れたりすると、追従CTAが現れた瞬間に
+   本文が横に跳ねる（「未来のために、多様な選択肢を」の節で実際に起きた）。
+   CTA が出るのは「数字と参加者の声」と「代表」の2節だけなので、そこだけ常に空ける。
+   ★中央揃えの節見出しは対象外（片側だけ空けると中心がずれる。下のブロック参照） */
+/* ★代表の節は本文を画面幅のまま使う（2026-10-01 の指示）。右を空けると列が痩せるため。
+   追従CTAはこの節に重なるが、動かないこと＝固定を優先する */
+/* ★保護者の声も本文を画面幅のまま使う（2026-10-01 の指示）。
+   左右対称に空ける案は塊は中央に来るが列が痩せるため撤回した。
+   追従CTAはこの節に重なるが、幅を縮めないこと＝固定を優先する */
+.ch--voices .dial__label{padding-inline:10px}
+.ch--voices .voices-title,
+.ch--founder .voices-title{white-space:normal;text-wrap:balance}
+/* 見出しだけは折り返しを許す。nowrap のままだと末尾の1字がCTAの下に入って読めない */
 /* ★中央揃えの節見出しはここから外す。片側だけ余白を足すと、追従CTAの出入りに合わせて
    見出しが横に跳ねる（2026-09-30 実測で22pxずれていた）。
    しかもこの2つは字面の右端がCTAに届いていないので、そもそも逃がす必要がない
    （実測: 「数字と参加者の声」の右端305 / CTAの左端333） */
-.has-side-cta .ch--voices .ch__head .h2,
-.has-side-cta .ch--faq .ch__head .h2,
-.has-side-cta .ch--schol .ch__head .h2,
-.has-side-cta .ch--programs .ch__head .h2{padding-right:0}
+/* 中央揃えの節見出しには片側余白を与えない（中心がずれるため）。
+   いずれも字面の右端が追従CTAに届いていないことを実測済み */
+.ch--voices .ch__head .h2,
+.ch--faq .ch__head .h2,
+.ch--schol .ch__head .h2,
+.ch--programs .ch__head .h2,
+.ch--who .ch__head .h2,
+.ch--about .ch__head .h2{padding-right:0}
 
 /* 375px で「サンフランシスコ／ボストン・ニューヨーク」の末尾1字だけが
    2行目に落ちていた。字を一段小さくして1行に収める */
@@ -718,7 +732,7 @@ main{position:relative;z-index:2}
    ★畳んだ高さは行数 × 行送りで出す。font-size と line-height を変えたら
      この式のぶんだけ自動で追従する */
 .vcard.is-foldable .vcard__quote{
-  max-height:calc(13px * 1.85 * var(--fold-lines,8));
+  max-height:calc(var(--q-size) * var(--q-lh) * var(--fold-lines,8));
   overflow:hidden;
   -webkit-mask-image:linear-gradient(#000 64%,transparent 100%);
   mask-image:linear-gradient(#000 64%,transparent 100%);
@@ -862,16 +876,19 @@ main{position:relative;z-index:2}
 
 /* 最終CTAのボタン。カーソルに引っ張られる動き（data-magnet の translate）はやめ、
    近づいたときに少し浮き上がるだけにする。光りは --mx/--my で従来どおり追従する */
-.final__ctas .btn{transition:transform .32s var(--ease-out),box-shadow .32s var(--ease-out)}
+.final__ctas .btn,
+.ch--who .panel .btn{transition:transform .32s var(--ease-out),box-shadow .32s var(--ease-out)}
 @media (hover:hover) and (pointer:fine){
-  .final__ctas .btn:hover,.final__ctas .btn:focus-visible{
+  .final__ctas .btn:hover,.final__ctas .btn:focus-visible,
+  .ch--who .panel .btn:hover,.ch--who .panel .btn:focus-visible{
     transform:translateY(-4px);
     box-shadow:0 14px 28px -12px rgba(26,5,8,.55);
   }
 }
 @media (prefers-reduced-motion:reduce){
-  .final__ctas .btn{transition:none}
-  .final__ctas .btn:hover,.final__ctas .btn:focus-visible{transform:none}
+  .final__ctas .btn,.ch--who .panel .btn{transition:none}
+  .final__ctas .btn:hover,.final__ctas .btn:focus-visible,
+  .ch--who .panel .btn:hover,.ch--who .panel .btn:focus-visible{transform:none}
 }
 
 /* ★背の低い機種は下げ幅を半分に。SE(667px) では 13vh 下げるとマスコットとの間隔が
@@ -894,3 +911,207 @@ main{position:relative;z-index:2}
 .ch--voices,
 .ch--brief,
 .ch--faq{padding-top:58px}
+
+/* ==========================================================================
+   ワールド寺子屋とは？の章（2026-10-01 に新設）
+   ★地はクリーム。上は映像の上に置いた問いかけ（暗い）、下は3つのプログラム（白）。
+     ここを白にすると下の節と地が同じになり、切れ目が消える
+   ========================================================================== */
+.ch--about{position:relative;z-index:1;background:var(--cream);color:var(--text)}
+.ch--about::before{content:'';position:absolute;inset:0;background-image:var(--paper);
+  opacity:.05;pointer-events:none;mix-blend-mode:multiply}
+/* 節の先頭に来るので、同居していた頃の上余白は要らない */
+.ch--about .intro__lead{margin-top:0}
+
+/* ==========================================================================
+   問いかけの上で一度だけ跳ぶマスコット（2026-10-01）
+   ★位置はバネ（js/mascot.js の attachJump）、潰しと伸びはここのキーフレーム。
+     同じ要素に2つの transform を書くと後勝ちで片方が消えるので、要素を分けてある
+   ========================================================================== */
+/* ★吹き出しが実体を持つので通常の行。左に案内役、右に吹き出し2つ */
+.intro__buddy{
+  /* ★吹き出しを広く取る。案内役の列を 96→76、隙間を 10→6 に詰め、
+     さらに右は柱の余白へ10px はみ出させる（+34px ＝ 約14%広い） */
+  display:grid;grid-template-columns:76px 1fr;gap:6px;
+  align-items:end;margin:0 0 26px;
+}
+/* 案内役の箱。跳ぶときはこの箱から上へはみ出す（overflow は切らない） */
+.intro__buddy-col{position:relative;width:76px;height:67px;pointer-events:none}
+.intro__buddy-lift{position:absolute;left:0;bottom:0;width:76px}
+.intro__says{
+  min-width:0;display:flex;flex-direction:column;gap:8px;align-items:stretch;
+  margin-right:calc(-1 * var(--px) + 10px);   /* 右だけ柱の外へ少し出す */
+}
+/* しっぽは左下から。案内役のほうを向く */
+.intro__say,.intro__checks{
+  max-width:none;width:100%;font-size:12.5px;line-height:1.72;
+  padding:11px 12px;border-radius:16px;
+  /* ★影を切る。.intro__hero は映像の上に文字を置くので text-shadow を持っているが、
+     吹き出しはクリームの地なので継承すると濁る。FV の吹き出しと同じく影なしにする */
+  text-shadow:none;
+}
+/* ---- LINE のように下から順にポップで出す ----
+   ★1つ目は「2つ目が出る位置」に現れ、2つ目が出た瞬間に押し上げられる。
+     上げ幅 --rise は2つ目の実寸から JS が書く（文言を変えても追従する）。
+   ★軸は左下。しっぽの根もとから膨らんで見える */
+.js .intro__say,.js .intro__checks{
+  opacity:0;transform:translateY(var(--rise,0px)) scale(.86);
+  transform-origin:0 100%;
+  transition:opacity .22s var(--ease-out),transform .34s cubic-bezier(.34,1.56,.64,1);
+}
+.js .intro__say.is-pop,.js .intro__checks.is-pop{opacity:1;transform:translateY(var(--rise,0px)) scale(1)}
+@media (prefers-reduced-motion:reduce){
+  .js .intro__say,.js .intro__checks{opacity:1;transform:none;transition:none}
+}
+.intro__say::after,.intro__checks::after{
+  right:auto;left:-5px;bottom:14px;width:14px;height:14px;
+}
+/* ---- ② 受け渡し: 右に立つ左向きの案内役 ----
+   列の順番を入れ替えるだけで、.intro__buddy の規則はそのまま使う */
+.intro__buddy--r{
+  grid-template-columns:1fr 76px;
+  /* ①と重ならない距離を空ける。ここが詰まっていると、①がまだ画面の真ん中に
+     居るうちに②が出てしまい、受け渡しに見えない */
+  margin:20vh 0 0;    /* svh 非対応ブラウザ向けのフォールバック */
+  margin:20svh 0 0;
+}
+/* 吹き出しは左の柱の外へ少し出す（①と左右対称） */
+.intro__buddy--r .intro__says{margin-right:0;margin-left:calc(-1 * var(--px) + 10px)}
+/* しっぽは右下から。案内役のほうを向く */
+.intro__buddy--r .intro__say::after{left:auto;right:-5px}
+/* 膨らむ軸も右下へ。左下のままだと、しっぽと反対側から伸びて見える */
+.js .intro__buddy--r .intro__say{transform-origin:100% 100%}
+
+/* ---- 受け渡しの出入り ----
+   ★②の吹き出しは initSays の対象外（あちらは最初の .intro__says だけを見る）。
+     is-pop が付かないので、ここで .is-handed に合わせて自分で開かせる */
+.js .intro__buddy--l{transition:opacity .5s var(--ease-out),transform .6s var(--ease-out)}
+.js .intro__buddy--r .intro__buddy-col{
+  opacity:0;transform:translateY(10px);
+  transition:opacity .45s var(--ease-out),transform .55s var(--ease-out);
+}
+.js .intro__hero.is-handed .intro__buddy--l{opacity:0;transform:translateY(-10px);pointer-events:none}
+.js .intro__hero.is-handed .intro__buddy--r .intro__buddy-col{opacity:1;transform:none}
+.js .intro__hero.is-handed .intro__buddy--r .intro__say{opacity:1;transform:scale(1);transition-delay:.12s}
+
+/* ★②はぴょこぴょこ跳ね続ける。①は一度きりの大ジャンプなので、動きの種類を分ける。
+   縮みの軸は足もと。HTML の箱に掛けるので、SVG 内部が transform-origin を
+   持っているかどうかに左右されない（pose-*.svg は持っていない） */
+.intro__buddy--r .rig{transform-origin:50% 100%}
+.js .intro__hero.is-handed .intro__buddy--r .rig{animation:edHop 3.4s var(--ease-out) .35s infinite}
+@keyframes edHop{
+   0%{transform:translateY(0) scaleY(1)}
+   5%{transform:translateY(0) scaleY(.88)}
+  13%{transform:translateY(-15px) scaleY(1.06)}
+  21%{transform:translateY(0) scaleY(.93)}
+  27%{transform:translateY(0) scaleY(1)}
+  33%{transform:translateY(0) scaleY(.9)}
+  41%{transform:translateY(-10px) scaleY(1.04)}
+  49%{transform:translateY(0) scaleY(.96)}
+  55%,100%{transform:translateY(0) scaleY(1)}
+}
+/* モーション低減では受け渡しも跳ねも行わない。①を消すと空白だけが残るので両方出したまま */
+@media (prefers-reduced-motion:reduce){
+  .js .intro__buddy--r .intro__buddy-col{opacity:1;transform:none;transition:none}
+  .js .intro__hero.is-handed .intro__buddy--l{opacity:1;transform:none}
+  .js .intro__hero.is-handed .intro__buddy--r .rig{animation:none}
+}
+
+.intro__checks{list-style:none;margin:0;display:flex;flex-direction:column;gap:7px}
+.intro__checks li{position:relative;padding-left:20px;font-weight:700}
+/* ✓ は字でなく線で描く（書体のサブセットに記号を足さずに済む） */
+.intro__checks li::before{
+  content:'';position:absolute;left:2px;top:.42em;
+  width:6px;height:11px;border:solid var(--wine);border-width:0 2px 2px 0;
+  transform:rotate(45deg);
+}
+/* ★rig-rev.svg の既定は #7F0117 / #FDF4DE で、このLPの他のマスコット（#55161F）と違う。
+   変数を差して揃える */
+.intro__buddy .rig{--ed-wine:var(--wine);--ed-cream:var(--cream)}
+/* ★箱ごとの scale（潰し伸び）は 2026-10-01 にやめた。顔と板まで潰れてゴムに見え、
+   関節が動いていないことの原因でもあった。いまは膝の曲げ伸ばしと沈みで表現する */
+
+/* ==========================================================================
+   案内役が見せる2つの吹き出し（2026-10-01）
+   左に案内役、右に「映像/写真」と「セリフ」の吹き出しを縦に2つ。
+   4つの組を順に送り、右から左へ入れ替わる（js/ui.js の initShow）
+   ★縦の比率は 4:5。元の 16/9 より縦を増やす指定。素材は 16:9 と 4:3 なので
+     cover で左右が切れる。被写体が中央にある素材を選んである
+   ========================================================================== */
+.show{
+  display:grid;grid-template-columns:84px 1fr;gap:10px;
+  align-items:end;margin-top:28px;
+}
+.show__mascot{order:-1;width:84px;align-self:end;margin-bottom:6px}
+.show__mascot .rig{display:block;width:100%}
+.show__mascot .rig img,.show__mascot .rig svg{display:block;width:100%;height:auto}
+.show__stage{min-width:0}
+
+/* ---- 左に立てる縦書きの題 ---- */
+/* ★1列目のマスに案内役と重ねて置く。案内役は下寄せ・題は上寄せなので、
+   列幅も映像の大きさも変わらない＝ほかの見た目は1pxも動かない。
+   5枚ぶんを同じマスに重ねてあるので、箱の幅はいちばん長い題に揃う */
+.show{grid-template-rows:auto}
+.show__titles,.show__mascot{grid-area:1 / 1}
+.show__stage{grid-area:1 / 2}
+.show__titles{display:grid;justify-self:end;align-self:start;margin:0}
+.show__ttl{
+  grid-area:1 / 1;
+  writing-mode:vertical-rl;
+  font-family:var(--ff-serif);font-weight:700;
+  font-size:14px;line-height:1;letter-spacing:.08em;
+  color:var(--wine);white-space:nowrap;
+  opacity:0;transform:translateY(-8px);
+  /* 映像の移り変わりと歩調を合わせる（.show__item は 1.0s / 1.25s） */
+  transition:opacity .60s var(--ease-out),transform .72s var(--ease-out);
+}
+.show__ttl.is-on{opacity:1;transform:none}
+@media (prefers-reduced-motion:reduce){.show__ttl{transition:none}}
+
+/* ---- 上の吹き出し: 映像/写真 ---- */
+.show__media{
+  position:relative;aspect-ratio:4/5;
+  border-radius:20px;overflow:hidden;background:var(--cream-2);
+  box-shadow:0 22px 46px -30px rgba(26,5,8,.6);
+}
+.show__item{
+  position:absolute;inset:0;
+  opacity:0;transform:translateX(24px);
+  /* ★ゆっくりさせるのは「移り変わりの動き」だけ。滞留時間（js の interval=4200ms）は
+     元のまま。transform の 1.25s より is-out の後片付け（js 側 1350ms）を必ず後にする。
+     逆にすると、まだ動いている札の印を外して左へ飛ぶ */
+  transition:opacity 1.0s var(--ease-out),transform 1.25s var(--ease-out);
+}
+.show__item.is-on{opacity:1;transform:none}
+/* 出ていく側は左へ。右から左へ移り変わって見える */
+.show__item.is-out{opacity:0;transform:translateX(-24px)}
+.show__item img,.show__item video{display:block;width:100%;height:100%;object-fit:cover}
+
+/* ---- 下の吹き出し: セリフ ---- */
+.show__cap{
+  /* ★4つのセリフを grid の同じマスに重ねる。箱の高さが「いちばん長いセリフ」に
+     自動で揃うので、文言を差し替えても溢れない。
+     min-height の決め打ちだと、em が <p> の継承サイズ基準になって9〜13px溢れていた */
+  position:relative;display:grid;margin:10px 0 0;
+  background:var(--cream);color:var(--wine-2);
+  border-radius:16px;padding:11px 14px;
+  box-shadow:0 10px 26px -16px rgba(26,5,8,.5);
+}
+/* しっぽは左下から。案内役のほうを向く */
+.show__cap::after{
+  content:'';position:absolute;left:-5px;bottom:14px;
+  width:14px;height:14px;background:var(--cream);
+  transform:rotate(45deg);border-radius:2px;
+}
+.show__line{
+  grid-area:1 / 1;
+  font-size:12.5px;line-height:1.72;font-weight:500;letter-spacing:.01em;
+  opacity:0;transform:scale(.94);
+  transition:opacity .60s var(--ease-out),transform .72s var(--ease-out);
+}
+/* ★セリフは映像と一緒にポップで切り替える（横移動でなく拡大で出す） */
+.show__line.is-on{opacity:1;transform:none}
+
+@media (prefers-reduced-motion:reduce){
+  .show__item,.show__line{transition:none}
+}

@@ -3,9 +3,9 @@
    幕 → 地の映像 → スクロール進捗 → 章の色 → 各UI
    ============================================================================= */
 
-import { mountRigs, attachFace, attachWalker, attachBow, attachPointing } from './mascot.js?v=2026093046';
-import { Spring, safeDt } from './lib/spring.js?v=2026093046';
-import { reduceMotion, finePointer, track, splitChars, initFaq, initGates, initReveal, initCounters, initClips, initMagnets, initTilt, initCursor, initShare, initCtas, initTicketTouch, initProgramAutoOpen, initProgramFolds, initVoiceFolds, initTypewriter } from './ui.js?v=2026093046';
+import { mountRigs, attachFace, attachWalker, attachBow, attachPointing, attachJump } from './mascot.js?v=2026100146';
+import { Spring, safeDt } from './lib/spring.js?v=2026100146';
+import { reduceMotion, finePointer, track, splitChars, initFaq, initGates, initReveal, initCounters, initClips, initMagnets, initTilt, initCursor, initShare, initCtas, initTicketTouch, initProgramAutoOpen, initProgramFolds, initVoiceFolds, initTypewriter, initShow, initSays, initHandoff } from './ui.js?v=2026100146';
 
 const root = document.documentElement;
 const $ = (s, r = document) => r.querySelector(s);
@@ -20,13 +20,12 @@ const rail = $('#rail');
 const sideCta = $('#sideCta');
 const foot = $('#foot');
 const introHeroEl = $('#introHero');
-/* ★区間Aの起点。2026-09-30 に「グローバル探究」の節を削除したので、
-   その直後にあった3つのプログラムの節を起点にした */
-const progSecEl = $('#dispatch');
 /* 追従CTA の表示区間の境目。節の上端で切り替える */
-const progSfEl  = $('#prog-sf');
 const voicesEl  = $('#voices');
 const briefEl   = $('#briefing');
+/* スクロールの合図（左端）。「ワールド寺子屋とは？」の節が見え始めたら引っ込める */
+const scrollCue = $('#scrollCue');
+const aboutEl   = $('#about');
 
 /* ------------------------------ 文字の分割（幕の前に） ------------------------------ */
 splitChars(fv);
@@ -105,6 +104,7 @@ const THEMES = [
   // ★後にある方が勝つので、内側の #introHero を #intro の後ろに置くこと
   ['#intro', 'light', 'flow'],
   ['#introHero', 'dark', 'flow'],
+  ['#about', 'light', 'flow'],
   // 3つのプログラムの一覧は白い章の中にある。レールの「3つの派遣」はここで光る
   ['#dispatch', 'light', 'dispatch'],
   ['#who', 'light', 'who'],
@@ -206,13 +206,18 @@ function updateFixed(now = performance.now()) {
   /* 追従CTA（右端）の出し入れ。★2026-09-11 に「重なりそうな要素を列挙して避ける」方式をやめた。
      要素が増えるたびに当たり判定が変わり、出たり消えたりが読めなくなっていた
      （実際 .faq__q i というセレクタが実物と違っていて、FAQ では一度も避けていなかった）。
-     いまは節の上端だけで2区間を決め打ちする。判定の線は画面の 62%（ボタンの中心の高さ）。
-       区間A: 3つのプログラムの節 〜 サンフランシスコの折りたたみ
-       区間B: 数字と参加者の声の節 〜 まずはオンライン説明会への節 */
+     いまは節の上端だけで区間を決め打ちする。判定の線は画面の 62%（ボタンの中心の高さ）。
+     ★2026-10-01: 3つのプログラムの節にかかっていた区間を廃止した。
+       錠剤と日程表を読んでいる最中に右端から追従CTAが出てくるのをやめる判断。
+       いまは1区間だけ: 数字と参加者の声の節 〜 まずはオンライン説明会への節 */
   const refY = vh * 0.62;
   const entered = (el) => (el ? el.getBoundingClientRect().top <= refY : false);
   const sideOn = !!sideCta && opened && !through
-    && ((entered(progSecEl) && !entered(progSfEl)) || (entered(voicesEl) && !entered(briefEl)));
+    && entered(voicesEl) && !entered(briefEl);
+  /* スクロールの合図は「ワールド寺子屋とは？」の節が画面に入るまで。
+     判定の線は画面の下端そのもの＝節の上端が見え始めた瞬間に消え始める */
+  const cueOn = !!scrollCue && !!aboutEl && opened
+    && aboutEl.getBoundingClientRect().top > vh;
 
   /* ===== 書く ===== */
   if (fv) {
@@ -245,8 +250,8 @@ function updateFixed(now = performance.now()) {
   if (band) {
     let vb = 1;
     if (fvVisible) vb = 1.02 + 0.10 * ez(p / 0.18);   // 立ち上がりぎわは少し明るく
-    // 問いかけの文字を前に出すため、映像は一段落とす（螺旋のときの進捗連動はやめ、固定値にした）
-    if (heroVisible) vb = Math.min(vb, 0.62);
+    // ★2026-10-01: 導入の映像を暗く落とすのをやめた。文字を乗せなくなったので、
+    //   前に出すために暗くする理由が無い。映像はそのままの明るさで出す
     band.style.setProperty('--vb', vb.toFixed(3));
   }
 
@@ -287,9 +292,7 @@ function updateFixed(now = performance.now()) {
   if (bar) bar.classList.toggle('is-hidden', through);
   if (rail) rail.classList.toggle('is-hidden', through || finalVisible);
   if (sideCta) sideCta.classList.toggle('is-on', sideOn);
-  /* ★追従CTAは幅57pxで、本文の右端まで 20px しかない（実測で37px被る）。
-     出ている間だけ html に印を付け、CSS 側で当たる本文の右余白を広げる */
-  document.documentElement.classList.toggle('has-side-cta', sideOn);
+  if (scrollCue) scrollCue.classList.toggle('is-on', cueOn);
 }
 /* 右端で追従CTAに隠されると困るもの。CTA の縦の帯にかかる間だけ引っ込める。
      .tbl      … 隠れると金額が読めなくなる
@@ -356,11 +359,15 @@ initCounters();
 initProgramFolds();
 initProgramAutoOpen();
 initTicketTouch();
-initClips();
+/* この節は initShow が1枚ずつ面倒を見る（重なった全枚を同時再生させないため） */
+initClips({ skip: '[data-show]' });
 /* ★16行。2〜4枚目（200〜230字）は全文が収まり、長い1枚目（約600字）だけが畳まれる。
    結果として札の高さも揃う */
 initVoiceFolds({ lines: 16 });
 initTypewriter();
+initShow();
+initSays();
+initHandoff();
 initMagnets();
 initTilt();
 initShare();
@@ -385,6 +392,7 @@ mountRigs().then((hosts) => {
     }
     if (host.classList.contains('rig--point')) attachPointing(host, { reduceMotion: reduceMotion.matches });
     if (host.classList.contains('rig--bow')) attachBow(host, { reduceMotion: reduceMotion.matches });
+    if (host.classList.contains('rig--jump')) attachJump(host, { reduceMotion: reduceMotion.matches });
   });
 }).catch((e) => console.warn('[mascot]', e));
 
@@ -398,7 +406,10 @@ if ('IntersectionObserver' in window) {
       track(en.target.id === 'fee' ? 'fee_section_view' : 'section_view', { section: en.target.id });
     });
   }, { threshold: 0, rootMargin: '0px 0px -25% 0px' });
-  ['flow', 'purpose', 'dispatch', 'who', 'fee', 'trust', 'briefing', 'faq', 'cta-final', 'foot'].forEach((id) => {
+  /* ★実在する節だけを並べる。flow / purpose / fee は撤去済みで、
+     about / scholarship / voices / founder が漏れていた（1節につき1回だけ送る） */
+  ['intro', 'about', 'dispatch', 'who', 'scholarship', 'voices', 'founder',
+   'briefing', 'trust', 'faq', 'cta-final', 'foot'].forEach((id) => {
     const el = document.getElementById(id); if (el) io.observe(el);
   });
 }

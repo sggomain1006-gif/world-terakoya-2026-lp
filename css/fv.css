@@ -510,6 +510,41 @@
   .has-cursor,.has-cursor a,.has-cursor button{cursor:none}
 }
 
+/* ---------- スクロールの合図（左端） ---------- */
+/* ★FVのCTAボタンの左の余白に立てる。横は .fv__sticky の左 padding（var(--px)）に、
+   縦は画面の下端まで落とす（2026-10-01 の指示）。棒線が画面の切れ目まで伸びるので、
+   「この先がある」ことが棒線の長さでなく位置で伝わる。
+   合図は 10px 幅で、ボタンまでの隙間は 375px幅で45px / 390px幅で28px / 430px幅で48px */
+.scroll-cue{
+  position:fixed;
+  left:var(--px);
+  bottom:0;
+  z-index:58;                               /* 追従CTA(60)の下・本文の上 */
+  display:flex;flex-direction:column;align-items:center;gap:10px;
+  color:#fff;
+  pointer-events:none;
+  /* 明るい写真や映像の上でも沈まないよう字側で保険を掛ける（.intro__hero と同じ理由）。
+     クリーム地の節が下から来る消え際も、この影があるぶん読める */
+  text-shadow:0 1px 3px rgba(26,5,8,.72),0 0 14px rgba(26,5,8,.55);
+  opacity:0;visibility:hidden;
+  transition:opacity 260ms var(--ease-out);
+}
+.scroll-cue.is-on{opacity:1;visibility:visible}
+.scroll-cue__txt{
+  writing-mode:vertical-rl;
+  font-family:var(--ff-mono);
+  font-size:10px;font-weight:500;line-height:1;
+  letter-spacing:.16em;
+  /* ★縦書きの letter-spacing は最後の1字の後ろにも入る。そのぶん棒線との隙間が
+     広く見えるので打ち消す */
+  margin-bottom:-.16em;
+}
+.scroll-cue__bar{
+  display:block;width:1px;height:46px;
+  background:currentColor;
+  box-shadow:0 1px 3px rgba(26,5,8,.6);
+}
+
 /* ---------- 追従CTA（右端・現行版と同一意匠） ----------
    FV を出てから最終CTA が画面を占めるまでの区間だけ出す。
    .is-on は JS が付ける。JS 無効時は出さない（消せない板が残らないように）。

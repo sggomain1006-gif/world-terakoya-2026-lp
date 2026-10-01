@@ -105,7 +105,9 @@ html.is-veiled body{overflow:hidden;height:100vh}
 .ch--faq .ch__head,
 .ch--voices .ch__head,
 .ch--schol .ch__head,
-.ch--programs .ch__head{max-width:none;text-align:center}
+.ch--programs .ch__head,
+.ch--who .ch__head,
+.ch--about .ch__head{max-width:none;text-align:center}
 .h3{font-family:var(--ff-serif);font-size:clamp(21px,calc(5.4 * var(--vw)),26px);line-height:1.45;letter-spacing:.02em;color:var(--wine);text-wrap:balance}
 .h4{font-family:var(--ff-serif);font-size:18px;line-height:1.5;letter-spacing:.02em;color:var(--wine);margin-top:44px}
 .h4.mono{font-family:var(--ff-mono);font-size:11px;letter-spacing:.2em;color:var(--wine);display:flex;align-items:baseline;gap:12px;font-weight:500}

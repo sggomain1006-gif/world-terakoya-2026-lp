@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="build" content="2026093046">
+<meta name="build" content="2026100146">
 <script src="js/fresh.js"></script>
 <script>
 /* 起動の最小限。JS が動く印と、幕（veil）の制御だけをここに置く。
@@ -23,7 +23,7 @@
   if(isReload&&location.hash){
     try{history.replaceState(null,'',location.pathname+location.search);}catch(e){}
   }
-  var deepLink=!isReload&&/^#(intro|purpose|dispatch|who|voices|founder|briefing|trust|faq|cta-final)$/.test(location.hash);
+  var deepLink=!isReload&&/^#(intro|about|dispatch|who|scholarship|voices|founder|briefing|trust|faq|cta-final)$/.test(location.hash);
   var pinning=!deepLink;
   function toTop(){if(pinning&&(window.scrollY||window.pageYOffset))window.scrollTo(0,0);}
   function pin(){if(!pinning)return;toTop();requestAnimationFrame(pin);}
@@ -33,36 +33,48 @@
   root.classList.add('is-veiled');
 }());
 </script>
-<link rel="stylesheet" href="fonts/fonts.css?v=2026093046">
-<link rel="stylesheet" href="css/base.css?v=2026093046">
-<link rel="stylesheet" href="css/fv.css?v=2026093046">
-<link rel="stylesheet" href="css/sections.css?v=2026093046">
-<link rel="stylesheet" href="css/spiral.css?v=2026093046">
-<link rel="stylesheet" href="css/kifu-parity.css?v=2026093046">
+<link rel="stylesheet" href="fonts/fonts.css?v=2026100146">
+<link rel="stylesheet" href="css/base.css?v=2026100146">
+<link rel="stylesheet" href="css/fv.css?v=2026100146">
+<link rel="stylesheet" href="css/sections.css?v=2026100146">
+<link rel="stylesheet" href="css/spiral.css?v=2026100146">
+<link rel="stylesheet" href="css/kifu-parity.css?v=2026100146">
 <!-- ★一時措置：パソコンでもスマホ版を表示する。戻すときはこの2行を消す -->
-<link rel="stylesheet" href="css/sp-force.css?v=2026093046">
+<link rel="stylesheet" href="css/sp-force.css?v=2026100146">
 <link rel="preload" as="image" href="img/poster-underfv.webp" fetchpriority="high">
-<link rel="modulepreload" href="js/main.js?v=2026093046">
-<link rel="modulepreload" href="js/ui.js?v=2026093046">
-<link rel="modulepreload" href="js/mascot.js?v=2026093046">
-<link rel="modulepreload" href="js/lib/gl.js?v=2026093046">
-<link rel="modulepreload" href="js/lib/mat4.js?v=2026093046">
-<link rel="modulepreload" href="js/lib/spring.js?v=2026093046">
-<link rel="modulepreload" href="js/lib/geom.js?v=2026093046">
+<link rel="modulepreload" href="js/main.js?v=2026100146">
+<link rel="modulepreload" href="js/ui.js?v=2026100146">
+<link rel="modulepreload" href="js/mascot.js?v=2026100146">
+<link rel="modulepreload" href="js/lib/spring.js?v=2026100146">
 <title>ワールド寺子屋プログラム2026（第5回）｜NPO法人EdFuture</title>
 <meta name="description" content="高校生が自分の探究テーマを持って渡米し、現地校で学び、自分でアポを取って大学や企業を訪ね、探究発表を行う海外探究プログラム。2027年3月派遣・3便。説明会は無料・オンライン・全3回。">
-<!-- ★寄付LP（edfuture.jp/kifu/）と同じアイコン一式。実ファイルをそのまま持ってきている -->
-<link rel="icon" href="favicon.ico?v=2026093046" sizes="48x48">
-<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png?v=2026093046">
-<link rel="icon" type="image/png" sizes="192x192" href="favicon-192x192.png?v=2026093046">
-<link rel="apple-touch-icon" href="apple-touch-icon.png?v=2026093046">
+<!-- ★寄付LP（edfuture.jp/kifu/）と同じアイコン一式。実ファイルをそのまま持ってきている。
+     ★この4行にだけ ?v= を付けない。Google は「ファビコンのURLは安定していること
+       （頻繁に変えないこと）」を要件にしており、bump.py で版を上げるたびにURLが
+       変わると検索結果のアイコンの扱いが毎回リセットされる。
+       bump.py は既にある ?v= を書き換えるだけなので、消しておけば今後も付かない。
+       絵を差し替えるときはファイル名を変える（中身だけ替えると古い絵が残る） -->
+<link rel="icon" href="favicon.ico" sizes="48x48">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="favicon-192x192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="canonical" href="https://edfuture.jp/world-terakoya-2026/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="NPO法人EdFuture">
 <meta property="og:title" content="ワールド寺子屋プログラム2026（第5回）｜NPO法人EdFuture">
 <meta property="og:description" content="まだ言葉にならない違和感を、問いに変えに行く。現地校で学び、自分でアポを取り、毎晩振り返る海外探究プログラム。">
 <meta property="og:url" content="https://edfuture.jp/world-terakoya-2026/">
-<meta property="og:image" content="https://edfuture.jp/world-terakoya-2026/img/ogp.jpg">
+<!-- ★OGP画像。ファイル名を変えてあるのは、同じURLのまま中身だけ差し替えると
+     Facebook/LINE が前の画像をキャッシュから出し続けるため。別名なら初回から新しい絵が出る。
+     ★形式が jpg なのは、og:image を取りに来るのはクローラーだけで、
+     ページ自体は一度も読み込まないため。webp にしても表示の速さは1msも変わらない一方、
+     LINE など一部のクローラーが webp を扱えず「画像なし」で出る危険だけが残る。
+     同じ絵の webp（img/ogp-2026.webp）も置いてあるので、切り替えるならこの1行 -->
+<meta property="og:image" content="https://edfuture.jp/world-terakoya-2026/img/ogp-2026.jpg">
+<meta property="og:image:type" content="image/jpeg">
+<meta property="og:image:width" content="1920">
+<meta property="og:image:height" content="1080">
+<meta property="og:image:alt" content="第5回ワールド寺子屋。サンフランシスコ便とボストン・ニューヨーク便の参加者の集合写真。">
 <meta name="twitter:card" content="summary_large_image">
 </head>
 <body>
@@ -77,7 +89,7 @@
          ここは素の画像1枚を CSS だけで歩かせる（跳ねる・傾く・しゃがむ） -->
     <div class="veil__toon">
       <span class="veil__shadow"></span>
-      <img class="veil__walker" src="assets/mascot/pose-walk-a.svg?v=2026093046" width="104" height="104" alt="" decoding="async">
+      <img class="veil__walker" src="assets/mascot/pose-walk-a.svg?v=2026100146" width="104" height="104" alt="" decoding="async">
     </div>
     <span class="veil__dots" aria-hidden="true"><i></i><i></i><i></i></span>
   </div>
@@ -89,13 +101,13 @@
      電話の縦横比へ切り出し済みなので、object-position で寄せる必要はない。
      柱は切り出しの時点で右寄りに置いてある。
      曲線の帯（映像）はこの上に乗り、スクロールで広がって覆い隠す -->
-<img class="fv-bg" src="img/fv-bg.webp?v=2026093046" width="1290" height="2796" decoding="async" alt="" aria-hidden="true">
+<img class="fv-bg" src="img/fv-bg.webp?v=2026100146" width="1290" height="2796" decoding="async" alt="" aria-hidden="true">
 <!-- 画面の下、左右に立つ参加者（支給の fv7.png / fv6.png。どちらも支給時点で背景が抜いてある）。
      ★前面は DOM の後ろ。fv7（右・男子）を後ろに書いて前に出している。
        fv7 は右端を画面の右端に合わせ、fv6 より 1.08 倍だけ大きい（手前にいる分）。
        横位置と高さは「顔を狙った vw に置く」逆算値（式は css/fv.css） -->
-<img class="fv-person fv-person--l" src="img/fv-left.webp?v=2026093046" width="880" height="1173" decoding="async" alt="" aria-hidden="true">
-<img class="fv-person fv-person--r" src="img/fv-right.webp?v=2026093046" width="880" height="1173" decoding="async" alt="" aria-hidden="true">
+<img class="fv-person fv-person--l" src="img/fv-left.webp?v=2026100146" width="880" height="1173" decoding="async" alt="" aria-hidden="true">
+<img class="fv-person fv-person--r" src="img/fv-right.webp?v=2026100146" width="880" height="1173" decoding="async" alt="" aria-hidden="true">
 
 <!-- ★2026-09-13: 水晶玉をやめた。FV には何も置かず、スクロールに合わせて
      この映像が全画面へ立ち上がる（背景と2人は奥へ引いて薄れる）。
@@ -176,8 +188,8 @@
              太いクリームの複製を下に敷いた版。写真の上でも輪郭が沈まない。
              ★data-rig は残す。<img> のままだと外部CSSが中に届かず、
              #trail（虹の足あと）が消えずに出てしまう -->
-        <div class="rig" data-rig="assets/mascot/pose-l-point-rev.svg?v=2026093046">
-          <img src="assets/mascot/pose-l-point-rev.svg?v=2026093046" width="104" height="104" alt="" aria-hidden="true" decoding="async">
+        <div class="rig" data-rig="assets/mascot/pose-l-point-rev.svg?v=2026100146">
+          <img src="assets/mascot/pose-l-point-rev.svg?v=2026100146" width="104" height="104" alt="" aria-hidden="true" decoding="async">
         </div>
       </div>
     </div>
@@ -212,82 +224,119 @@
   <!-- ① 問いかけ（映像の上） -->
   <div class="intro__hero" id="introHero">
     <div class="wrap">
-      <p class="intro__ask" data-reveal>
-        <span>知りたいことがあったとき、</span>
-        <span>あなたはどうしますか。</span>
+      <!-- ★案内役と吹き出し2つ。右側に置くので、ポーズは右を指す data-pose="point"。
+           3段に分けてあるのは transform の後勝ちを避けるため:
+             列（位置の基準） > lift（JSのバネが translateY を書く） > .rig
+           ★以前は高さ0の留め具だったが、吹き出しが実体を持つので通常の行にした -->
+      <div class="intro__buddy intro__buddy--l">
+        <div class="intro__buddy-col" aria-hidden="true">
+          <div class="intro__buddy-lift">
+            <div class="rig rig--jump" data-rig="assets/mascot/rig-rev.svg?v=2026100146" data-pose="point">
+              <img src="assets/mascot/pose-point-rev.svg?v=2026100146" width="96" height="85" alt="" aria-hidden="true" decoding="async">
+            </div>
+          </div>
+        </div>
+        <div class="intro__says">
+          <p class="say intro__say">動画は実際のワールド寺子屋の様子だよ！<br>みんなは「なんかもやもやするな〜」って気持ちあったりする？<br>例えばこんなの！</p>
+          <!-- ★チェックは字でなく丸と線で描く（.sched-note と同じ理由。書体のサブセットに
+               記号を足さずに済み、大きさも自由に決められる） -->
+          <ul class="say intro__checks">
+            <li>異文化の中で自分の意見を発信したい</li>
+            <li>一歩踏みだすきっかけが欲しい</li>
+            <li>グローバルな視野を持ちたい</li>
+            <li>新しい環境で成長し、自信をつけたい</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- ② 受け渡し。右に立つ左向きの案内役。ここが画面に入ると①は引っ込む。
+           ★左右を入れ替えるのは CSS の列指定だけ。.intro__buddy の規則はそのまま使う。
+           ★絵は pose-l-point-rev.svg（FVのCTA脇と同じ左向き・白フチ付き）。
+             鏡像で左向きを作らないのは、胴体の「Ed」が裏返るため -->
+      <div class="intro__buddy intro__buddy--r">
+        <div class="intro__says">
+          <p class="say intro__say">もしちょっとでも当てはまるかも？<br>と思ったら、ぜひ海外への<br>一歩を踏み出してみてね！</p>
+        </div>
+        <div class="intro__buddy-col" aria-hidden="true">
+          <div class="intro__buddy-lift">
+            <div class="rig" data-rig="assets/mascot/pose-l-point-rev.svg?v=2026100146">
+              <img src="assets/mascot/pose-l-point-rev.svg?v=2026100146" width="96" height="85" alt="" aria-hidden="true" decoding="async">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ★2026-10-01: ここにあった「② この短期留学で一歩踏み出そう」と
+       「③ ワールド寺子屋とは（4枚の縦積み＋案内役）」を削除した。
+       戻すとき: git show 11c2cf6:index.html から .intro__step 〜 .intro__what を取り出して
+       この位置に貼る。CSS（.intro__step / .intro__what / .ilist / .intro__guide）は
+       消していないので、HTML を戻すだけで元どおりになる -->
+</section>
+
+<!-- ===================== ワールド寺子屋とは？（2026-10-01 に新設） =====================
+     もとは導入の章（#intro）の中に .intro__what として同居していたものを、
+     独立した節として組み直した。見出しは他の節と同じ型（.ch__head + 中央揃えの .h2）。
+     ★カードの CSS（.ilist / .ilist__item / .ilist__media …）は削除時も残してあったので、
+       そのまま使っている -->
+<section class="ch ch--about" id="about" aria-labelledby="about-h">
+  <div class="ch__head wrap">
+    <h2 class="h2" id="about-h" data-reveal>ワールド寺子屋とは？</h2>
+  </div>
+
+  <div class="wrap">
+    <p class="intro__lead" data-reveal>米国高校生との<b>バディ制度によるリアルな異文化交流</b>を通じて、探究型学習とグローバルな視点を育む短期海外留学プログラムです。異文化環境での試行錯誤と、仲間との濃密な振り返りを通じて、自身の価値観をアップデートし、<b>未来の進路を切り拓く主体性とチャレンジ精神</b>を育みます。</p>
+
+    <!-- ★案内役が右の2つの吹き出しを見せる作り（2026-10-01）。
+         上の吹き出し＝映像/写真、下の吹き出し＝それに合うセリフ。
+         4つを順に送り、右から左へ入れ替わる。JS は js/ui.js の initShow -->
+    <div class="show" data-show>
+      <!-- 映像の左に立てる縦書きの題。映像と同じ順番で切り替わる（切り替えは initShow）。
+           ★.show の1列目に、案内役と同じマスへ重ねて置いてある。案内役は下寄せ・
+             こちらは上寄せなので、既存の要素の位置は1pxも動かない -->
+      <p class="show__titles">
+        <span class="show__ttl is-on">現地学校に通う</span>
+        <span class="show__ttl">バディ制度</span>
+        <span class="show__ttl">リーチアウト</span>
+        <span class="show__ttl">世界的企業・国際機関への訪問</span>
+        <span class="show__ttl">振り返り</span>
       </p>
-      <p class="intro__ask-body" data-reveal>調べる。本を読む。動画を見る。たいていはそれで足ります。<br class="pc">でも、本当に知りたいことの答えは、まだ誰かの頭の中にしかないことがあります。</p>
-    </div>
-  </div>
-
-  <!-- ② この短期留学で一歩踏み出そう -->
-  <div class="intro__step">
-    <div class="wrap">
-      <p class="intro__eyebrow mono" data-reveal>A SHORT STAY, A FIRST STEP</p>
-      <h3 class="intro__h" data-reveal>この短期留学で、<br>一歩踏み出そう。</h3>
-      <p class="intro__lead" data-reveal>ワールド寺子屋は、2027年3月にアメリカで10〜14日間を過ごす短期留学プログラムです。英語力も成績も問いません。応募に必要なのは志望動機だけ。出発前に5回の事前研修があるので、いま聞きたいことがはっきりしていなくても大丈夫です。</p>
-      <figure class="intro__media" data-reveal>
-        <video class="clip" playsinline muted loop preload="none" poster="img/poster-clip-welcome.webp" data-src="video/clip-welcome.mp4" width="960" height="540" aria-label="現地校のウェルカムセッションで説明を聞く参加者たち"></video>
-      </figure>
-    </div>
-  </div>
-
-  <!-- ③ ワールド寺子屋とは（4枚の縦積み） -->
-  <div class="intro__what">
-    <div class="wrap">
-      <h3 class="intro__h intro__h--what" data-reveal>ワールド寺子屋とは</h3>
-      <p class="intro__lead" data-reveal>観光でも、語学研修でもありません。<b>自分の問いを持って行き、その答えを持っていそうな人に、自分でアポを取って会いに行く</b>。それがこのプログラムの中心です。やることは大きく4つあります。</p>
-
-      <ol class="ilist">
-        <li class="ilist__item" data-reveal>
-          <p class="ilist__no" aria-hidden="true">01</p>
-          <div class="ilist__text">
-            <h4 class="ilist__t">現地の高校に通う</h4>
-            <p class="ilist__b">現地の学校で実際に授業を受けます。日本語を学んでいる同世代の生徒とペアになる「バディ制度」があり、サンフランシスコ派遣には全校が集まる Unity Assembly Day もあります。</p>
-          </div>
-          <figure class="ilist__media">
+      <div class="show__stage">
+        <!-- ★5枚とも aria-hidden。回り続ける画廊なので、読み上げでは「いま表に居る1枚」を
+             追いかけても意味が通らない。中身は左の縦書きの題と下のセリフが文章で伝えており、
+             映像の aria-label はその言い換えになっていた（読み上げが15件→10件に減る）。
+             .show__cap の aria-live も外した。4.2秒ごとに読み上げへ割り込むため -->
+        <div class="show__media">
+          <div class="show__item is-on" aria-hidden="true">
             <video class="clip" playsinline muted loop preload="none" poster="img/poster-clip-cafeteria.webp" data-src="video/clip-cafeteria.mp4" width="960" height="540" aria-label="現地校の食堂で同世代の生徒と過ごす参加者"></video>
-          </figure>
-        </li>
-
-        <li class="ilist__item" data-reveal>
-          <p class="ilist__no" aria-hidden="true">02</p>
-          <div class="ilist__text">
-            <h4 class="ilist__t">バディと動く。通訳はつかない</h4>
-            <p class="ilist__b">到着したらバディと合流し、フィールドワークも活動も一緒に進めます。通訳はつきません。うまく言えなくても、自分の言葉で話すことになります。</p>
           </div>
-          <figure class="ilist__media">
+          <div class="show__item" aria-hidden="true">
             <video class="clip" playsinline muted loop preload="none" poster="img/poster-clip-talk.webp" data-src="video/clip-talk.mp4" width="960" height="540" aria-label="現地バディと向かい合って話す参加者"></video>
-          </figure>
-        </li>
-
-        <li class="ilist__item ilist__item--key" data-reveal>
-          <p class="ilist__no" aria-hidden="true">03</p>
-          <div class="ilist__text">
-            <h4 class="ilist__t">自分でアポを取って、会いに行く</h4>
-            <p class="ilist__b">ここが中心です。用意された見学先を回るのではなく、自分の問いに答えを持っていそうな人を決めて、自分で連絡を取ります。これまでに米国教職員連盟の州支部へ取材した人や、ハーバード教育大学院の博士課程に話を聞きに行った人がいます。</p>
           </div>
-          <figure class="ilist__media">
-            <img src="img/step-03.webp" width="1200" height="900" loading="lazy" decoding="async" alt="現地で相手に話を聞いている参加者">
-          </figure>
-        </li>
-
-        <li class="ilist__item" data-reveal>
-          <p class="ilist__no" aria-hidden="true">04</p>
-          <div class="ilist__text">
-            <h4 class="ilist__t">発表として持ち帰る</h4>
-            <p class="ilist__b">その日に見たこと・分からなかったことは、毎晩みんなで言葉にして共有します。最終日は現地で探究発表。帰国後も報告会があります（2027年4月11日オンライン／4月17日対面）。持ち帰るのは思い出ではなく、誰に何を聞いて何が分かったかの記録です。</p>
+          <div class="show__item" aria-hidden="true">
+            <img src="img/step-03.webp?v=2026100146" width="1200" height="900" loading="lazy" decoding="async" alt="現地で相手に話を聞いている参加者">
           </div>
-          <figure class="ilist__media">
-            <img src="img/step-05.webp" width="1200" height="900" loading="lazy" decoding="async" alt="マイクを持って前に立ち、発表している参加者">
-          </figure>
-        </li>
-      </ol>
+          <div class="show__item" aria-hidden="true">
+            <video class="clip" playsinline muted loop preload="none" poster="img/poster-kigyo.webp" data-src="video/clip-kigyo.mp4" width="720" height="900" aria-label="現地の企業のキャンパスを訪ねている参加者たち"></video>
+          </div>
+          <div class="show__item" aria-hidden="true">
+            <video class="clip" playsinline muted loop preload="none" poster="img/poster-furikaeri.webp" data-src="video/clip-furikaeri.mp4" width="720" height="900" aria-label="公園の芝生に輪になって一日を振り返る参加者たち"></video>
+          </div>
+        </div>
 
-      <div class="intro__guide" data-reveal>
-        <p class="say say--wine">応募のときに探究テーマが決まっていなくても大丈夫だよ！</p>
-        <div class="intro__mascot rig" data-rig="assets/mascot/pose-l-point-rev.svg?v=2026093046">
-          <img src="assets/mascot/pose-l-point-rev.svg?v=2026093046" width="104" height="104" alt="" aria-hidden="true" decoding="async">
+        <p class="show__cap">
+          <span class="show__line is-on">現地の学校に、ほんとうに通うよ。日本語を学んでいる同世代とペアになるんだ！</span>
+          <span class="show__line">バディと一緒に動くよ。通訳はつかないから、自分の言葉で話すことになるんだ。</span>
+          <span class="show__line">ここが中心！ 自分の問いに答えを持っていそうな人に、自分でアポを取って会いに行くよ。</span>
+          <span class="show__line">現地の企業も訪ねるよ。名前だけ知っていた場所に自分の足で立つと、聞きたいことが変わるんだ。</span>
+          <span class="show__line">一日の終わりは全員で振り返り。持ち帰るのは思い出じゃなくて、何を聞いて何が分かったかの記録だよ。</span>
+        </p>
+      </div>
+
+      <div class="show__mascot" aria-hidden="true">
+        <div class="rig" data-rig="assets/mascot/pose-point-rev.svg?v=2026100146">
+          <img src="assets/mascot/pose-point-rev.svg?v=2026100146" width="104" height="104" alt="" decoding="async">
         </div>
       </div>
     </div>
@@ -325,7 +374,7 @@
             </summary>
             <div class="plist__body">
               <figure class="plist__scene">
-                <img src="img/prog-sf.webp?v=2026093046" width="1200" height="799" loading="lazy" decoding="async" alt="ゴールデンゲートブリッジの全景。2本の主塔と海、対岸の丘">
+                <img src="img/prog-sf.webp?v=2026100146" width="1200" height="799" loading="lazy" decoding="async" alt="ゴールデンゲートブリッジの全景。2本の主塔と海、対岸の丘">
               </figure>
               <p class="plist__lead">西海岸の大学と企業を、自分の問いを持って回る10日間。</p>
               <dl class="plist__facts">
@@ -360,8 +409,8 @@
               <div class="plist__guide" data-reveal>
                 <p class="say say--wine">スタンフォードもGoogleも、自分の足で回るよ！</p>
                 <!-- 左向きの完成ポーズ。吹き出しは左に置くので向きが合う -->
-                <div class="plist__mascot rig rig--face rig--point" data-rig="assets/mascot/pose-l-point.svg?v=2026093046">
-                  <img src="assets/mascot/pose-l-point.svg?v=2026093046" width="104" height="104" alt="" aria-hidden="true" decoding="async">
+                <div class="plist__mascot rig rig--face rig--point" data-rig="assets/mascot/pose-l-point.svg?v=2026100146">
+                  <img src="assets/mascot/pose-l-point.svg?v=2026100146" width="104" height="104" alt="" aria-hidden="true" decoding="async">
                 </div>
               </div>
             </div>
@@ -377,7 +426,7 @@
             </summary>
             <div class="plist__body">
               <figure class="plist__scene">
-                <img class="plist__scene--liberty" src="img/prog-bn1.webp?v=2026093046" width="1200" height="900" loading="lazy" decoding="async" alt="青空の下に立つ自由の女神像">
+                <img class="plist__scene--liberty" src="img/prog-bn1.webp?v=2026100146" width="1200" height="900" loading="lazy" decoding="async" alt="青空の下に立つ自由の女神像">
               </figure>
               <p class="plist__lead">ニューヨークで3日、ボストンで6日。都市を移りながら現地校に入る。</p>
               <dl class="plist__facts">
@@ -413,8 +462,8 @@
                 <p class="say say--wine">ニューヨークとボストン、2つの街で学ぶよ！</p>
                 <!-- 左に立って右を指すポーズ。完成ポーズなので rig--face は付けない
                      （付けると瞳と口がずれて重なり、目や口が二重に見える） -->
-                <div class="plist__mascot rig" data-rig="assets/mascot/pose-point.svg?v=2026093046">
-                  <img src="assets/mascot/pose-point.svg?v=2026093046" width="104" height="104" alt="" aria-hidden="true" decoding="async">
+                <div class="plist__mascot rig" data-rig="assets/mascot/pose-point.svg?v=2026100146">
+                  <img src="assets/mascot/pose-point.svg?v=2026100146" width="104" height="104" alt="" aria-hidden="true" decoding="async">
                 </div>
               </div>
             </div>
@@ -430,7 +479,7 @@
             </summary>
             <div class="plist__body">
               <figure class="plist__scene">
-                <img src="img/prog-bn2.webp?v=2026093046" width="1200" height="800" loading="lazy" decoding="async" alt="マサチューセッツ工科大学のグレートドームと、手前の芝生の広場">
+                <img src="img/prog-bn2.webp?v=2026100146" width="1200" height="800" loading="lazy" decoding="async" alt="マサチューセッツ工科大学のグレートドームと、手前の芝生の広場">
               </figure>
               <p class="plist__lead">3派遣でいちばん長い14日間。都市のあとに、バーモントの生活が入る。</p>
               <dl class="plist__facts">
@@ -469,8 +518,8 @@
               <div class="plist__guide plist__guide--right" data-reveal>
                 <p class="say say--wine">いちばん長い14日間。バーモントの生活も入るよ！</p>
                 <!-- 腕を上げたポーズ。これも完成ポーズなので rig--face は付けない -->
-                <div class="plist__mascot rig" data-rig="assets/mascot/pose-cheer.svg?v=2026093046">
-                  <img src="assets/mascot/pose-cheer.svg?v=2026093046" width="104" height="104" alt="" aria-hidden="true" decoding="async">
+                <div class="plist__mascot rig" data-rig="assets/mascot/pose-cheer.svg?v=2026100146">
+                  <img src="assets/mascot/pose-cheer.svg?v=2026100146" width="104" height="104" alt="" aria-hidden="true" decoding="async">
                 </div>
               </div>
             </div>
@@ -486,8 +535,8 @@
              js/mascot.js 側でも原点を補うようにしたが、ここは静止で確実にする） -->
     <div class="purpose__guide" data-reveal>
       <p class="say say--wine">3つのコースから選べるよ！</p>
-      <div class="purpose__mascot rig" data-rig="assets/mascot/pose-l-point-rev.svg?v=2026093046">
-        <img src="assets/mascot/pose-l-point-rev.svg?v=2026093046" width="104" height="104" alt="" aria-hidden="true" decoding="async">
+      <div class="purpose__mascot rig" data-rig="assets/mascot/pose-l-point-rev.svg?v=2026100146">
+        <img src="assets/mascot/pose-l-point-rev.svg?v=2026100146" width="104" height="104" alt="" aria-hidden="true" decoding="async">
       </div>
     </div>
   </div>
@@ -506,18 +555,9 @@
     <div class="tabs" id="tabs">
       <!-- ---------- 大学生 ---------- -->
       <div class="panel panel--solo">
-        <h3 class="h3"><span class="nb">高校生に帯同する、</span><span class="nb">大学生の参加枠があります</span></h3>
-        <p class="lead">ワールド寺子屋に挑戦する高校生に帯同し、サンフランシスコ、またはボストン・ニューヨークでの学びと成長を見届ける枠です。各派遣3名程度。引率スタッフではありません。高校生が多様な文化や人との出会いを通じて挑戦していく姿を支えながら、自分自身も教育・国際交流・キャリア形成について探究します。</p>
-        <p>ハーバード大学、スタンフォード大学、MITの学生や、教育大学院の学生との交流もあります。次世代の教育をどう考えるかという視野と、そこで築いた人脈を持ち帰ってください。</p>
+        <p class="lead">挑戦する高校生に帯同し、サンフランシスコ、またはボストン・ニューヨークでの学びと成長を支えます。<strong>引率スタッフではなく</strong>、自分自身も教育・国際交流・キャリア形成などのテーマについて探究します。<strong>次世代の教育をどう考えるかという視野</strong>と、そこで築いた人脈を持ち帰ってください。</p>
         <!-- 募集要項の定義をそのまま注記として置く（言い換えると条件が変わって読める） -->
-        <p class="note">※ 大学生とは、大学生、大学院生、専門学校生等高等教育機関に所属する者を指す。</p>
-
-        <h4 class="h4">このプログラムの目的</h4>
-        <ul class="conds">
-          <li><b>海外文化と起業文化を学ぶ。</b> 現地の高校での活動に加えて、大学やスタートアップ企業を訪問します。</li>
-          <li><b>自分の考え方と価値観を広げる。</b> 文化も歴史も日本とまったく異なるアメリカを、見学するのではなく過ごします。</li>
-          <li><b>教育のあり方を学ぶ。</b> 高校生が海外で挑戦していく姿から、挑戦心・主体性・多様性の理解がどう育つのかを間近で見ます。</li>
-        </ul>
+        <p class="note">※ 大学生とは、大学生、大学院生、専門学校生等高等教育機関に所属する者を指します。</p>
 
         <figure class="ph ph--169" data-ph>
           <video class="clip" playsinline muted loop preload="none" poster="img/poster-clip-street.webp" data-src="video/clip-street.mp4" width="960" height="540" aria-label="街角で現地の人と話す参加者"></video>
@@ -531,12 +571,11 @@
               <tr><th scope="row">募集人数</th><td>各派遣3名程度</td></tr>
               <tr><th scope="row">宿泊</th><td>スタッフの宿舎に帯同、またはホテル</td></tr>
               <tr><th scope="row">選考</th><td>書類（志望理由500字以内）＋動画選考</td></tr>
-              <tr><th scope="row">奨学金</th><td>プログラム費が全額免除される給付型の枠が1名分</td></tr>
-            </tbody>
+                          </tbody>
           </table>
         </div>
-        <p class="cta-lead">参加条件・選考枠・高校生との関わり方は、説明会で確認できます。</p>
-        <a target="_blank" rel="noopener" class="btn btn--lg btn--fv" href="https://forms.gle/aiwPwzEzKZAgK7mAA" data-cta="form" data-cta-pos="panel-university" data-magnet>説明会に申し込む</a>
+        <p class="cta-lead">参加条件・選考枠・その他詳細については説明会で確認できます。</p>
+        <a target="_blank" rel="noopener" class="btn btn--lg btn--fv" href="https://forms.gle/aiwPwzEzKZAgK7mAA" data-cta="form" data-cta-pos="panel-university" data-magnet="glow">説明会に申し込む</a>
 
       </div>
     </div>
@@ -560,7 +599,7 @@
     <h2 class="h2" id="schol-h" data-reveal>奨学金について</h2>
   </div>
   <div class="wrap">
-    <p class="schol__lead" data-reveal>高校生・大学生それぞれに、費用が全額免除になる枠を<strong>1名分ずつ</strong>用意しています。<strong>給付型なので、返す必要はありません</strong>。</p>
+    <p class="schol__lead" data-reveal>高校生・大学生それぞれに、費用が全額免除になる枠を<strong>1名分ずつ</strong>用意しています。<strong>本奨学金は給付型（返済不要）です</strong>。</p>
 
     <ul class="schol__slots" data-reveal>
       <li class="schol__slot">
@@ -579,8 +618,8 @@
 
     <div class="schol__guide" data-reveal>
       <p class="say say--wine">費用が理由なら、まず相談してね！</p>
-      <div class="schol__mascot rig" data-rig="assets/mascot/pose-l-point-rev.svg?v=2026093046">
-        <img src="assets/mascot/pose-l-point-rev.svg?v=2026093046" width="104" height="104" alt="" aria-hidden="true" decoding="async">
+      <div class="schol__mascot rig" data-rig="assets/mascot/pose-l-point-rev.svg?v=2026100146">
+        <img src="assets/mascot/pose-l-point-rev.svg?v=2026100146" width="104" height="104" alt="" aria-hidden="true" decoding="async">
       </div>
     </div>
   </div>
@@ -724,9 +763,9 @@
 
   <div class="wrap">
     <ul class="tickets" data-reveal>
-      <li class="ticket" data-tilt><img src="img/ticket-1.webp?v=2026093046" width="1200" height="602" loading="lazy" decoding="async" alt="第1回 オンライン説明会 2026年9月26日（土）19:00〜20:00"></li>
-      <li class="ticket" data-tilt><img src="img/ticket-2.webp?v=2026093046" width="1200" height="604" loading="lazy" decoding="async" alt="第2回 オンライン説明会 2026年10月5日（月）19:00〜20:00"></li>
-      <li class="ticket" data-tilt><img src="img/ticket-3.webp?v=2026093046" width="1200" height="601" loading="lazy" decoding="async" alt="第3回 オンライン説明会 2026年10月16日（金）19:00〜20:00"></li>
+      <li class="ticket" data-tilt><img src="img/ticket-1.webp?v=2026100146" width="1200" height="602" loading="lazy" decoding="async" alt="第1回 オンライン説明会 2026年9月26日（土）19:00〜20:00"></li>
+      <li class="ticket" data-tilt><img src="img/ticket-2.webp?v=2026100146" width="1200" height="604" loading="lazy" decoding="async" alt="第2回 オンライン説明会 2026年10月5日（月）19:00〜20:00"></li>
+      <li class="ticket" data-tilt><img src="img/ticket-3.webp?v=2026100146" width="1200" height="601" loading="lazy" decoding="async" alt="第3回 オンライン説明会 2026年10月16日（金）19:00〜20:00"></li>
     </ul>
 
     <!-- GP の LP（edfuture_gp_upload_server）の .sched-note を、この章の地に合わせて置き直した -->
@@ -744,8 +783,8 @@
            画面幅が変わっても常にボタンの右端に付く。ボタンの規則は触っていない。
            ★pointer-events:none。通すと CTA のタップを奪う -->
       <span class="brief__buddy" aria-hidden="true">
-        <span class="rig" data-rig="assets/mascot/pose-l-point-rev.svg?v=2026093046">
-          <img src="assets/mascot/pose-l-point-rev.svg?v=2026093046" width="104" height="104" alt="" decoding="async">
+        <span class="rig" data-rig="assets/mascot/pose-l-point-rev.svg?v=2026100146">
+          <img src="assets/mascot/pose-l-point-rev.svg?v=2026100146" width="104" height="104" alt="" decoding="async">
         </span>
       </span>
     </p>
@@ -826,8 +865,8 @@
       <!-- ★FV と同じ扱い。rig--bow（おじぎ）を外して静止させ、白フチ付きの完成ポーズを使う。
            rig-rev.svg のままだと、手足を回すおじぎに白フチ層だけが追従せず、
            本体から取り残された白い影が背後に残る（2026-09-30 に実物で確認） -->
-      <div class="rig" data-rig="assets/mascot/pose-bow-rev.svg?v=2026093046">
-        <img src="assets/mascot/pose-bow-rev.svg?v=2026093046" width="88" height="88" alt="" aria-hidden="true" decoding="async">
+      <div class="rig" data-rig="assets/mascot/pose-bow-rev.svg?v=2026100146">
+        <img src="assets/mascot/pose-bow-rev.svg?v=2026100146" width="88" height="88" alt="" aria-hidden="true" decoding="async">
       </div>
       <p class="say say--dark">まずは話を聞きに来てね</p>
     </div>
@@ -898,6 +937,14 @@
   </div>
 </footer>
 
+<!-- スクロールの合図（左端）。FVのCTAボタンの左の余白に立てる。
+     「ワールド寺子屋とは？」の節が見え始めるまで固定で出し続ける（出し入れは js/main.js の updateFixed）。
+     ★飾りなので読み上げからは外し、タップも奪わない（押す先を持たない合図なので） -->
+<div class="scroll-cue" id="scrollCue" aria-hidden="true">
+  <span class="scroll-cue__txt">SCROLL</span>
+  <span class="scroll-cue__bar"></span>
+</div>
+
 <!-- 追従CTA（右端・現行版と同一意匠） -->
 <a target="_blank" rel="noopener" class="side-cta" id="sideCta" href="https://forms.gle/aiwPwzEzKZAgK7mAA" data-cta="form" data-cta-pos="side">
   <span class="side-cta__sub">無料・60分</span>
@@ -907,7 +954,7 @@
 <!-- カーソル（PC・fine pointer のときだけ JS が有効化） -->
 <div class="cursor" id="cursor" aria-hidden="true"><i></i><span></span></div>
 
-<script src="js/sp-force.js?v=2026093046"></script>
-<script type="module" src="js/main.js?v=2026093046"></script>
+<script src="js/sp-force.js?v=2026100146"></script>
+<script type="module" src="js/main.js?v=2026100146"></script>
 </body>
 </html>

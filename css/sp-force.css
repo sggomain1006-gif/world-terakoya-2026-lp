@@ -26,6 +26,10 @@
 .sp-force .fv-person--r{right:calc((100vw - var(--sp-w)) / 2);margin-right:0}
 /* 右端に貼り付く縦書きCTAは、桁の右端に合わせる */
 .sp-force .side-cta{left:auto;right:calc(50% - var(--sp-w) / 2);margin-left:0}
+/* 左端に立つスクロールの合図も、桁の左端＋本文の左余白（--px）に合わせる。
+   ★入れ忘れると窓の左端（x=20）に取り残され、下の ::before の幕（z-index 80）の
+     裏に完全に隠れて1pxも見えなくなる */
+.sp-force .scroll-cue{left:calc(50% - var(--sp-w) / 2 + var(--px));right:auto;margin-left:0}
 /* ★桁の外へはみ出す分を隠す幕。position:fixed の要素は親の overflow では切れないので、
    桁の左右を同じ地色の帯で覆う。fv6 は left:-8.18% で桁の外へ出ており、
    実機なら画面外で切れる部分がパソコンでは見えてしまう。

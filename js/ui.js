@@ -4,7 +4,7 @@
    マグネットボタン / チケットの傾き / カーソル / 共有 / 計測
    ============================================================================= */
 
-import { Spring, expSmooth, safeDt } from './lib/spring.js?v=2026093046';
+import { Spring, expSmooth, safeDt } from './lib/spring.js?v=2026100146';
 
 export const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 export const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)');
@@ -183,20 +183,28 @@ export function initCounters() {
 }
 
 /* ------------------------------- 動画の遅延再生 ------------------------------- */
+/* data-src を <source> に差し込んで読み込ませる。initClips と initShow で共用する。
+   ★<video src> でなく <source> なのは、読み込みを始めるまで一切取りに行かせないため */
+function loadClip(v) {
+  if (!v || v.dataset.loaded) return;
+  v.dataset.loaded = '1';
+  const s = document.createElement('source');
+  s.type = 'video/mp4'; s.src = v.getAttribute('data-src');
+  v.appendChild(s);
+  v.load();
+}
+function playClip(v) {
+  if (!v || reduceMotion.matches) return;
+  const p = v.play();
+  if (p && p.catch) p.catch(() => {});
+}
+
 export function initClips({ skip = null } = {}) {
   // skip: この要素の中の映像は呼び出し側が自分で面倒を見る（螺旋は前面の1枚だけ動かす）
   let clips = Array.from(document.querySelectorAll('video.clip[data-src]'));
   if (skip) clips = clips.filter((v) => !v.closest(skip));
   if (!clips.length) return;
-  const load = (v) => {
-    if (v.dataset.loaded) return;
-    v.dataset.loaded = '1';
-    const s = document.createElement('source');
-    s.type = 'video/mp4'; s.src = v.getAttribute('data-src');
-    v.appendChild(s);
-    v.load();
-  };
-  const play = (v) => { if (reduceMotion.matches) return; const p = v.play(); if (p && p.catch) p.catch(() => {}); };
+  const load = loadClip, play = playClip;
   if (!('IntersectionObserver' in window)) { clips.forEach((v) => { load(v); play(v); }); return; }
   const io = new IntersectionObserver((entries) => {
     entries.forEach((en) => {
@@ -475,7 +483,7 @@ export function initVoiceFolds({ lines = 8 } = {}) {
    ★先に全文を span に割ってから隠す。あとから足すと吹き出しが打つたびに広がり、
      マスコットと CTA の位置がずれる。箱の大きさは最初から最終形で確定させる。
    ★モーション低減では何もしない（全文がそのまま出る） */
-export function initTypewriter({ selector = '.fv__buddy-say', speed = 58, delay = 1100 } = {}) {
+export function initTypewriter({ selector = '.fv__buddy-say', speed = 58, delay = 650 } = {}) {
   const el = document.querySelector(selector);
   if (!el) return;
   if (reduceMotion.matches) return;
@@ -526,4 +534,143 @@ export function initTypewriter({ selector = '.fv__buddy-say', speed = 58, delay 
     if (document.hidden && timer) { clearTimeout(timer); timer = 0;
       chars.forEach((c) => c.classList.add('is-on')); el.classList.remove('is-typing'); }
   });
+}
+
+/* ------------------- 案内役が見せる2つの吹き出しを順に送る -------------------
+   上（映像/写真）は右から左へ移り変わり、下（セリフ）は同時にポップで差し替わる。
+   ★画面に入っている間だけ回す。出る前から送っていると、現れたときには一周している。
+   ★モーション低減では送らない（1組目のまま） */
+export function initShow({ interval = 4200 } = {}) {
+  const root = document.querySelector('[data-show]');
+  if (!root) return;
+  const items = Array.from(root.querySelectorAll('.show__item'));
+  /* 映像と一緒に切り替える連れ（セリフ・縦書きの題）。同じ順番で並んでいることだけが前提 */
+  const tracks = [
+    Array.from(root.querySelectorAll('.show__line')),
+    Array.from(root.querySelectorAll('.show__ttl')),
+  ].filter((t) => t.length);
+  if (items.length < 2) return;
+
+  let i = 0, timer = 0, visible = false, steps = 0;
+
+  /* ★映像は表に出ている1枚だけ動かす。.show__item は全部同じマスに重なっていて
+     位置が同じなので、initClips の交差監視に任せると全枚ぶんを同時に読み込んで
+     同時に再生してしまう（実測で4本・計5.4MB を一度に取得し、デコーダも4本立っていた）。
+     次の1枚だけ先に読んでおくと、切り替わった瞬間にポスターが出ることもない。
+     main.js 側は initClips({ skip: '[data-show]' }) でこの節を除外してある */
+  const videoOf = (el) => el.querySelector('video.clip[data-src]');
+  const syncVideos = () => {
+    const next = (i + 1) % items.length;
+    items.forEach((el, k) => {
+      const v = videoOf(el);
+      if (!v) return;
+      if (visible && (k === i || k === next)) loadClip(v);
+      if (visible && k === i) playClip(v);
+      else if (!v.paused) v.pause();
+    });
+  };
+
+  const show = (next) => {
+    const prev = i; i = (next + items.length) % items.length;
+    if (prev === i) return;
+    items[prev].classList.remove('is-on');
+    items[prev].classList.add('is-out');
+    items[i].classList.remove('is-out');
+    items[i].classList.add('is-on');
+    for (const t of tracks) {
+      if (t[prev]) t[prev].classList.remove('is-on');
+      if (t[i]) t[i].classList.add('is-on');
+    }
+    syncVideos();
+    /* 出ていった札は、次に右から入れるよう印を落としておく */
+    setTimeout(() => { if (i !== prev) items[prev].classList.remove('is-out'); }, 1350);
+    /* ★計測は最初の一周だけ。見えている間ずっと送ると 4.2 秒ごとに増え続け、
+       GA4 を結線した瞬間に 1 セッションの上限を食い潰す */
+    if (steps < items.length) { steps++; track('show_step', { i }); }
+  };
+  const tick = () => { show(i + 1); timer = setTimeout(tick, interval); };
+  const start = () => { syncVideos(); if (!timer && !reduceMotion.matches) timer = setTimeout(tick, interval); };
+  const stop = () => {
+    clearTimeout(timer); timer = 0;
+    items.forEach((el) => { const v = videoOf(el); if (v && !v.paused) v.pause(); });
+  };
+
+  if ('IntersectionObserver' in window) {
+    new IntersectionObserver((es) => {
+      visible = es.some((e) => e.isIntersecting);
+      if (visible) start(); else stop();
+    }, { threshold: 0.3 }).observe(root);
+  } else start();
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) stop(); else if (visible) start();
+  });
+}
+
+/* ------------------ 映像の節: 案内役の受け渡し ------------------
+   2人目（右・左向き）が画面に入ったら、1人目と吹き出し2つを引っ込める。
+   ★rootMargin を下だけ -20% にしてある。これで「下から入ってきたとき」は画面の
+     8割の高さで切り替わり、「上へ抜けたとき」は完全に画面の外へ出てから戻る。
+     素の threshold で往復させると、上へ抜ける途中（まだ4割見えている）で
+     2人目が消え始めてしまう */
+export function initHandoff() {
+  const hero = document.querySelector('.intro__hero');
+  const next = document.querySelector('.intro__buddy--r');
+  if (!hero || !next) return;
+  if (!('IntersectionObserver' in window)) { hero.classList.add('is-handed'); return; }
+  new IntersectionObserver((es) => {
+    es.forEach((e) => hero.classList.toggle('is-handed', e.isIntersecting));
+  }, { threshold: 0, rootMargin: '0px 0px -20% 0px' }).observe(next);
+}
+
+/* ------------------ 問いかけの上の吹き出しを LINE のように出す ------------------
+   1つ目は「2つ目が出る位置」に現れ、2つ目が出た瞬間に押し上げられる。
+   ★上げ幅は2つ目の実寸＋隙間から出す。決め打ちだと文言を変えた瞬間にずれる
+   ★モーション低減では何もしない（CSS 側で最初から見えている） */
+export function initSays({ gap = 700 } = {}) {
+  const wrap = document.querySelector('.intro__says');
+  if (!wrap || reduceMotion.matches) return;
+  const bubbles = Array.from(wrap.children).filter((el) => el.classList.contains('say'));
+  if (!bubbles.length) return;
+
+  const setRise = () => {
+    const styles = getComputedStyle(wrap);
+    const g = parseFloat(styles.rowGap || styles.gap) || 0;
+    /* 自分より下に出る吹き出しの高さぶんだけ、最初は下げておく */
+    let below = 0;
+    for (let i = bubbles.length - 1; i >= 0; i--) {
+      bubbles[i].style.setProperty('--rise', `${below.toFixed(1)}px`);
+      below += bubbles[i].offsetHeight + g;
+    }
+  };
+  setRise();
+  window.addEventListener('resize', () => { if (!wrap.dataset.done) setRise(); }, { passive: true });
+
+  let fired = false;
+  const run = () => {
+    if (fired) return;
+    fired = true;
+    bubbles.forEach((el, i) => {
+      setTimeout(() => {
+        el.classList.add('is-pop');
+        /* 自分が出たら、上にいる吹き出しを押し上げる */
+        for (let k = 0; k < i; k++) bubbles[k].style.setProperty('--rise', '0px');
+        if (i === bubbles.length - 1) wrap.dataset.done = '1';
+      }, i * gap);
+    });
+  };
+
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver((es) => {
+      if (!es.some((e) => e.isIntersecting)) return;
+      if (document.documentElement.classList.contains('is-veiled')) return;  /* 幕の裏では出さない */
+      io.disconnect(); run();
+      /* ★発火の線は「画面の下から35%」。それより上に吹き出しの頭が来たら出す。
+         ここを下げすぎると、1つ目は画面の外でポップを済ませてしまい、
+         スクロールして辿り着いたときには「もう出ている」状態になる
+         （1つ目は --rise で2つ目の位置まで下げてあるので、束の上端より
+          さらに150px 下に居る。実測で下端は上端+245px）。
+         0.25 や先回り80px では実際そうなっていたので、-35% まで引き上げた */
+    }, { threshold: 0, rootMargin: '0px 0px -35% 0px' });
+    io.observe(wrap);
+  } else run();
 }
