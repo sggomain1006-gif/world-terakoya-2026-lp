@@ -4,7 +4,7 @@
    マグネットボタン / チケットの傾き / カーソル / 共有 / 計測
    ============================================================================= */
 
-import { Spring, expSmooth, safeDt } from './lib/spring.js?v=20261001103';
+import { Spring, expSmooth, safeDt } from './lib/spring.js?v=20261001105';
 
 export const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 export const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)');
@@ -14,6 +14,14 @@ let currentPersona = 'student';
 export function track(event, params) {
   const payload = { event, current_tab: currentPersona, ...(params || {}) };
   try { window.dataLayer.push(payload); } catch (e) { /* 計測でUIを止めない */ }
+  /* ★gtag.js は dataLayer に積まれた生オブジェクトを GA4 イベントにしない。
+     上の push は GTM 用に残したまま、ここで gtag へも同じものを渡す。
+     タグ読込前に呼ばれても gtag は dataLayer にキューされるので取りこぼさない */
+  try {
+    if (typeof window.gtag === 'function') {
+      window.gtag('event', event, { current_tab: currentPersona, ...(params || {}) });
+    }
+  } catch (e) { /* 同上 */ }
 }
 
 /* ----------------------------------- 文字の分割 ---------------------------------- */
