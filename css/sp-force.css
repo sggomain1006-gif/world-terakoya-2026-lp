@@ -39,6 +39,20 @@
      裏に完全に隠れて1pxも見えなくなる */
 .sp-force .scroll-cue{left:calc(var(--gutter) + var(--px));right:auto;margin-left:0}
 
+/* ---------- 重ね順：柱（SP版表示）を一番上に ----------
+   左右の飾りの光（.pcside::before）は inset:-18% で柱の中まで伸びており、
+   実測で片側 94.5px（1440px時）＝柱390pxの約半分を覆って、濃い地のセクションを
+   白く洗っていた。光の形も位置も変えず、柱をその上に重ねて隠す。
+   ★.fv-person--l は z=0 のまま。左へ32pxはみ出す分を .pcbg(80) が隠す役目は変えない。
+   ★柱の中に重ねる固定要素（SCROLLの合図・ヘッダー）は柱よりさらに上へ上げ直す。
+     ここで上げ直さないと、柱(82)の背景に沈んで見えなくなる。
+   ★幕(.veil z=100) はこれより上なので触らない。
+   ★すべて .sp-force 配下＝768px以上でのみ発火。SP幅の重ね順は1つも動かない */
+.sp-force main,
+.sp-force .s-foot{position:relative;z-index:82}
+.sp-force .scroll-cue{z-index:83}
+.sp-force .bar{z-index:84}
+
 /* ---------- 左右の地（ぼかした映像） ----------
    ★桁の外へはみ出す fixed 要素を隠す役目も兼ねる。position:fixed は親の overflow で
      切れないので、不透明な板で覆うのが唯一の手。fv6 は left:-8.18% で桁の外へ出ており、
