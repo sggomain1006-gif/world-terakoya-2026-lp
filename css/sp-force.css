@@ -56,6 +56,12 @@
 .sp-force .fv-bg,
 .sp-force .fv-film,
 .sp-force .fv-person{z-index:82}
+/* ★.fv-film の中の .stage-video は transform:scale(var(--vz)) で、--vz が
+   1.08→1.00 と動く。390pxの柱に対して8%拡大＝片側15.6pxはみ出す（実測）。
+   しかも --va（濃さ）は 0→1 と逆に上がるので、細くなるほど濃く見える。
+   これまでは .pcbg(80) が上から隠していたが、この層を 82 へ上げたので
+   自分で切る必要がある。切り口は柱の端＝これまでと同じ見え方になる */
+.sp-force .fv-film{overflow:hidden}
 .sp-force .bar{z-index:84}
 
 /* 左の人物だけ柱から左へ 0.0818×390＝31.9px はみ出す。これまでは .pcbg(80) が
