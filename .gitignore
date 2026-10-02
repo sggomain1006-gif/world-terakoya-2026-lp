@@ -1,2 +1,5 @@
 .DS_Store
 *.log
+
+# サーバー配布用フォルダ（ローカル生成物・gitには入れない）
+world-terakoya-2026/
